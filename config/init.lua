@@ -74,7 +74,7 @@ require("misw.git").setup()
 -- after the UI is up
 util.later(function()
   vim.opt.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus"
+  require("misw.editor").later() -- trouble.setup() before lualine's trouble.statusline()
   require("misw.ui").later()
-  require("misw.editor").later()
   require("misw.dap").setup()
 end)

@@ -55,7 +55,15 @@ local function setup()
     },
     cmdline = {
       enabled = true,
-      keymap = { preset = "cmdline", ["<Right>"] = false, ["<Left>"] = false },
+      keymap = {
+        preset = "cmdline",
+        ["<Right>"] = false,
+        ["<Left>"] = false,
+        -- menu open: walk/accept items; otherwise history / run the command
+        ["<Up>"] = { "select_prev", "fallback" },
+        ["<Down>"] = { "select_next", "fallback" },
+        ["<CR>"] = { "accept", "fallback" },
+      },
       completion = {
         list = { selection = { preselect = false } },
         menu = {
