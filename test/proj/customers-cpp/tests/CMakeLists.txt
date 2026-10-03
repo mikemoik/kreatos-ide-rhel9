@@ -1,0 +1,5 @@
+foreach(name test_customer_db test_json test_search_report)
+  add_executable(${name} ${name}.cpp)
+  target_link_libraries(${name} PRIVATE customers::db)
+  add_test(NAME ${name} COMMAND ${name})
+endforeach()

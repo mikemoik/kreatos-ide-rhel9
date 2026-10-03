@@ -1,0 +1,8 @@
+[project]
+name = "customerdb"
+version = "0.1.0"
+description = "Sample: customer database in a single JSON file"
+requires-python = ">=3.9"
+
+[tool.ruff]
+line-length = 100
