@@ -1,0 +1,21 @@
+# License overrides for scripts/gen-inventory.py: components whose license
+# files are missing or not recognisable. name <TAB> SPDX <TAB> where it is stated.
+# NOASSERTION = upstream declares no license (no license file, none on GitHub).
+neovim-dep/libuv	MIT AND CC-BY-4.0	LICENSE (code), LICENSE-docs (docs)
+neovim-dep/lpeg	MIT	source headers (lpvm.h), lpeg.html
+plugin/ethereal.nvim	MIT	header of colors/ethereal.vim
+tool/lua-language-server/3rd/love-api	NOASSERTION	no license upstream
+tool/lua-language-server/3rd/lovr-api	NOASSERTION	README: example code CC0, rest unstated
+tool/lua-language-server/meta/3rd/busted	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/Cocos4.0	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/Defold	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/ffi-reflect	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/Jass	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/lfs	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/love2d	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/lovr	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/luaecs	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/luassert	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/luv	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/OpenResty	NOASSERTION	no license upstream (LuaCATS definitions)
+tool/lua-language-server/meta/3rd/skynet	NOASSERTION	no license upstream (LuaCATS definitions)

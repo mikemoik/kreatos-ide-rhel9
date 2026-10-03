@@ -1,6 +1,0 @@
----
-source: tests/tests.rs
-expression: format(&contents)
----
-local x = a.b.c
-

@@ -38,6 +38,25 @@ fetch_tar() {
   tar xzf "$file" -C "$dest" --strip-components=1
 }
 
+# go_vendor DIR — `go mod vendor` in DIR. Uses a local go if there is one,
+# else RHEL's own Go in a UBI9 container (the same Go the target builds with).
+go_vendor() {
+  if command -v go >/dev/null; then
+    (cd "$1" && GOFLAGS=-mod=mod GOTOOLCHAIN=local go mod vendor)
+  else
+    # rootless docker: the container's root is the calling user on the host
+    docker run --rm -v "$1:/w" -w /w -e GOTOOLCHAIN=local \
+      "$(go_image)" go mod vendor
+  fi
+}
+go_image() {
+  docker build -q -t kreatos-ide-rhel9-go - >/dev/null <<'EOF'
+FROM registry.access.redhat.com/ubi9/ubi:latest
+RUN dnf -y install golang && dnf clean all
+EOF
+  echo kreatos-ide-rhel9-go
+}
+
 # github_archive URL COMMIT — tarball URL for a commit of a github repo
 github_archive() { echo "${1%.git}/archive/$2.tar.gz"; }
 
@@ -97,6 +116,8 @@ done <"$TMP/parsers.lock.tsv"
 # kind tarball: release tarball of a tag
 # kind git:     shallow clone with all submodules (their commits go to VERSIONS)
 # kind cargo:   tarball + `cargo vendor` of its locked crates into vendor/crates
+# kind gomod:   tarball + `go mod vendor` (modules land in the tool's own vendor/)
+# kind pypi:    the sdist of a PyPI release (url = https://pypi.org/project/NAME)
 rm -rf "$V/tools" "$V/crates"
 mkdir -p "$V/tools" "$V/crates"
 while IFS=$'\t' read -r name kind url ref packages; do
@@ -104,8 +125,16 @@ while IFS=$'\t' read -r name kind url ref packages; do
   log "tool $name ($kind $ref)"
   dest=$V/tools/$name
   case $kind in
-    tarball | cargo)
+    tarball | cargo | gomod)
       fetch_tar "$url/archive/refs/tags/$ref.tar.gz" "$dest"
+      record "tool/$name" "$url" "$ref"
+      ;;
+    pypi)
+      read -r sdist sha < <(curl -fsSL --retry 5 "https://pypi.org/pypi/${url##*/}/$ref/json" |
+        python3 -c 'import json, sys
+u = [u for u in json.load(sys.stdin)["urls"] if u["packagetype"] == "sdist"][0]
+print(u["url"], u["digests"]["sha256"])')
+      fetch_tar "$sdist" "$dest" "$sha"
       record "tool/$name" "$url" "$ref"
       ;;
     git)
@@ -122,6 +151,15 @@ while IFS=$'\t' read -r name kind url ref packages; do
       exit 1
       ;;
   esac
+  if [[ $kind == gomod ]]; then
+    go_vendor "$dest"
+    # Windows/Plan 9 parts of golang.org/x/sys are never compiled on Linux
+    find "$dest/vendor/golang.org/x/sys" -mindepth 1 -maxdepth 1 -type d \
+      \( -name windows -o -name plan9 \) -exec rm -rf {} + 2>/dev/null || true
+    # "# <module> <version>" lines of modules.txt are the pins (from go.sum)
+    awk '$1 == "#" && $2 !~ /^=>/ { print $2, $3 }' "$dest/vendor/modules.txt" |
+      while read -r mod ver; do record "gomod/$name/$mod" "https://$mod" "$ver"; done
+  fi
   if [[ $kind == cargo ]]; then
     # the source replacement config cargo prints, with the crate dir as a
     # placeholder that build.sh fills in
@@ -149,4 +187,6 @@ sort "$TMP/versions" >"$ROOT/VERSIONS"
 cp "$TMP/parsers.lock.tsv" "$ROOT/manifest/parsers.lock.tsv"
 rm -rf "$ROOT/vendor"
 mv "$V" "$ROOT/vendor"
+log "third-party inventory (README.md)"
+python3 "$ROOT/scripts/gen-inventory.py"
 log "done — review 'git status', then commit"

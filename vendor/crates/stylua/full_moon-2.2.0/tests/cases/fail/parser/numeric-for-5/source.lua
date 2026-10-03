@@ -1,1 +1,0 @@
-for local = 1, 10 do end

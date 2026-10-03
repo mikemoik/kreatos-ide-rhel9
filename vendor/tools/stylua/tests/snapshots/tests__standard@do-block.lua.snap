@@ -1,8 +1,0 @@
----
-source: tests/tests.rs
-expression: format(&contents)
----
-do
-	local x = 5
-end
-

@@ -1,4 +1,4 @@
--- LSP: servers built from source by build.sh (lua-language-server, ruff, ty),
+-- LSP: servers built from source by build.sh (ruff, ty),
 -- configs from nvim-lspconfig, native vim.lsp.enable. A server whose binary is
 -- not on PATH is skipped. Keymaps are set per buffer for what the server
 -- supports.
@@ -6,7 +6,7 @@ local util = require("misw.util")
 local icons = util.icons
 local M = {}
 
-M.servers = { "ty", "ruff", "lua_ls" }
+M.servers = { "ty", "ruff" }
 
 local function keys()
   local P = function(name, opts)

@@ -1,5 +1,0 @@
-call(1 < 2)
-call(1 <= 2)
-call(2 > 1)
-call(2 >= 1)
-call(x >= y)

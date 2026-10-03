@@ -1,2 +1,0 @@
--- stylua: ignore
-return      "hi"

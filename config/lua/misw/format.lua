@@ -1,6 +1,6 @@
 -- Formatting: conform.nvim, format on save (toggle <leader>uf / <leader>uF).
--- stylua (lua), shfmt (sh), fish_indent (fish); everything else falls back to
--- the LSP formatter (ruff for Python).
+-- shfmt (sh), fish_indent (fish); everything else falls back to the LSP
+-- formatter (ruff for Python). No Lua formatter is bundled.
 local util = require("misw.util")
 local M = {}
 
@@ -13,7 +13,6 @@ function M.setup()
       lsp_format = "fallback",
     },
     formatters_by_ft = {
-      lua = { "stylua" },
       fish = { "fish_indent" },
       sh = { "shfmt" },
     },

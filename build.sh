@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 # build.sh [PREFIX] — offline build of kreatos-ide from vendor/ (no network).
 #
-# Needs only the RHEL9 toolchain: gcc, gcc-c++, make, cmake, python3,
-# rust-toolset (cargo). The repo itself is never written to (it can be mounted
+# Needs only the RHEL9 toolchain: gcc, make, cmake, python3, rust-toolset
+# (cargo). The repo itself is never written to (it can be mounted
 # read-only); intermediate files go to $KIDE_BUILD_DIR (default:
 # $TMPDIR/kide-build).
 #
 # Result:
 #   PREFIX/bin/nvim                   Neovim built from vendor/neovim
 #   PREFIX/bin/kide                   launcher: nvim + the bundled config and tools
-#   PREFIX/bin/lua-language-server    LSP server (wrapper), runtime tree in
-#                                     PREFIX/lib/lua-language-server
-#   PREFIX/bin/stylua                 formatter
+#   PREFIX/bin/{ruff,ty}              Python linter/formatter + type checker (LSP)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/site     pack/vendor/opt plugins, parser/, queries/
 set -euo pipefail
@@ -25,7 +23,7 @@ SITE=$SHARE/site
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 
-for tool in cc c++ make cmake python3 cargo; do
+for tool in cc make cmake python3 cargo; do
   command -v "$tool" >/dev/null || { echo "missing build tool: $tool" >&2; exit 1; }
 done
 
@@ -97,53 +95,10 @@ while IFS=$'\t' read -r lang url rev location; do
   echo "$rev" >"$SITE/parser-info/$lang.revision"
 done <"$ROOT/manifest/parsers.lock.tsv"
 
-# --- tools: LSP servers + formatters -----------------------------------------
+# --- tools: LSP servers + formatters ------------------------------------------
 TOOLS=$BUILD/tools
 rm -rf "$TOOLS"
-mkdir -p "$TOOLS/bin"
-export PATH="$TOOLS/bin:$PATH"
-
-# ninja is only a build helper (luamake drives it); RHEL ships it only in CRB
-log "ninja (build helper, not installed)"
-cp -a "$ROOT/vendor/tools/ninja" "$TOOLS/ninja"
-(cd "$TOOLS/ninja" && python3 configure.py --bootstrap >/dev/null)
-cp "$TOOLS/ninja/ninja" "$TOOLS/bin/ninja"
-
-log "lua-language-server"
-cp -a "$ROOT/vendor/tools/lua-language-server" "$TOOLS/luals"
-# luamake links libstdc++ statically; RHEL ships libstdc++-static only in CRB,
-# so link it dynamically (built on the target, the system libstdc++ is there)
-python3 - "$TOOLS/luals" <<'PY'
-import sys
-root = sys.argv[1]
-patches = {
-    "make.lua": ('crt = "static"', 'crt = "dynamic"'),
-    "3rd/bee.lua/compile/common.lua": ('crt = "static"', 'crt = "dynamic"'),
-    "3rd/luamake/bee.lua/compile/common.lua": ('crt = "static"', 'crt = "dynamic"'),
-    "3rd/luamake/compile/ninja/linux.ninja": ("-Wl,-Bstatic -lstdc++ -Wl,-Bdynamic", "-lstdc++"),
-}
-for rel, (old, new) in patches.items():
-    path = f"{root}/{rel}"
-    text = open(path).read()
-    if old not in text:
-        sys.exit(f"static libstdc++ patch: {old!r} not found in {rel}")
-    open(path, "w").write(text.replace(old, new))
-PY
-(cd "$TOOLS/luals/3rd/luamake" && ./compile/build.sh)
-(cd "$TOOLS/luals" && ./3rd/luamake/luamake rebuild)
-LUALS=$PREFIX/lib/lua-language-server
-rm -rf "$LUALS"
-mkdir -p "$LUALS"
-cp -a "$TOOLS/luals/"{bin,locale,meta,script,main.lua,debugger.lua} "$LUALS/"
-cat >"$PREFIX/bin/lua-language-server" <<'WRAPPER'
-#!/bin/sh
-# logs and generated meta files go to the user's state dir, not the install tree
-lib=$(dirname "$(readlink -f "$0")")/../lib/lua-language-server
-state=${XDG_STATE_HOME:-$HOME/.local/state}/kreatos-ide/lua-language-server
-mkdir -p "$state"
-exec "$lib/bin/lua-language-server" --logpath="$state/log" --metapath="$state/meta" "$@"
-WRAPPER
-chmod +x "$PREFIX/bin/lua-language-server"
+mkdir -p "$TOOLS"
 
 # cargo_build NAME [cargo args…] — offline build against vendor/crates/NAME
 cargo_build() {
@@ -157,22 +112,41 @@ cargo_build() {
   (cd "$TOOLS/$name" && CARGO_HOME="$TOOLS/cargo-home" cargo build --release --frozen "$@")
 }
 
-log "stylua"
-# edition 2018 means feature resolver 1, which leaks the test-only assert_cmd's
-# bstr/unicode feature into the build; those use pregenerated binary DFA
-# tables (stripped). Resolver 2 keeps dev-dependency features out.
-mkdir -p "$TOOLS/stylua"
-cp -a "$ROOT/vendor/tools/stylua/." "$TOOLS/stylua/"
-python3 - "$TOOLS/stylua/Cargo.toml" <<'PY'
+log "ruff + ty"
+# ruff_python_parser only uses bstr's plain byte-string methods; its default
+# `unicode` feature would need pregenerated binary DFA tables (stripped).
+# Without it bstr no longer depends on regex-automata, so that edge leaves
+# Cargo.lock too (cargo 1.92 insists, newer cargo would not).
+mkdir -p "$TOOLS/ruff"
+cp -a "$ROOT/vendor/tools/ruff/." "$TOOLS/ruff/"
+python3 - "$TOOLS/ruff" <<'PY'
 import sys
-path = sys.argv[1]
-text = open(path).read()
-if "resolver" in text or "[package]\n" not in text:
-    sys.exit("stylua resolver patch: unexpected Cargo.toml")
-open(path, "w").write(text.replace("[package]\n", '[package]\nresolver = "2"\n', 1))
+root = sys.argv[1]
+patches = {
+    "Cargo.toml": (
+        'bstr = { version = "1.9.1" }',
+        'bstr = { version = "1.9.1", default-features = false, features = ["std"] }',
+    ),
+    "Cargo.lock": (
+        'name = "bstr"\nversion = "1.12.1"\n'
+        'source = "registry+https://github.com/rust-lang/crates.io-index"\n'
+        'checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"\n'
+        'dependencies = [\n "memchr",\n "regex-automata",\n "serde",\n]',
+        'name = "bstr"\nversion = "1.12.1"\n'
+        'source = "registry+https://github.com/rust-lang/crates.io-index"\n'
+        'checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"\n'
+        'dependencies = [\n "memchr",\n "serde",\n]',
+    ),
+}
+for rel, (old, new) in patches.items():
+    path = f"{root}/{rel}"
+    text = open(path).read()
+    if old not in text:
+        sys.exit(f"ruff bstr patch: expected text not found in {rel}")
+    open(path, "w").write(text.replace(old, new, 1))
 PY
-cargo_build stylua --all-features
-install -m755 "$TOOLS/stylua/target/release/stylua" "$PREFIX/bin/stylua"
+cargo_build ruff -p ruff -p ty
+install -m755 "$TOOLS/ruff/target/release/ruff" "$TOOLS/ruff/target/release/ty" "$PREFIX/bin/"
 
 # --- launcher ----------------------------------------------------------------
 log "launcher"

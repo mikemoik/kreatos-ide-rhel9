@@ -1,2 +1,0 @@
---`signatures` the value defaults to zero or is ignored if `signatures.length
---=== 0`. Whenever possible implementors should make an active decision about

@@ -1,3 +1,0 @@
-function x()
-	call()
-end

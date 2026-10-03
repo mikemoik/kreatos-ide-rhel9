@@ -1,8 +1,0 @@
----
-source: tests/tests.rs
-expression: format(&contents)
----
-#!/usr/bin/env lua
-
-print("Hello world")
-

@@ -1,1 +1,0 @@
-type Foo<X, Y, Z = string, P> = nil

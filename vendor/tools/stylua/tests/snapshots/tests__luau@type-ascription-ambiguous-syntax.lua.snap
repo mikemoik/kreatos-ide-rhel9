@@ -1,7 +1,0 @@
----
-source: tests/tests.rs
-expression: format(&contents)
----
-local foo = bar;
-(foo :: number).length = true
-

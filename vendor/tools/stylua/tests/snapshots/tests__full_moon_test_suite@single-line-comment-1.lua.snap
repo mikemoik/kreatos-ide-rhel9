@@ -1,7 +1,0 @@
----
-source: tests/tests.rs
-expression: format(&contents)
----
--- hello world
--- and doge you too
-
