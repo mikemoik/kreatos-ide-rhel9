@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# build.sh [PREFIX] — offline build of kreatos-ide from vendor/ (no network).
+# build.sh [--no-build] [PREFIX] — offline build of kreatos-ide from vendor/
+# (no network).
+#
+# --no-build: refresh an existing install's plugins, nvim + yazi config,
+# launcher and bashrc only; nvim, the parsers and the tools are not rebuilt.
 #
 # Needs only the RHEL9 toolchain: gcc, make, cmake, python3, rust-toolset
 # (cargo), golang. The repo itself is never written to (it can be mounted
@@ -26,7 +30,12 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")" && pwd)
-PREFIX=$(realpath -m "${1:-$HOME/.local/kreatos-ide}")
+NO_BUILD=0
+args=()
+for arg in "$@"; do
+  if [[ $arg == --no-build ]]; then NO_BUILD=1; else args+=("$arg"); fi
+done
+PREFIX=$(realpath -m "${args[0]:-$HOME/.local/kreatos-ide}")
 BUILD=$(realpath -m "${KIDE_BUILD_DIR:-${TMPDIR:-/tmp}/kide-build}")
 JOBS=${JOBS:-$(nproc)}
 SHARE=$PREFIX/share/kreatos-ide
@@ -34,12 +43,21 @@ SITE=$SHARE/site
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 
+log "checking sources (no binaries)"
+python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config" "$ROOT/yazi"
+
+if ((NO_BUILD)) && [[ ! -x $PREFIX/bin/nvim ]]; then
+  echo "--no-build: no kide install in $PREFIX (run without --no-build first)" >&2
+  exit 1
+fi
+
+# --- binaries: nvim, parsers, tools (skipped with --no-build) ------------------
+# (not indented: the heredocs below must stay at column 0)
+if ((!NO_BUILD)); then
+
 for tool in cc make cmake python3 cargo go; do
   command -v "$tool" >/dev/null || { echo "missing build tool: $tool" >&2; exit 1; }
 done
-
-log "checking sources (no binaries)"
-python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config" "$ROOT/yazi"
 
 # --- Neovim ------------------------------------------------------------------
 # cmake.deps with USE_EXISTING_SRC_DIR builds each dep from .deps/build/src/<name>
@@ -74,16 +92,6 @@ cmake -S "$BUILD/neovim" -B "$BUILD/neovim/build" -G "Unix Makefiles" \
   -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX="$PREFIX"
 cmake --build "$BUILD/neovim/build" -j "$JOBS"
 cmake --install "$BUILD/neovim/build"
-
-# --- plugins + config ----------------------------------------------------------
-log "plugins"
-rm -rf "$SITE/pack"
-mkdir -p "$SITE/pack/vendor/opt"
-cp -a "$ROOT/vendor/plugins/." "$SITE/pack/vendor/opt/"
-
-log "config"
-rm -rf "$SHARE/config"
-cp -a "$ROOT/config" "$SHARE/config"
 
 # --- treesitter parsers + queries --------------------------------------------
 # what nvim-treesitter's installer would do: parser/<lang>.so,
@@ -237,8 +245,6 @@ EOF
 log "yazi"
 CRATES=$yazi_crates cargo_build yazi -p yazi-fm -p yazi-cli
 install -m755 "$TOOLS/yazi/target/release/yazi" "$TOOLS/yazi/target/release/ya" "$PREFIX/bin/"
-rm -rf "$SHARE/yazi"
-cp -a "$ROOT/yazi" "$SHARE/yazi"
 
 # debugpy runs from its source tree (pure Python; the optional Cython
 # speedups are not built). nvim-dap-python starts it via kide-python.
@@ -255,6 +261,19 @@ export PYTHONPATH="$lib${PYTHONPATH:+:$PYTHONPATH}"
 exec python3 "$@"
 WRAPPER
 chmod +x "$PREFIX/bin/kide-python"
+
+fi # binaries
+
+# --- plugins + config ----------------------------------------------------------
+log "plugins"
+rm -rf "$SITE/pack"
+mkdir -p "$SITE/pack/vendor/opt"
+cp -a "$ROOT/vendor/plugins/." "$SITE/pack/vendor/opt/"
+
+log "config"
+rm -rf "$SHARE/config" "$SHARE/yazi"
+cp -a "$ROOT/config" "$SHARE/config"
+cp -a "$ROOT/yazi" "$SHARE/yazi"
 
 # --- launcher ----------------------------------------------------------------
 log "launcher"

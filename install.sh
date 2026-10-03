@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# install.sh [PREFIX] — the whole install in one call:
+# install.sh [--no-build] [PREFIX] — the whole install in one call:
 #
 #   curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
-#   ./install.sh [PREFIX]          # from a checkout (no download)
+#   curl -fsSL …/install.sh | bash -s -- --no-build   # config only, see build.sh
+#   ./install.sh [--no-build] [PREFIX]                 # from a checkout (no download)
 #
 #   1. installs the missing RHEL packages (dnf; asks for the sudo password)
 #   2. piped from curl: downloads the repo tarball ($KIDE_TARBALL) to a temp dir
-#   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide)
+#   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide);
+#      with --no-build only refreshes plugins, config, launcher and bashrc
 #   4. copies the sample projects (test/proj) to ~/kide-samples, if not there yet
 #   5. starts a new shell in which `kide` is on PATH
 set -euo pipefail

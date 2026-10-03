@@ -25,6 +25,15 @@ Without network (repo copied over), run `./install.sh` from the checkout: it
 skips the download. Another prefix: `./install.sh /opt/kide`, or
 `curl … | bash -s /opt/kide`.
 
+Config-only update of an existing install (seconds, no compiling): plugins,
+nvim and yazi config, `kide` launcher and `PREFIX/bashrc` are refreshed;
+nvim, the treesitter parsers and the tools stay as they are:
+
+    curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash -s -- --no-build
+
+(`./install.sh --no-build [PREFIX]` from a checkout.) A change to Neovim, the
+parser list or a tool still needs the full install.
+
 Everything is installed inside `PREFIX`. The only changes outside it are
 `~/kide-samples` and one line `build.sh` adds to `~/.bashrc` (once), sourcing
 `PREFIX/bashrc`, which
