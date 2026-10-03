@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# install.sh [PREFIX] — the whole install in one call:
+#
+#   curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
+#   ./install.sh [PREFIX]          # from a checkout (no download)
+#
+#   1. installs the missing RHEL packages (dnf; asks for the sudo password)
+#   2. piped from curl: downloads the repo tarball ($KIDE_TARBALL) to a temp dir
+#   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide)
+#   4. starts a new shell in which `kide` is on PATH
+set -euo pipefail
+
+KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
+
+# build toolchain, tar (download), git (gitsigns), and the C/C++ tools kide
+# uses from RHEL
+PKGS=(gcc make cmake python3 rust-toolset golang findutils diffutils tar
+      git-core gcc-c++ clang-tools-extra gdb lldb)
+
+log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
+
+# everything runs inside main, so bash has read the whole script before any
+# command (sudo, dnf) can read from stdin when it is piped from curl
+main() {
+  local missing=() p src tmp=
+  for p in "${PKGS[@]}"; do rpm -q "$p" >/dev/null 2>&1 || missing+=("$p"); done
+  if ((${#missing[@]})); then
+    log "installing RHEL packages: ${missing[*]}"
+    if ((EUID == 0)); then dnf -y install "${missing[@]}"
+    else sudo dnf -y install "${missing[@]}" </dev/tty
+    fi
+  fi
+
+  src=$(dirname "${BASH_SOURCE[0]:-}")
+  if [ ! -f "$src/build.sh" ]; then
+    tmp=$(mktemp -d)
+    trap "rm -rf '$tmp'" EXIT
+    log "downloading $KIDE_TARBALL"
+    curl -fL "$KIDE_TARBALL" | tar -xz -C "$tmp" --strip-components=1
+    src=$tmp
+  fi
+
+  "$src/build.sh" "$@"
+
+  # a script cannot change its caller's PATH: replace it with a new shell that
+  # reads ~/.bashrc (interactive terminals only)
+  if [ -t 1 ] && { : </dev/tty; } 2>/dev/null; then
+    [ -n "$tmp" ] && rm -rf "$tmp"
+    log "new shell: run kide (exit returns to the previous shell)"
+    exec bash -i </dev/tty
+  fi
+}
+
+main "$@"

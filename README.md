@@ -4,17 +4,23 @@ misw's kreatos Neovim setup, packaged to build **offline from source** on
 RHEL9. Everything the build needs is in this repo; the build never touches the
 network, and the repo holds no binaries (checked by `scripts/check-sources.py`).
 
-## Build (on the RHEL9 box)
+## Install (on the RHEL9 box)
 
-Toolchain, from the RHEL repos only:
+One call does everything:
 
-    dnf install gcc make cmake python3 rust-toolset golang git-core
+    curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
 
-Then:
+1. Installs the RHEL packages that are missing (from the RHEL repos only;
+   asks for your sudo password): the build toolchain (gcc, make, cmake,
+   python3, rust-toolset, golang), tar, git-core, and the C/C++ tools below.
+2. Downloads this repo as a tarball into a temp dir (removed afterwards).
+3. Builds and installs kreatos-ide offline into `~/.local/kreatos-ide`
+   (`build.sh`, ~5 min).
+4. Opens a new shell in which `kide` works. Every later shell finds it too.
 
-    ./build.sh                 # installs into ~/.local/kreatos-ide
-    ./build.sh /opt/kide       # or any prefix
-    kide                       # in a new shell
+Without network (repo copied over), run `./install.sh` from the checkout: it
+skips the download. Another prefix: `./install.sh /opt/kide`, or
+`curl … | bash -s /opt/kide`.
 
 Everything is installed inside `PREFIX`. The only change outside it is one
 line `build.sh` adds to `~/.bashrc` (once), sourcing `PREFIX/bashrc`, which
@@ -30,9 +36,8 @@ go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
 ### C/C++ development
 
 RHEL9 ships the heavy C/C++ tools itself, so they are **not** bundled; kide
-uses them when installed (and skips them otherwise):
-
-    dnf install gcc-c++ clang-tools-extra gdb lldb
+uses them when installed (and skips them otherwise). `install.sh` installs
+them: `gcc-c++ clang-tools-extra gdb lldb`.
 
 - `clang-tools-extra`: clangd (LSP), clang-format (format on save),
   clang-tidy (runs inside clangd)
@@ -143,6 +148,12 @@ clang-tools-extra, gdb and lldb): a small CMake project is configured and
 built, clangd reports an error, neocmakelsp attaches, clang-format formats,
 gdb and lldb-dap each stop at a breakpoint in the built program, cmake-tools,
 clangd_extensions and neotest-gtest load, neogen writes a Doxygen comment.
+
+To try the install by hand in the same container (the image has every
+package, so `install.sh` only builds; the container and its install are gone
+on exit):
+
+    docker run --rm -it --network=none -v "$PWD:/src:ro" kreatos-ide-rhel9-test /src/install.sh
 
 <!-- inventory:start -->
 
