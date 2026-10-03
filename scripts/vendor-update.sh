@@ -226,6 +226,13 @@ sort "$TMP/versions" >"$ROOT/VERSIONS"
 cp "$TMP/parsers.lock.tsv" "$ROOT/manifest/parsers.lock.tsv"
 rm -rf "$ROOT/vendor"
 mv "$V" "$ROOT/vendor"
+# upstream .gitignore files (fzf ignores its own vendor/) would keep vendored
+# sources out of the commit; the build only sees them in this checkout
+ignored=$(git -C "$ROOT" status --ignored --porcelain vendor | sed -n 's/^!! //p')
+if [[ -n $ignored ]]; then
+  printf 'git-ignored under vendor/ (git add -f them):\n%s\n' "$ignored" >&2
+  exit 1
+fi
 log "third-party inventory (README.md)"
 python3 "$ROOT/scripts/gen-inventory.py"
 log "done — review 'git status', then commit"
