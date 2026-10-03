@@ -72,10 +72,10 @@ Also built from source and put on `PATH` with kide (upstream defaults; yazi
 gets one setting, see below):
 
 - `lazygit` — git TUI; inside kide on `<leader>gg` (root dir) / `<leader>gG` (cwd)
-- `yazi` + `ya` — file manager; text files (Enter, `o`) open in kide. `yazi`
-  is a wrapper that runs it with the bundled config (`yazi/yazi.toml`,
-  installed to `PREFIX/share/kreatos-ide/yazi`, via `YAZI_CONFIG_HOME`), so a
-  `~/.config/yazi` on the machine is left alone. Needs RHEL's `file` for
+- `yazi` + `ya` — file manager; text files (Enter, `o`) open in kide. `PREFIX/bashrc`
+  sets `YAZI_CONFIG_HOME` to the bundled config (`yazi/yazi.toml`, installed
+  to `PREFIX/share/kreatos-ide/yazi`), so a `~/.config/yazi` on the machine is
+  not used. Needs RHEL's `file` for
   file-type detection (`install.sh` installs it). Code previews are highlighted for the languages
   of Sublime Text's own packages (Python, C/C++, shell, Lua, JSON, YAML,
   Markdown, Makefile, HTML/JS/TS, Rust, Go, …) plus CMake, TOML and
