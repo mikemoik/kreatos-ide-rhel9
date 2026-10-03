@@ -68,12 +68,15 @@ into the project root, which is what clangd reads.
 
 ### Terminal tools
 
-Also built from source and put on `PATH` with kide (plain binaries, upstream
-defaults, no config):
+Also built from source and put on `PATH` with kide (upstream defaults; yazi
+gets one setting, see below):
 
 - `lazygit` — git TUI; inside kide on `<leader>gg` (root dir) / `<leader>gG` (cwd)
-- `yazi` + `ya` — file manager. Needs RHEL's `file` for file-type detection
-  (`install.sh` installs it). Code previews are highlighted for the languages
+- `yazi` + `ya` — file manager; text files (Enter, `o`) open in kide. `yazi`
+  is a wrapper that runs it with the bundled config (`yazi/yazi.toml`,
+  installed to `PREFIX/share/kreatos-ide/yazi`, via `YAZI_CONFIG_HOME`), so a
+  `~/.config/yazi` on the machine is left alone. Needs RHEL's `file` for
+  file-type detection (`install.sh` installs it). Code previews are highlighted for the languages
   of Sublime Text's own packages (Python, C/C++, shell, Lua, JSON, YAML,
   Markdown, Makefile, HTML/JS/TS, Rust, Go, …) plus CMake, TOML and
   Dockerfile; other text files preview as plain text, and so do HTML,
@@ -93,6 +96,7 @@ defaults, no config):
 | `vendor/tools` | LSP servers, formatters, debugger (`manifest/tools.tsv`): ruff + ty, neocmakelsp, shfmt, debugpy, fd, fzf, lazygit, yazi, yazi-prebuilt (the syntax repos for yazi's previews); Go tools carry their modules in their own `vendor/` |
 | `vendor/crates` | the Rust crates of each cargo tool (`cargo vendor --locked`), plus the cargo source config |
 | `config` | the nvim config (kreatos `home/nvim`, adapted, see below) |
+| `yazi` | the yazi config bundled with kide (text files open in kide) |
 | `manifest/` | the pins; `parsers.lock.tsv` is generated from `parsers.txt`; `licenses.tsv` holds license facts the inventory cannot detect |
 | `VERSIONS` | every vendored component with upstream URL and commit/tag/sha256 |
 

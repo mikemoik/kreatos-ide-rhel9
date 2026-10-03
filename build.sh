@@ -13,10 +13,13 @@
 #   PREFIX/bin/neocmakelsp            CMake LSP
 #   PREFIX/bin/shfmt                  shell formatter
 #   PREFIX/bin/{fd,fzf,lazygit}       file finder, fuzzy finder, git TUI
-#   PREFIX/bin/{yazi,ya}              file manager + its CLI
+#   PREFIX/bin/{yazi,ya}              file manager + its CLI; bin/yazi is a
+#                                     wrapper for lib/kreatos-ide/yazi with
+#                                     the bundled config (text opens in kide)
 #   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
+#   PREFIX/share/kreatos-ide/yazi     yazi/ (yazi.toml)
 #   PREFIX/share/kreatos-ide/site     pack/vendor/opt plugins, parser/, queries/
 #   PREFIX/bashrc                     puts PREFIX/bin first on PATH; sourced by
 #                                     one line in ~/.bashrc (the only change
@@ -37,7 +40,7 @@ for tool in cc make cmake python3 cargo go; do
 done
 
 log "checking sources (no binaries)"
-python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config"
+python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config" "$ROOT/yazi"
 
 # --- Neovim ------------------------------------------------------------------
 # cmake.deps with USE_EXISTING_SRC_DIR builds each dep from .deps/build/src/<name>
@@ -234,7 +237,20 @@ EOF
 
 log "yazi"
 CRATES=$yazi_crates cargo_build yazi -p yazi-fm -p yazi-cli
-install -m755 "$TOOLS/yazi/target/release/yazi" "$TOOLS/yazi/target/release/ya" "$PREFIX/bin/"
+install -m755 "$TOOLS/yazi/target/release/ya" "$PREFIX/bin/"
+install -D -m755 "$TOOLS/yazi/target/release/yazi" "$PREFIX/lib/kreatos-ide/yazi"
+rm -rf "$SHARE/yazi"
+cp -a "$ROOT/yazi" "$SHARE/yazi"
+# YAZI_CONFIG_HOME keeps kide's yazi config apart from any ~/.config/yazi
+cat >"$PREFIX/bin/yazi" <<'EOF'
+#!/bin/sh
+# yazi with kide's bundled config (text files open in kide)
+bin=$(dirname "$(readlink -f "$0")")
+export YAZI_CONFIG_HOME="$bin/../share/kreatos-ide/yazi"
+export PATH="$bin:$PATH"
+exec "$bin/../lib/kreatos-ide/yazi" "$@"
+EOF
+chmod +x "$PREFIX/bin/yazi"
 
 # debugpy runs from its source tree (pure Python; the optional Cython
 # speedups are not built). nvim-dap-python starts it via kide-python.
