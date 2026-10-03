@@ -16,14 +16,18 @@ One call does everything:
 2. Downloads this repo as a tarball into a temp dir (removed afterwards).
 3. Builds and installs kreatos-ide offline into `~/.local/kreatos-ide`
    (`build.sh`, ~5 min).
-4. Opens a new shell in which `kide` works. Every later shell finds it too.
+4. Copies the sample projects to `~/kide-samples` (only if that does not
+   exist yet): `customers-py` and `customers-cpp`, a multi-file customer
+   database in Python and C++/CMake to try kide on (see their READMEs).
+5. Opens a new shell in which `kide` works. Every later shell finds it too.
 
 Without network (repo copied over), run `./install.sh` from the checkout: it
 skips the download. Another prefix: `./install.sh /opt/kide`, or
 `curl … | bash -s /opt/kide`.
 
-Everything is installed inside `PREFIX`. The only change outside it is one
-line `build.sh` adds to `~/.bashrc` (once), sourcing `PREFIX/bashrc`, which
+Everything is installed inside `PREFIX`. The only changes outside it are
+`~/kide-samples` and one line `build.sh` adds to `~/.bashrc` (once), sourcing
+`PREFIX/bashrc`, which
 puts `PREFIX/bin` at the front of `PATH`, so `kide` and the bundled tools are
 found first in every new shell.
 

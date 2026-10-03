@@ -7,7 +7,8 @@
 #   1. installs the missing RHEL packages (dnf; asks for the sudo password)
 #   2. piped from curl: downloads the repo tarball ($KIDE_TARBALL) to a temp dir
 #   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide)
-#   4. starts a new shell in which `kide` is on PATH
+#   4. copies the sample projects (test/proj) to ~/kide-samples, if not there yet
+#   5. starts a new shell in which `kide` is on PATH
 set -euo pipefail
 
 KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
@@ -41,6 +42,12 @@ main() {
   fi
 
   "$src/build.sh" "$@"
+
+  # sample projects to try kide on; never overwrites an existing copy
+  if [ ! -e "$HOME/kide-samples" ]; then
+    log "sample projects: ~/kide-samples"
+    cp -r "$src/test/proj" "$HOME/kide-samples"
+  fi
 
   # a script cannot change its caller's PATH: replace it with a new shell that
   # reads ~/.bashrc (interactive terminals only)
