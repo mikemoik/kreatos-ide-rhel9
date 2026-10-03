@@ -1,0 +1,49 @@
+name: CI
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+  workflow_dispatch:
+
+env:
+  MISE_AUTO_INSTALL: "false"
+
+jobs:
+  stylua-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check formatting
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --color always --check lua/
+
+  plenary-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim: ["0.8", "0.9", "0.10", "0.11"]
+        os: [ubuntu-22.04]
+        include:
+          - neovim: "latest"
+            os: [windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Install neovim and other deps"
+        uses: jdx/mise-action@v2
+        with:
+          install: true # [default: true] run `mise install`
+          install_args: "neovim@${{matrix.neovim}}" # [default: ""] additional arguments to `mise install`
+      - name: "Run tests"
+        run: |
+          mise use neovim@${{matrix.neovim}}
+          mise deps
+          mise test
+
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v2

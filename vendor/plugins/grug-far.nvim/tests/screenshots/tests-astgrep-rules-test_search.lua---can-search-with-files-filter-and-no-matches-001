@@ -1,0 +1,10 @@
+-|---------|---
+1|id: grug_test
+2|language: typescript
+3|rule:
+4|  pattern: george
+5|    
+6|*.ts
+7|
+8|
+9|no matches

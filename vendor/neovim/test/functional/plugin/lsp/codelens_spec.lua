@@ -1,0 +1,559 @@
+local t = require('test.testutil')
+local n = require('test.functional.testnvim')()
+local t_lsp = require('test.functional.plugin.lsp.testutil')
+local Screen = require('test.functional.ui.screen')
+
+local dedent = t.dedent
+local eq = t.eq
+
+local api = n.api
+local exec_lua = n.exec_lua
+local insert = n.insert
+local feed = n.feed
+
+local clear_notrace = t_lsp.clear_notrace
+local create_server_definition = t_lsp.create_server_definition
+
+describe('vim.lsp.codelens', function()
+  local text = dedent([[
+    struct S {
+        a: i32,
+        b: String,
+    }
+
+    impl S {
+        fn new(a: i32, b: String) -> Self {
+            S { a, b }
+        }
+    }
+
+    fn main() {
+        let s = S::new(42, String::from("Hello, world!"));
+        println!("S.a: {}, S.b: {}", s.a, s.b);
+    }
+  ]])
+
+  local grid_with_lenses = dedent([[
+    {1:       1 implementation}                              |
+    struct S {                                           |
+        a: i32,                                          |
+        b: String,                                       |
+    }                                                    |
+                                                         |
+    impl S {                                             |
+        fn new(a: i32, b: String) -> Self {              |
+            S { a, b }                                   |
+        }                                                |
+    }                                                    |
+                                                         |
+    {1:   ▶︎ Run }                                            |
+    fn main() {                                          |
+        let s = S::new(42, String::from("Hello, world!"))|
+    ;                                                    |
+        println!("S.a: {}, S.b: {}", s.a, s.b);          |
+    }                                                    |
+    ^                                                     |
+                                                         |
+  ]])
+
+  local grid_without_lenses = dedent([[
+    struct S {                                           |
+        a: i32,                                          |
+        b: String,                                       |
+    }                                                    |
+                                                         |
+    impl S {                                             |
+        fn new(a: i32, b: String) -> Self {              |
+            S { a, b }                                   |
+        }                                                |
+    }                                                    |
+                                                         |
+    fn main() {                                          |
+        let s = S::new(42, String::from("Hello, world!"))|
+    ;                                                    |
+        println!("S.a: {}, S.b: {}", s.a, s.b);          |
+    }                                                    |
+    ^                                                     |
+    {1:~                                                    }|*2
+                                                         |
+  ]])
+
+  --- @type test.functional.ui.screen
+  local screen
+
+  --- @type integer
+  local client_id
+
+  before_each(function()
+    clear_notrace()
+    exec_lua(create_server_definition)
+
+    screen = Screen.new(nil, 20)
+
+    client_id = exec_lua(function()
+      _G.server = _G._create_server({
+        capabilities = {
+          codeLensProvider = {
+            resolveProvider = true,
+          },
+        },
+        handlers = {
+          ['textDocument/codeLens'] = function(_, _, callback)
+            callback(nil, {
+              {
+                data = {
+                  kind = {
+                    impls = {
+                      position = {
+                        character = 7,
+                        line = 0,
+                      },
+                    },
+                  },
+                  version = 0,
+                },
+                range = {
+                  ['end'] = {
+                    character = 8,
+                    line = 0,
+                  },
+                  start = {
+                    character = 7,
+                    line = 0,
+                  },
+                },
+              },
+              {
+                command = {
+                  arguments = {},
+                  command = 'rust-analyzer.runSingle',
+                  title = '▶︎ Run ',
+                },
+                range = {
+                  ['end'] = {
+                    character = 7,
+                    line = 11,
+                  },
+                  start = {
+                    character = 3,
+                    line = 11,
+                  },
+                },
+              },
+            })
+          end,
+          ['codeLens/resolve'] = function(_, _, callback)
+            vim.schedule(function()
+              callback(nil, {
+                command = {
+                  arguments = {},
+                  command = 'rust-analyzer.showReferences',
+                  title = '1 implementation',
+                },
+                range = {
+                  ['end'] = {
+                    character = 8,
+                    line = 0,
+                  },
+                  start = {
+                    character = 7,
+                    line = 0,
+                  },
+                },
+              })
+            end)
+          end,
+        },
+      })
+
+      return vim.lsp.start({ name = 'dummy', cmd = _G.server.cmd })
+    end)
+
+    insert(text)
+
+    exec_lua(function()
+      vim.lsp.codelens.enable()
+    end)
+
+    screen:expect({ grid = grid_with_lenses })
+  end)
+
+  it('clears/shows code lenses when disabled/enabled', function()
+    exec_lua(function()
+      vim.lsp.codelens.enable(false)
+    end)
+
+    screen:expect({ grid = grid_without_lenses })
+
+    exec_lua(function()
+      vim.lsp.codelens.enable(true)
+    end)
+
+    screen:expect({ grid = grid_with_lenses })
+  end)
+
+  it('clears code lenses when sole client detaches', function()
+    exec_lua(function()
+      vim.lsp.get_client_by_id(client_id):stop()
+    end)
+
+    screen:expect({ grid = grid_without_lenses })
+  end)
+
+  it('get code lenses in the current buffer', function()
+    local result = exec_lua(function()
+      vim.api.nvim_win_set_cursor(0, { 12, 3 })
+      return vim.lsp.codelens.get()
+    end)
+
+    eq({
+      {
+        client_id = 1,
+        lens = {
+          command = {
+            arguments = {},
+            command = 'rust-analyzer.showReferences',
+            title = '1 implementation',
+          },
+          range = {
+            ['end'] = {
+              character = 8,
+              line = 0,
+            },
+            start = {
+              character = 7,
+              line = 0,
+            },
+          },
+        },
+      },
+      {
+        client_id = 1,
+        lens = {
+          command = {
+            arguments = {},
+            command = 'rust-analyzer.runSingle',
+            title = '▶︎ Run ',
+          },
+          range = {
+            ['end'] = {
+              character = 7,
+              line = 11,
+            },
+            start = {
+              character = 3,
+              line = 11,
+            },
+          },
+        },
+      },
+    }, result)
+  end)
+
+  it('refreshes code lenses on request', function()
+    feed('ggdd')
+
+    screen:expect([[
+      {1:       1 implementation}                              |
+          ^a: i32,                                          |
+          b: String,                                       |
+      }                                                    |
+                                                           |
+      impl S {                                             |
+          fn new(a: i32, b: String) -> Self {              |
+              S { a, b }                                   |
+          }                                                |
+      }                                                    |
+                                                           |
+      {1:   ▶︎ Run }                                            |
+      fn main() {                                          |
+          let s = S::new(42, String::from("Hello, world!"))|
+      ;                                                    |
+          println!("S.a: {}, S.b: {}", s.a, s.b);          |
+      }                                                    |
+                                                           |
+      {1:~                                                    }|
+                                                           |
+    ]])
+    exec_lua(function()
+      vim.lsp.codelens.on_refresh(
+        nil,
+        nil,
+        { method = 'workspace/codeLens/refresh', client_id = client_id }
+      )
+    end)
+    screen:expect([[
+      {1:       1 implementation}                              |
+          ^a: i32,                                          |
+          b: String,                                       |
+      }                                                    |
+                                                           |
+      impl S {                                             |
+          fn new(a: i32, b: String) -> Self {              |
+              S { a, b }                                   |
+          }                                                |
+      }                                                    |
+                                                           |
+      fn main() {                                          |
+      {1:   ▶︎ Run }                                            |
+          let s = S::new(42, String::from("Hello, world!"))|
+      ;                                                    |
+          println!("S.a: {}, S.b: {}", s.a, s.b);          |
+      }                                                    |
+                                                           |
+      {1:~                                                    }|
+                                                           |
+    ]])
+  end)
+
+  it('refreshes immediately and cancels a pending automatic refresh', function()
+    exec_lua(function()
+      local deferred
+      local request_count = 0
+      local defer_fn = vim.defer_fn
+      local client = assert(vim.lsp.get_client_by_id(client_id))
+      local request = client.request
+
+      --- @diagnostic disable-next-line: duplicate-set-field
+      vim.defer_fn = function(callback)
+        deferred = {
+          callback = callback,
+          closed = false,
+          stopped = false,
+          is_closing = function(self)
+            return self.closed
+          end,
+          stop = function(self)
+            self.stopped = true
+          end,
+          close = function(self)
+            self.closed = true
+          end,
+        }
+        return deferred
+      end
+
+      client.request = function(self, method, ...)
+        if method == 'textDocument/codeLens' then
+          request_count = request_count + 1
+        end
+        return request(self, method, ...)
+      end
+
+      vim.api.nvim_buf_set_lines(0, 0, 0, false, { '// changed' })
+      assert(deferred, 'expected pending automatic codelens refresh')
+
+      vim.lsp.codelens.on_refresh(
+        nil,
+        nil,
+        { method = 'workspace/codeLens/refresh', client_id = client_id }
+      )
+
+      vim.defer_fn = defer_fn
+      client.request = request
+
+      assert(deferred.stopped, 'expected pending codelens refresh to stop')
+      assert(deferred.closed, 'expected pending codelens refresh to close')
+      assert(request_count == 1, 'expected exactly one immediate codelens refresh request')
+    end)
+  end)
+
+  it('ignores stale codeLens/resolve responses', function()
+    clear_notrace()
+    exec_lua(create_server_definition)
+
+    insert('line1\nline2\n')
+
+    exec_lua(function()
+      local codelens_request_count = 0
+      _G.stale_resolve_sent = false
+      _G.server = _G._create_server({
+        capabilities = {
+          codeLensProvider = {
+            resolveProvider = true,
+          },
+        },
+        handlers = {
+          ['textDocument/codeLens'] = function(_, _, callback)
+            codelens_request_count = codelens_request_count + 1
+            if codelens_request_count == 1 then
+              callback(nil, {
+                {
+                  range = {
+                    ['end'] = {
+                      character = 1,
+                      line = 0,
+                    },
+                    start = {
+                      character = 0,
+                      line = 0,
+                    },
+                  },
+                },
+              })
+            else
+              callback(nil, {})
+            end
+          end,
+          ['codeLens/resolve'] = function(_, lens, callback)
+            vim.defer_fn(function()
+              _G.stale_resolve_sent = true
+              callback(nil, {
+                command = {
+                  arguments = {},
+                  command = 'dummy.command',
+                  title = 'resolved',
+                },
+                range = lens.range,
+              })
+            end, 100)
+          end,
+        },
+      })
+
+      local stale_client_id = vim.lsp.start({ name = 'dummy', cmd = _G.server.cmd })
+      vim.lsp.codelens.enable()
+      vim.wait(1000, function()
+        return #vim.lsp.codelens.get() > 0
+      end)
+
+      vim.api.nvim__redraw({ flush = true })
+
+      vim.lsp.codelens.on_refresh(nil, nil, {
+        method = 'workspace/codeLens/refresh',
+        client_id = stale_client_id,
+      })
+
+      assert(
+        vim.wait(1000, function()
+          return _G.stale_resolve_sent
+        end),
+        'timed out waiting for stale resolve response'
+      )
+    end)
+
+    eq('', api.nvim_get_vvar('errmsg'))
+  end)
+
+  it('ignores refresh responses for deleted buffer', function()
+    clear_notrace()
+    exec_lua(create_server_definition)
+
+    insert('line1\n')
+
+    exec_lua(function()
+      local codelens_request_count = 0
+      _G.refresh_response_sent = false
+      _G.server = _G._create_server({
+        capabilities = {
+          codeLensProvider = {
+            resolveProvider = true,
+          },
+        },
+        handlers = {
+          ['textDocument/codeLens'] = function(_, _, callback)
+            codelens_request_count = codelens_request_count + 1
+
+            local lenses = {
+              {
+                command = {
+                  arguments = {},
+                  command = 'dummy.command',
+                  title = 'Lens',
+                },
+                range = {
+                  ['end'] = {
+                    character = 1,
+                    line = 0,
+                  },
+                  start = {
+                    character = 0,
+                    line = 0,
+                  },
+                },
+              },
+            }
+
+            if codelens_request_count == 1 then
+              callback(nil, lenses)
+            else
+              -- Delay the refresh response so the buffer is wiped before it arrives.
+              vim.schedule(function()
+                _G.refresh_response_sent = true
+                callback(nil, lenses)
+              end)
+            end
+          end,
+        },
+      })
+
+      local client_id = vim.lsp.start({ name = 'dummy', cmd = _G.server.cmd })
+      vim.lsp.codelens.enable()
+
+      assert(
+        vim.wait(1000, function()
+          return #vim.lsp.codelens.get() > 0
+        end),
+        'timed out waiting for initial codelens response'
+      )
+
+      vim.lsp.codelens.on_refresh(nil, nil, {
+        method = 'workspace/codeLens/refresh',
+        client_id = client_id,
+      })
+      vim.cmd.bwipeout({ bang = true })
+
+      assert(
+        vim.wait(1000, function()
+          return _G.refresh_response_sent
+        end),
+        'timed out waiting for refresh response'
+      )
+    end)
+
+    eq('', api.nvim_get_vvar('errmsg'))
+  end)
+
+  it('clears extmarks beyond the bottom of the buffer', function()
+    feed('12G4dd')
+    screen:expect([[
+      {1:       1 implementation}                              |
+      struct S {                                           |
+          a: i32,                                          |
+          b: String,                                       |
+      }                                                    |
+                                                           |
+      impl S {                                             |
+          fn new(a: i32, b: String) -> Self {              |
+              S { a, b }                                   |
+          }                                                |
+      }                                                    |
+                                                           |
+      {1:   ▶︎ Run }                                            |
+      ^                                                     |
+      {1:~                                                    }|*5
+      4 fewer lines                                        |
+    ]])
+    feed('dd')
+    screen:expect([[
+      {1:       1 implementation}                              |
+      struct S {                                           |
+          a: i32,                                          |
+          b: String,                                       |
+      }                                                    |
+                                                           |
+      impl S {                                             |
+          fn new(a: i32, b: String) -> Self {              |
+              S { a, b }                                   |
+          }                                                |
+      }                                                    |
+      ^                                                     |
+      {1:~                                                    }|*7
+      4 fewer lines                                        |
+    ]])
+  end)
+
+  after_each(function()
+    api.nvim_exec_autocmds('VimLeavePre', { modeline = false })
+  end)
+end)

@@ -1,0 +1,9 @@
+-|----
+1|grug
+2|return match .. "_and_curly"
+3|
+4|
+5|buffer-range=file2.doc:2:0-2:-1
+6|file2.doc
+7|      grug talks and grug drinks
+8|      grug_and_curly talks and grug_and_curly drinks

@@ -1,0 +1,25 @@
+--|---------|---------|---------|---------|---------|---------|---------|---------|
+01|                                        │                                       
+02|      grug walks                        │  Paths:                              
+03|      curly winks                       │                                       
+04|                                        │                                       
+05|                                        │ STATUS_SUCCESS ⟪ ripgrep ⟫
+06|                                        │ 5 matches in 2 files   sync completed
+07|                                        │                                       
+08|                                        │  file1.txt                            
+09|                                        │▒   2       grug walks              [1]
+10|                                        │▒   2       curly walks                
+11|                                        │                                       
+12|                                        │                                       
+13|                                        │                                       
+14|                                        │                                       
+15|                                        │                                       
+16|                                        │                                       
+17|                                        │                                       
+18|                                        │                                       
+19|                                        │                                       
+20|                                        │                                       
+21|                                        │                                       
+22|                                        │                                       
+23|file1.txt                            2,7 Grug FAR - 1: grug                  8,1
+24|                                                                                

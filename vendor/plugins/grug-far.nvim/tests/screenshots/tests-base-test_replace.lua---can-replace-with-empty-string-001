@@ -1,0 +1,15 @@
+--|----
+01|grug
+02|
+03|
+04|--replace=
+05|
+06|file1.txt
+07| and grug walks 
+08| and  walks 
+09|
+10|file2.doc
+11|      grug talks and grug drinks
+12|       talks and  drinks
+13|      and then grug thinks
+14|      and then  thinks

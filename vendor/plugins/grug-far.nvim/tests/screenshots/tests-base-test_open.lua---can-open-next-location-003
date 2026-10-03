@@ -1,0 +1,25 @@
+--|---------|---------|---------|---------|---------|---------|---------|---------|
+01|                                        │file1.txt                              
+02|      grug talks and grug drinks        │  2        grug walks               [1]
+03|      then grug thinks                  │  3        then grug swims          [2]
+04|                                        │                                       
+05|                                        │file2.doc                              
+06|                                        │  2       grug talks and grug drink [3]
+07|                                        │  3       then grug thinks          [4]
+08|                                        │                                       
+09|                                        │                                       
+10|                                        │                                       
+11|                                        │                                       
+12|                                        │                                       
+13|                                        │                                       
+14|                                        │                                       
+15|                                        │                                       
+16|                                        │                                       
+17|                                        │                                       
+18|                                        │                                       
+19|                                        │                                       
+20|                                        │                                       
+21|                                        │                                       
+22|                                        │                                       
+23|file2.doc                           3,12 Grug FAR - 1: grug                 12,1
+24|                                                                                

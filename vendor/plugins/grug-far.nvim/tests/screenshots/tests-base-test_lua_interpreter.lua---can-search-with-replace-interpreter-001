@@ -1,0 +1,15 @@
+--|----
+01|grug
+02|return match .. "_and_curly"
+03|
+04|
+05|
+06|file1.txt
+07| grug walks 
+08| grug_and_curly walks 
+09|
+10|file2.doc
+11|      grug talks and grug drinks
+12|      grug_and_curly talks and grug_and_curly drinks
+13|      then grug thinks
+14|      then grug_and_curly thinks
