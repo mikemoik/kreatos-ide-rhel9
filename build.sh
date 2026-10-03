@@ -104,6 +104,7 @@ done <"$ROOT/manifest/parsers.lock.tsv"
 
 # --- tools: LSP servers + formatters ------------------------------------------
 TOOLS=$BUILD/tools
+chmod -R u+w "$TOOLS" 2>/dev/null || true # Go leaves its module cache read-only
 rm -rf "$TOOLS"
 mkdir -p "$TOOLS"
 
@@ -163,7 +164,7 @@ install -m755 "$TOOLS/neocmakelsp/target/release/neocmakelsp" "$PREFIX/bin/"
 
 log "shfmt"
 cp -a "$ROOT/vendor/tools/shfmt" "$TOOLS/shfmt"
-(cd "$TOOLS/shfmt" && GOFLAGS=-mod=vendor GOTOOLCHAIN=local GOPROXY=off \
+(cd "$TOOLS/shfmt" && GOFLAGS='-mod=vendor -modcacherw' GOTOOLCHAIN=local GOPROXY=off \
   GOCACHE="$TOOLS/gocache" GOPATH="$TOOLS/gopath" go build -trimpath -o "$PREFIX/bin/shfmt" ./cmd/shfmt)
 
 # debugpy runs from its source tree (pure Python; the optional Cython
