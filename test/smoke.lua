@@ -64,6 +64,43 @@ local function run()
     check("treesitter highlight ." .. ext, vim.treesitter.highlighter.active[buf] ~= nil, vim.bo[buf].filetype)
   end
 
+  -- LSP servers attach and answer (a diagnostic proves the server works).
+  -- Each case is a small project: servers stay quiet on loose files.
+  local lsp_cases = {
+    { server = "lua_ls", marker = ".luarc.json", ext = "lua", text = "print(undefined_global_x)\n" },
+  }
+  for _, case in ipairs(lsp_cases) do
+    local project = ("%s/lsp_%s"):format(dir, case.server)
+    vim.fn.mkdir(project, "p")
+    vim.fn.writefile({ "{}" }, project .. "/" .. case.marker)
+    local file = ("%s/main.%s"):format(project, case.ext)
+    vim.fn.writefile(vim.split(case.text, "\n"), file)
+    vim.cmd.edit(file)
+    local buf = vim.api.nvim_get_current_buf()
+    local attached = vim.wait(20000, function()
+      return #vim.lsp.get_clients({ bufnr = buf, name = case.server }) > 0
+    end, 100)
+    check("lsp " .. case.server .. " attaches", attached)
+    local diagnosed = attached and vim.wait(30000, function()
+      return #vim.diagnostic.get(buf) > 0
+    end, 200)
+    check("lsp " .. case.server .. " reports diagnostics", diagnosed)
+  end
+
+  -- formatters run through conform
+  local fmt_cases = {
+    { formatter = "stylua", ext = "lua", text = "local   x={1,2}", want = "local x = { 1, 2 }" },
+  }
+  for _, case in ipairs(fmt_cases) do
+    local file = ("%s/fmt_%s.%s"):format(dir, case.formatter, case.ext)
+    vim.fn.writefile({ case.text }, file)
+    vim.cmd.edit(file)
+    local buf = vim.api.nvim_get_current_buf()
+    local fok, ferr = pcall(require("conform").format, { bufnr = buf, formatters = { case.formatter } })
+    local got = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1]
+    check("format " .. case.formatter, fok and got == case.want, ferr or got)
+  end
+
   -- completion engine starts with the Lua fuzzy matcher
   vim.api.nvim_exec_autocmds("InsertEnter", {})
   local ok, err = pcall(function()

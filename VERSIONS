@@ -1,3 +1,148 @@
+crate/stylua/aho-corasick-1.1.2 https://crates.io                                            Cargo.lock
+crate/stylua/anes-0.1.6      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/anstyle-1.0.4   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/anyhow-1.0.79   https://crates.io                                            Cargo.lock
+crate/stylua/assert_cmd-2.0.13 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/assert_fs-1.1.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/atty-0.2.14     https://crates.io                                            Cargo.lock
+crate/stylua/autocfg-1.1.0   https://crates.io                                            Cargo.lock
+crate/stylua/bitflags-1.3.2  https://crates.io                                            Cargo.lock
+crate/stylua/bitflags-2.4.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/borsh-1.5.1     https://crates.io                                            Cargo.lock
+crate/stylua/bstr-0.2.17     https://crates.io                                            Cargo.lock
+crate/stylua/bstr-1.9.0      https://crates.io                                            Cargo.lock
+crate/stylua/bumpalo-3.14.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/bytecount-0.6.7 https://crates.io                                            Cargo.lock
+crate/stylua/cast-0.3.0      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/cfg_aliases-0.2.1 https://crates.io                                            Cargo.lock
+crate/stylua/cfg-if-1.0.0    https://crates.io                                            Cargo.lock
+crate/stylua/ciborium-0.2.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/ciborium-io-0.2.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/ciborium-ll-0.2.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/clap-3.2.25     https://crates.io                                            Cargo.lock
+crate/stylua/clap_derive-3.2.25 https://crates.io                                            Cargo.lock
+crate/stylua/clap_lex-0.2.4  https://crates.io                                            Cargo.lock
+crate/stylua/console-0.15.8  https://crates.io                                            Cargo.lock
+crate/stylua/criterion-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/criterion-plot-0.5.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/crossbeam-channel-0.5.15 https://crates.io                                            Cargo.lock
+crate/stylua/crossbeam-deque-0.8.5 https://crates.io                                            Cargo.lock
+crate/stylua/crossbeam-epoch-0.9.18 https://crates.io                                            Cargo.lock
+crate/stylua/crossbeam-utils-0.8.19 https://crates.io                                            Cargo.lock
+crate/stylua/crunchy-0.2.2   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/derive_more-1.0.0 https://crates.io                                            Cargo.lock
+crate/stylua/derive_more-impl-1.0.0 https://crates.io                                            Cargo.lock
+crate/stylua/difflib-0.4.0   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/doc-comment-0.3.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/ec4rs-1.0.2     https://crates.io                                            Cargo.lock
+crate/stylua/either-1.9.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/encode_unicode-0.3.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/env_logger-0.10.2 https://crates.io                                            Cargo.lock
+crate/stylua/equivalent-1.0.1 https://crates.io                                            Cargo.lock
+crate/stylua/errno-0.3.8     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/fastrand-2.0.1  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/fluent-uri-0.1.4 https://crates.io                                            Cargo.lock
+crate/stylua/full_moon-2.2.0 https://crates.io                                            Cargo.lock
+crate/stylua/full_moon_derive-0.11.0 https://crates.io                                            Cargo.lock
+crate/stylua/globset-0.4.14  https://crates.io                                            Cargo.lock
+crate/stylua/globwalk-0.9.1  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/half-2.3.1      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/hashbrown-0.12.3 https://crates.io                                            Cargo.lock
+crate/stylua/hashbrown-0.14.3 https://crates.io                                            Cargo.lock
+crate/stylua/heck-0.4.1      https://crates.io                                            Cargo.lock
+crate/stylua/hermit-abi-0.1.19 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/hermit-abi-0.3.4 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/ignore-0.4.22   https://crates.io                                            Cargo.lock
+crate/stylua/indexmap-1.9.3  https://crates.io                                            Cargo.lock
+crate/stylua/indexmap-2.1.0  https://crates.io                                            Cargo.lock
+crate/stylua/insta-1.34.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/itertools-0.10.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/itoa-1.0.10     https://crates.io                                            Cargo.lock
+crate/stylua/js-sys-0.3.67   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/lazy_static-1.4.0 https://crates.io                                            Cargo.lock
+crate/stylua/libc-0.2.155    https://crates.io                                            Cargo.lock
+crate/stylua/linked-hash-map-0.5.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/linux-raw-sys-0.4.13 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/log-0.4.20      https://crates.io                                            Cargo.lock
+crate/stylua/lsp-server-0.7.8 https://crates.io                                            Cargo.lock
+crate/stylua/lsp-textdocument-0.4.2 https://crates.io                                            Cargo.lock
+crate/stylua/lsp-types-0.97.0 https://crates.io                                            Cargo.lock
+crate/stylua/memchr-2.7.1    https://crates.io                                            Cargo.lock
+crate/stylua/num_cpus-1.16.0 https://crates.io                                            Cargo.lock
+crate/stylua/num-traits-0.2.17 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/once_cell-1.19.0 https://crates.io                                            Cargo.lock
+crate/stylua/oorandom-11.1.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/os_str_bytes-6.6.1 https://crates.io                                            Cargo.lock
+crate/stylua/paste-1.0.14    https://crates.io                                            Cargo.lock
+crate/stylua/plotters-0.3.5  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/plotters-backend-0.3.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/plotters-svg-0.3.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/predicates-3.1.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/predicates-core-1.0.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/predicates-tree-1.0.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/proc-macro2-1.0.95 https://crates.io                                            Cargo.lock
+crate/stylua/proc-macro-error-1.0.4 https://crates.io                                            Cargo.lock
+crate/stylua/proc-macro-error-attr-1.0.4 https://crates.io                                            Cargo.lock
+crate/stylua/quote-1.0.35    https://crates.io                                            Cargo.lock
+crate/stylua/rayon-1.8.1     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/rayon-core-1.12.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/redox_syscall-0.4.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/regex-1.10.3    https://crates.io                                            Cargo.lock
+crate/stylua/regex-automata-0.4.5 https://crates.io                                            Cargo.lock
+crate/stylua/regex-syntax-0.8.2 https://crates.io                                            Cargo.lock
+crate/stylua/rustix-0.38.30  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/rustversion-1.0.14 https://crates.io                                            Cargo.lock
+crate/stylua/ryu-1.0.16      https://crates.io                                            Cargo.lock
+crate/stylua/same-file-1.0.6 https://crates.io                                            Cargo.lock
+crate/stylua/serde-1.0.219   https://crates.io                                            Cargo.lock
+crate/stylua/serde_derive-1.0.219 https://crates.io                                            Cargo.lock
+crate/stylua/serde_json-1.0.112 https://crates.io                                            Cargo.lock
+crate/stylua/serde_repr-0.1.20 https://crates.io                                            Cargo.lock
+crate/stylua/serde_spanned-0.6.5 https://crates.io                                            Cargo.lock
+crate/stylua/similar-2.4.0   https://crates.io                                            Cargo.lock
+crate/stylua/smol_str-0.3.2  https://crates.io                                            Cargo.lock
+crate/stylua/strsim-0.10.0   https://crates.io                                            Cargo.lock
+crate/stylua/strum-0.25.0    https://crates.io                                            Cargo.lock
+crate/stylua/strum_macros-0.25.3 https://crates.io                                            Cargo.lock
+crate/stylua/syn-1.0.109     https://crates.io                                            Cargo.lock
+crate/stylua/syn-2.0.100     https://crates.io                                            Cargo.lock
+crate/stylua/tempfile-3.9.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/termcolor-1.4.1 https://crates.io                                            Cargo.lock
+crate/stylua/termtree-0.4.1  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/textwrap-0.16.0 https://crates.io                                            Cargo.lock
+crate/stylua/thiserror-1.0.56 https://crates.io                                            Cargo.lock
+crate/stylua/thiserror-impl-1.0.56 https://crates.io                                            Cargo.lock
+crate/stylua/threadpool-1.8.1 https://crates.io                                            Cargo.lock
+crate/stylua/tinytemplate-1.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/toml-0.8.8      https://crates.io                                            Cargo.lock
+crate/stylua/toml_datetime-0.6.5 https://crates.io                                            Cargo.lock
+crate/stylua/toml_edit-0.21.0 https://crates.io                                            Cargo.lock
+crate/stylua/unicode-ident-1.0.12 https://crates.io                                            Cargo.lock
+crate/stylua/unicode-width-0.1.11 https://crates.io                                            Cargo.lock
+crate/stylua/unicode-xid-0.2.6 https://crates.io                                            Cargo.lock
+crate/stylua/version_check-0.9.4 https://crates.io                                            Cargo.lock
+crate/stylua/wait-timeout-0.2.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/walkdir-2.4.0   https://crates.io                                            Cargo.lock
+crate/stylua/wasm-bindgen-0.2.108 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/wasm-bindgen-macro-0.2.108 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/wasm-bindgen-macro-support-0.2.108 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/wasm-bindgen-shared-0.2.108 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/web-sys-0.3.67  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/winapi-0.3.9    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/winapi-i686-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/winapi-util-0.1.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/winapi-x86_64-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_aarch64_gnullvm-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_aarch64_msvc-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_i686_gnu-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_i686_msvc-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows-sys-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows-targets-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_x86_64_gnu-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_x86_64_gnullvm-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/windows_x86_64_msvc-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/stylua/winnow-0.5.35   https://crates.io                                            Cargo.lock
+crate/stylua/yaml-rust-0.4.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
 grammar/tree-sitter-bash     https://github.com/tree-sitter/tree-sitter-bash              a06c2e4415e9bc0346c6b86d401879ffb44058f7
 grammar/tree-sitter-c        https://github.com/tree-sitter/tree-sitter-c                 ae19b676b13bdcc13b7665397e6d9b14975473dd
 grammar/tree-sitter-diff     https://github.com/tree-sitter-grammars/tree-sitter-diff     2520c3f934b3179bb540d23e0ef45f75304b5fed
@@ -64,3 +209,29 @@ plugin/snacks.nvim           https://github.com/folke/snacks.nvim               
 plugin/todo-comments.nvim    https://github.com/folke/todo-comments.nvim                  31e3c38ce9b29781e4422fc0322eb0a21f4e8668
 plugin/trouble.nvim          https://github.com/folke/trouble.nvim                        bd67efe408d4816e25e8491cc5ad4088e708a69a
 plugin/which-key.nvim        https://github.com/folke/which-key.nvim                      3aab2147e74890957785941f0c1ad87d0a44c15a
+tool/lua-language-server/3rd/bee.lua https://github.com/actboy168/bee.lua                         f55b6988e8d9564816a555118b0e76564ef9a283
+tool/lua-language-server/3rd/EmmyLuaCodeStyle https://github.com/CppCXY/EmmyLuaCodeStyle                   8c4289b7617ccdb0b247a6171f111f28ac7ae969
+tool/lua-language-server/3rd/json.lua https://github.com/actboy168/json.lua                        08095fd2cdfde8f49a5f5b54b35ec7b3d4906a36
+tool/lua-language-server/3rd/json.lua/test/ltest https://github.com/actboy168/ltest                           0d2d81f8488f6e56bbea5c3132d34e632e2632b2
+tool/lua-language-server/3rd/love-api https://github.com/love2d-community/love-api                 853639288547618dece86c3a8e52348fe304eba2
+tool/lua-language-server/3rd/lovr-api https://github.com/bjornbytes/lovr-docs                      e89c753e1c2849b7533481fcf058095f8e050b9f
+tool/lua-language-server/3rd/lpeglabel https://github.com/sqmedeiros/lpeglabel                      912b0b9e8641074408ffc2259e069b188e0c717b
+tool/lua-language-server/3rd/luamake/bee.lua https://github.com/actboy168/bee.lua                         466c4f071a17ab7c31e402383b0a2097b03535ba
+tool/lua-language-server/3rd/luamake https://github.com/actboy168/luamake                         4c4bd16c9b0c1d773402fc15c76367f7899a1f91
+tool/lua-language-server     https://github.com/LuaLS/lua-language-server                 3.19.1
+tool/lua-language-server/meta/3rd/bee https://github.com/LuaCATS/bee.git                           c8ce19fd5536a7e98ef186d1d75825f0bb8c9216
+tool/lua-language-server/meta/3rd/busted https://github.com/LuaCATS/busted.git                        5ed85d0e016a5eb5eca097aa52905eedf1b180f1
+tool/lua-language-server/meta/3rd/Cocos4.0 https://github.com/LuaCATS/cocos4.0.git                      c0b2259e0d367561fd4563ae114b029b4dfe3a8f
+tool/lua-language-server/meta/3rd/Defold https://github.com/LuaCATS/defold.git                        05379b40fb3084d82f7270475e42da8d521c4dae
+tool/lua-language-server/meta/3rd/ffi-reflect https://github.com/LuaCATS/ffi-reflect.git                   e9037efca4021a15552b281f5e91418afd370d8f
+tool/lua-language-server/meta/3rd/Jass https://github.com/LuaCATS/jass.git                          80d85cbbfd8ae2473fb39c7df4be814602f5bc4f
+tool/lua-language-server/meta/3rd/lfs https://github.com/LuaCATS/luafilesystem.git                 9b5cfc15be744c829c66519cb11e49669ae7e39b
+tool/lua-language-server/meta/3rd/love2d https://github.com/LuaCATS/love2d.git                        98f7684525a6e866ffa6df449b7aef406a807dae
+tool/lua-language-server/meta/3rd/lovr https://github.com/LuaCATS/lovr.git                          3ba215f98e1647111b50b311d45c31338fdc615f
+tool/lua-language-server/meta/3rd/luaecs https://github.com/LuaCATS/luaecs.git                        21192fbdccc0f140dae2f74f7c3ec7d74e2aadd0
+tool/lua-language-server/meta/3rd/luassert https://github.com/LuaCATS/luassert.git                      d3528bb679302cbfdedefabb37064515ab95f7b9
+tool/lua-language-server/meta/3rd/luv https://github.com/LuaCATS/luv.git                           3615eb12c94a7cfa7184b8488cf908abb5e94c9c
+tool/lua-language-server/meta/3rd/OpenResty https://github.com/LuaCATS/openresty.git                     3bec36f0f645bb38b3c8208990d5c36feb66ce3d
+tool/lua-language-server/meta/3rd/skynet https://github.com/LuaCATS/skynet.git                        afa6717ac4f71e42012fa2ebf4b410d04db647ae
+tool/ninja                   https://github.com/ninja-build/ninja                         v1.13.2
+tool/stylua                  https://github.com/JohnnyMorganz/StyLua                      v2.5.2

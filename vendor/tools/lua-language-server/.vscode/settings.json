@@ -1,0 +1,17 @@
+// Just some comment
+{
+    "Lua.misc.parameters": [
+        //"--preview",
+        "--develop=true",
+        "--dbgport=11431",
+        //"--dbgwait",
+        "--loglevel=trace",
+        "--trace-rpc",
+        //"--save-coder",
+        //"--shownode",
+        //"--lazy",
+    ],
+    "files.associations": {
+        "thread": "cpp"
+    },
+}

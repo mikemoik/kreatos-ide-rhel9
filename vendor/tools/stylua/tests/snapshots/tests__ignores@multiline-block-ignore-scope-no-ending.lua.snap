@@ -1,0 +1,12 @@
+---
+source: tests/tests.rs
+expression: format(&contents)
+---
+local foo = bar
+do
+    -- stylua: ignore start
+    local bar   =     baz
+    local bar   =     baz
+end
+local bar = baz
+

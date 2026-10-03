@@ -6,9 +6,28 @@
 
 A file counts as binary when it contains a NUL byte (images, archives,
 compiled objects, wasm, …). Empty files are fine.
+
+Stripping a file inside a vendored Rust crate also drops it from the crate's
+.cargo-checksum.json, which cargo checks file by file (these are e.g. the
+Windows import libraries of windows-* crates, never built on Linux).
 """
+import json
 import os
 import sys
+
+
+def drop_cargo_checksum(path):
+    d = os.path.dirname(path)
+    while d and d != os.path.dirname(d):
+        sums = os.path.join(d, ".cargo-checksum.json")
+        if os.path.isfile(sums):
+            with open(sums) as f:
+                data = json.load(f)
+            data["files"].pop(os.path.relpath(path, d), None)
+            with open(sums, "w") as f:
+                json.dump(data, f)
+            return
+        d = os.path.dirname(d)
 
 
 def is_binary(path):
@@ -34,6 +53,7 @@ def scan(top, strip):
             if is_binary(path):
                 if strip:
                     os.remove(path)
+                    drop_cargo_checksum(path)
                     print(f"stripped {os.path.relpath(path, top)}")
                 else:
                     bad.append(f"binary: {path}")
