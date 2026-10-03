@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = [".", "./examples/*"]
+
+[package]
+name = "treesitter_kind_collector"
+version = "0.2.0"
+edition = "2021"
+authors = ["Decodertalkers <aakari@tutanota.com>"]
+repository = "https://github.com/Decodetalkers/treesitter_type_collector"
+keywords = ["treesitter"]
+license = "MIT"
+description = "collect kind names from node-types.json of treesitter"
+readme = "README.md"
+
+[workspace.dependencies]
+treesitter_kind_collector = { version = "0.2.0", path = "./" }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = "2.0"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"

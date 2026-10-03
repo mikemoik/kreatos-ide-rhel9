@@ -117,30 +117,107 @@ local function run()
     check("format " .. case.name, fok and got == case.want, ferr or got)
   end
 
-  -- debugging: nvim-dap-python + the bundled debugpy stop at a breakpoint
+  -- debugging: a session started through nvim-dap stops at a breakpoint
   local dap = require("dap")
-  local dbuf = open_in_project("dap", "pyproject.toml", "py", { "x = 1", "y = x + 1", "print(y)" })
-  require("dap.breakpoints").set({}, dbuf, 2)
-  local stopped_line
-  dap.listeners.after.event_stopped["smoke"] = function(session, body)
-    session:request("stackTrace", { threadId = body.threadId }, function(_, resp)
-      stopped_line = resp and resp.stackFrames[1].line
-    end)
+  local function debug_check(name, buf, line, config)
+    require("dap.breakpoints").clear()
+    require("dap.breakpoints").set({}, buf, line)
+    local stopped_line
+    dap.listeners.after.event_stopped["smoke"] = function(session, body)
+      session:request("stackTrace", { threadId = body.threadId }, function(_, resp)
+        stopped_line = resp and resp.stackFrames[1].line
+      end)
+    end
+    config = vim.tbl_extend("force", { name = "smoke" }, config)
+    local dok, derr = pcall(dap.run, config)
+    local stopped = dok and vim.wait(60000, function()
+      return stopped_line ~= nil
+    end, 200)
+    check(name .. " stops at breakpoint", stopped and stopped_line == line, derr or tostring(stopped_line))
+    pcall(dap.terminate)
+    vim.wait(10000, function()
+      return dap.session() == nil
+    end, 100)
   end
-  local dok, derr = pcall(dap.run, {
-    type = "python",
+  local pybuf = open_in_project("dap", "pyproject.toml", "py", { "x = 1", "y = x + 1", "print(y)" })
+  debug_check("debugpy", pybuf, 2, { type = "python", request = "launch", program = vim.api.nvim_buf_get_name(pybuf) })
+
+  -- C/C++: a CMake project, configured + built with the RHEL toolchain
+  local cpp = dir .. "/cpp"
+  vim.fn.mkdir(cpp, "p")
+  vim.fn.writefile({
+    "cmake_minimum_required(VERSION 3.16)",
+    "project(smoke CXX)",
+    "add_executable(app main.cpp)",
+  }, cpp .. "/CMakeLists.txt")
+  vim.fn.writefile({
+    "#include <cstdio>",
+    "int main() {",
+    "  int x = 1;",
+    "  int y = x + 1;",
+    '  std::printf("%d\\n", y);',
+    "  return 0;",
+    "}",
+  }, cpp .. "/main.cpp")
+  vim.fn.writefile({ "int broken() {", '  int x = "not an int";', "  return x;", "}" }, cpp .. "/broken.cpp")
+  local cmake_out = vim.fn.system({ "sh", "-c", ("cd %s && cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug "
+    .. "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON >/dev/null && cmake --build build >/dev/null "
+    .. "&& ln -s build/compile_commands.json ."):format(cpp) })
+  check("cmake configure + build", vim.v.shell_error == 0, cmake_out)
+  local app = cpp .. "/build/app"
+
+  vim.cmd.edit(cpp .. "/broken.cpp")
+  local cbuf = vim.api.nvim_get_current_buf()
+  check("lsp clangd attaches", wait_client(cbuf, "clangd"))
+  check("lsp clangd reports diagnostics", vim.wait(60000, function()
+    for _, d in ipairs(vim.diagnostic.get(cbuf)) do
+      if d.severity == vim.diagnostic.severity.ERROR then
+        return true
+      end
+    end
+  end, 200), vim.inspect(vim.diagnostic.get(cbuf)))
+
+  vim.cmd.edit(cpp .. "/CMakeLists.txt")
+  check("lsp neocmake attaches", wait_client(vim.api.nvim_get_current_buf(), "neocmake"))
+
+  local fbuf = open_in_project("fmt_cpp", "marker.txt", "cpp", { "int main(){return 0;}" })
+  local fok, ferr = pcall(require("conform").format, { bufnr = fbuf })
+  local got = vim.api.nvim_buf_get_lines(fbuf, 0, 1, false)[1]
+  check("format clang-format", fok and got == "int main() { return 0; }", ferr or got)
+
+  vim.cmd.edit(cpp .. "/main.cpp")
+  local mbuf = vim.api.nvim_get_current_buf()
+  debug_check("gdb (dap)", mbuf, 4, { type = "gdb", request = "launch", program = app, cwd = cpp })
+  debug_check("lldb-dap", mbuf, 4, {
+    type = "lldb-dap",
     request = "launch",
-    name = "smoke",
-    program = vim.api.nvim_buf_get_name(dbuf),
+    program = app,
+    cwd = cpp,
+    disableASLR = false, -- as in misw.cpp: the test runs in a container
   })
-  local stopped = dok and vim.wait(30000, function()
-    return stopped_line ~= nil
-  end, 200)
-  check("debugpy stops at breakpoint", stopped and stopped_line == 2, derr or tostring(stopped_line))
-  pcall(dap.terminate)
-  vim.wait(5000, function()
-    return dap.session() == nil
-  end, 100)
+
+  local cmok, cmerr = pcall(function()
+    assert(package.loaded["cmake-tools"], "cmake-tools not loaded")
+    assert(vim.fn.exists(":CMakeBuild") == 2, ":CMakeBuild missing")
+    assert(vim.fn.exists(":ClangdTypeHierarchy") == 2, ":ClangdTypeHierarchy missing")
+  end)
+  check("cmake-tools + clangd_extensions loaded", cmok, cmerr)
+
+  local ntok, nterr = pcall(function()
+    local names = vim.tbl_map(function(a)
+      return a.name
+    end, require("neotest.config").adapters)
+    assert(vim.tbl_contains(names, "neotest-gtest"), "adapters: " .. vim.inspect(names))
+  end)
+  check("neotest with gtest adapter", ntok, nterr)
+
+  -- neogen writes a Doxygen skeleton above a C++ function
+  local nbuf = open_in_project("neogen", "marker.txt", "cpp", { "int add(int a, int b) { return a + b; }" })
+  vim.api.nvim_win_set_cursor(0, { 1, 4 })
+  local gok, gerr = pcall(require("neogen").generate, { type = "func" })
+  vim.cmd.stopinsert()
+  local text = table.concat(vim.api.nvim_buf_get_lines(nbuf, 0, -1, false), "\n")
+  check("neogen doxygen comment", gok and text:find("@param a", 1, true) ~= nil, gerr or text)
 
   -- completion engine starts with the Lua fuzzy matcher
   vim.api.nvim_exec_autocmds("InsertEnter", {})

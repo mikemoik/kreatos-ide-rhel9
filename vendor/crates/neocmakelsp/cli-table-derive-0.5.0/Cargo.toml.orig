@@ -1,0 +1,27 @@
+[package]
+name = "cli-table-derive"
+version = "0.5.0"
+authors = ["Devashish Dixit <devashishdxt@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "A crate for printing tables on command line"
+homepage = "https://github.com/devashishdxt/cli-table"
+repository = "https://github.com/devashishdxt/cli-table"
+categories = ["command-line-interface"]
+keywords = ["table", "cli", "format"]
+readme = "README.md"
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-*"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+doc = []
+
+[dependencies]
+proc-macro2 = "1.0.94"
+syn = "2.0.100"
+quote = "1.0.40"
+
+[lib]
+proc-macro = true

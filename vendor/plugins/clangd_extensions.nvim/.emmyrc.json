@@ -1,0 +1,15 @@
+{
+    "diagnostics": {
+        "globals": [
+            "vim"
+        ]
+    },
+    "runtime": {
+        "version": "LuaJIT"
+    },
+    "workspace": {
+        "library": [
+            "/usr/share/nvim/runtime/lua/"
+        ]
+    }
+}

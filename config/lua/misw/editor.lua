@@ -130,6 +130,8 @@ local function which_key()
         { "<leader>d", group = "debug" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
+        { "<leader>m", group = "cmake" },
+        { "<leader>t", group = "test" },
         { "<leader>gh", group = "hunks" },
         { "<leader>q", group = "quit/session" },
         { "<leader>s", group = "search" },

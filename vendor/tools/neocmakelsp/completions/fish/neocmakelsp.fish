@@ -1,0 +1,1 @@
+COMPLETE=fish neocmakelsp | source

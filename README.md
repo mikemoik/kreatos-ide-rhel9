@@ -22,6 +22,36 @@ cache live under `NVIM_APPNAME=kreatos-ide` (`~/.local/share/kreatos-ide`, …),
 so it never mixes with another nvim. The repo is only read; intermediate files
 go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
 
+### C/C++ development
+
+RHEL9 ships the heavy C/C++ tools itself, so they are **not** bundled; kide
+uses them when installed (and skips them otherwise):
+
+    dnf install gcc-c++ clang-tools-extra gdb lldb
+
+- `clang-tools-extra`: clangd (LSP), clang-format (format on save),
+  clang-tidy (runs inside clangd)
+- `gdb` (16, speaks DAP itself) and `lldb` (`lldb-dap`): the two debug
+  adapters; gdb is the default (also for cmake-tools and neotest-gtest)
+- `cmake`, `make`, `gcc`/`gcc-toolset-*`, `clang`, `valgrind` as usual
+
+Bundled for C/C++: neocmakelsp (CMake LSP), clangd_extensions.nvim,
+cmake-tools.nvim, neotest + neotest-gtest, neogen, and the cpp, cmake, make
+and doxygen parsers. Keys:
+
+| Keys | Action |
+|---|---|
+| `<leader>ch` / `cH` / `cs` | switch source/header, type hierarchy, symbol info |
+| `<leader>mg` `mb` `mr` `md` | CMake generate, build, run, debug target |
+| `<leader>mt` `mT` `ms` `mc` | select launch target, build target, build type; clean |
+| `<leader>tr` `tt` `tT` `td` | run nearest test, file, all; debug nearest |
+| `<leader>ts` `to` `tO` `tl` `tS` | test summary, output, output panel, run last, stop |
+| `<leader>cn` | Doxygen/docstring skeleton for the function under the cursor |
+| `<leader>d…` | debugging (pick "Launch (gdb)" or "Launch (lldb-dap)") |
+
+cmake-tools builds into `build/<BuildType>` and links `compile_commands.json`
+into the project root, which is what clangd reads.
+
 ## What is inside
 
 | Path | Content |
@@ -67,7 +97,8 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
   installs anything.
 - nvim-dap-python starts the bundled debugpy through `kide-python` (python3
   with the bundled debugpy on `PYTHONPATH`) instead of a system debugpy.
-- LSP servers: `ty`, `ruff` (no `lua_ls`); no Lua formatter (no stylua).
+- LSP servers: `ty`, `ruff`, `clangd` (from RHEL), `neocmake` (no `lua_ls`);
+  no Lua formatter (no stylua). C/C++ additions: see above.
   Lua files still get treesitter highlighting, indent and folds. A server
   whose binary is missing is skipped.
 
@@ -79,6 +110,7 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 | 2 | lua-language-server, stylua | built and tested, then dropped: no Lua development on the target |
 | 3 | ruff + ty 0.15.11 (newest tag that builds with Rust 1.92) | done, passes in UBI9 offline |
 | 4 | shfmt 3.13.1, debugpy 1.8.21 (last release for Python 3.9) | done, passes in UBI9 offline |
+| C++ | parsers, neocmakelsp 0.11.0 (newest that builds with Rust 1.92), clangd_extensions, cmake-tools, neotest-gtest, neogen; config for RHEL's clangd/clang-format/gdb/lldb-dap | task 123 |
 
 ## Updating the pins (on a connected machine)
 
@@ -101,7 +133,11 @@ highlights query compiles, treesitter highlighting on Lua/Python/sh/TypeScript
 files, each LSP server attaches to a small project and reports a diagnostic,
 each formatter formats through conform, a debugpy session started through
 nvim-dap-python stops at a breakpoint, blink.cmp running with the Lua
-matcher.
+matcher. For C/C++ (the test image also installs RHEL's gcc-c++,
+clang-tools-extra, gdb and lldb): a small CMake project is configured and
+built, clangd reports an error, neocmakelsp attaches, clang-format formats,
+gdb and lldb-dap each stop at a breakpoint in the built program, cmake-tools,
+clangd_extensions and neotest-gtest load, neogen writes a Doxygen comment.
 
 <!-- inventory:start -->
 
@@ -128,7 +164,10 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | gomod/shfmt/mvdan.cc/editorconfig | <https://mvdan.cc/editorconfig> | `v0.3.0` | BSD-3-Clause |
 | grammar/tree-sitter-bash | <https://github.com/tree-sitter/tree-sitter-bash> | `a06c2e4415e9` | MIT |
 | grammar/tree-sitter-c | <https://github.com/tree-sitter/tree-sitter-c> | `ae19b676b13b` | MIT |
+| grammar/tree-sitter-cmake | <https://github.com/uyha/tree-sitter-cmake> | `c7b2a71e7f8e` | MIT |
+| grammar/tree-sitter-cpp | <https://github.com/tree-sitter/tree-sitter-cpp> | `12bd6f7e9608` | MIT |
 | grammar/tree-sitter-diff | <https://github.com/tree-sitter-grammars/tree-sitter-diff> | `2520c3f934b3` | MIT |
+| grammar/tree-sitter-doxygen | <https://github.com/tree-sitter-grammars/tree-sitter-doxygen> | `ccd998f378c3` | MIT |
 | grammar/tree-sitter-html | <https://github.com/tree-sitter/tree-sitter-html> | `73a3947324f6` | MIT |
 | grammar/tree-sitter-javascript | <https://github.com/tree-sitter/tree-sitter-javascript> | `58404d8cf191` | MIT |
 | grammar/tree-sitter-jsdoc | <https://github.com/tree-sitter/tree-sitter-jsdoc> | `658d18dcdddb` | MIT |
@@ -136,6 +175,7 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | grammar/tree-sitter-luadoc | <https://github.com/tree-sitter-grammars/tree-sitter-luadoc> | `873612aadd3f` | MIT |
 | grammar/tree-sitter-lua | <https://github.com/tree-sitter-grammars/tree-sitter-lua> | `e40f5b6e6df9` | MIT |
 | grammar/tree-sitter-luap | <https://github.com/tree-sitter-grammars/tree-sitter-luap> | `c134aaec6acf` | MIT |
+| grammar/tree-sitter-make | <https://github.com/tree-sitter-grammars/tree-sitter-make> | `5e9e8f8ff338` | MIT |
 | grammar/tree-sitter-markdown | <https://github.com/tree-sitter-grammars/tree-sitter-markdown> | `da063e1ba430` | MIT |
 | grammar/tree-sitter-printf | <https://github.com/tree-sitter-grammars/tree-sitter-printf> | `ec4e5674573d` | ISC |
 | grammar/tree-sitter-python | <https://github.com/tree-sitter/tree-sitter-python> | `v0.25.0` | MIT |
@@ -164,6 +204,8 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | neovim | <https://github.com/neovim/neovim> | `v0.12.5` | Apache-2.0 AND Vim |
 | plugin/blink.cmp | <https://github.com/saghen/blink.cmp> | `b19413d21406` | MIT |
 | plugin/bufferline.nvim | <https://github.com/akinsho/bufferline.nvim> | `655133c3b4c3` | GPL-3.0 |
+| plugin/clangd_extensions.nvim | <https://github.com/p00f/clangd_extensions.nvim> | `78c2ecd659d5` | MIT |
+| plugin/cmake-tools.nvim | <https://github.com/Civitasv/cmake-tools.nvim> | `ee807ac4e625` | GPL-3.0 |
 | plugin/conform.nvim | <https://github.com/stevearc/conform.nvim> | `c2526f1cde52` | MIT |
 | plugin/ethereal.nvim | <https://github.com/bjarneo/ethereal.nvim> | `a0ec73332e53` | MIT |
 | plugin/flash.nvim | <https://github.com/folke/flash.nvim> | `fcea7ff88323` | Apache-2.0 |
@@ -175,6 +217,9 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | plugin/mini.ai | <https://github.com/nvim-mini/mini.ai> | `9eae720f2b20` | MIT |
 | plugin/mini.icons | <https://github.com/nvim-mini/mini.icons> | `efc85e42262c` | MIT |
 | plugin/mini.pairs | <https://github.com/nvim-mini/mini.pairs> | `4089aa6ea642` | MIT |
+| plugin/neogen | <https://github.com/danymat/neogen> | `23e7e9f883d0` | GPL-3.0 |
+| plugin/neotest-gtest | <https://github.com/alfaix/neotest-gtest> | `bdffb45731ed` | MIT |
+| plugin/neotest | <https://github.com/nvim-neotest/neotest> | `27bf92149804` | MIT |
 | plugin/neo-tree.nvim | <https://github.com/nvim-neo-tree/neo-tree.nvim> | `1bd82358e516` | MIT |
 | plugin/noice.nvim | <https://github.com/folke/noice.nvim> | `7bfd942445fb` | Apache-2.0 |
 | plugin/nui.nvim | <https://github.com/MunifTanjim/nui.nvim> | `de740991c124` | MIT |
@@ -193,8 +238,241 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | plugin/trouble.nvim | <https://github.com/folke/trouble.nvim> | `bd67efe408d4` | Apache-2.0 |
 | plugin/which-key.nvim | <https://github.com/folke/which-key.nvim> | `3aab2147e748` | Apache-2.0 |
 | tool/debugpy | <https://pypi.org/project/debugpy> | `1.8.21` | MIT |
+| tool/neocmakelsp | <https://github.com/neocmakelsp/neocmakelsp> | `v0.11.0` | MIT |
 | tool/ruff | <https://github.com/astral-sh/ruff> | `0.15.11` | MIT |
 | tool/shfmt | <https://github.com/mvdan/sh> | `v3.13.1` | BSD-3-Clause |
+
+<details><summary>Rust crates of neocmakelsp: 162 built, 63 manifest-only stubs (pinned by its Cargo.lock)</summary>
+
+| Crate | License | Built |
+|---|---|---|
+| aho-corasick-1.1.4 | Unlicense OR MIT | yes |
+| android_system_properties-0.1.5 | MIT OR Apache-2.0 | no (stub) |
+| anstream-1.0.0 | MIT OR Apache-2.0 | yes |
+| anstyle-1.0.14 | MIT OR Apache-2.0 | yes |
+| anstyle-parse-1.0.0 | MIT OR Apache-2.0 | yes |
+| anstyle-query-1.1.5 | MIT OR Apache-2.0 | yes |
+| anstyle-wincon-3.0.11 | MIT OR Apache-2.0 | no (stub) |
+| anyhow-1.0.102 | MIT OR Apache-2.0 | yes |
+| assert_cmd-2.2.0 | MIT OR Apache-2.0 | no (stub) |
+| autocfg-1.5.1 | Apache-2.0 OR MIT | yes |
+| auto_impl-1.3.0 | MIT OR Apache-2.0 | yes |
+| bitflags-2.11.0 | MIT OR Apache-2.0 | yes |
+| bstr-1.12.1 | MIT OR Apache-2.0 | yes |
+| bumpalo-3.20.3 | MIT OR Apache-2.0 | no (stub) |
+| bytes-1.11.1 | MIT | yes |
+| cc-1.2.58 | MIT OR Apache-2.0 | yes |
+| cfg-if-1.0.4 | MIT OR Apache-2.0 | yes |
+| chrono-0.4.45 | MIT OR Apache-2.0 | yes |
+| clap-4.6.0 | MIT OR Apache-2.0 | yes |
+| clap_builder-4.6.0 | MIT OR Apache-2.0 | yes |
+| clap_complete-4.6.0 | MIT OR Apache-2.0 | yes |
+| clap_derive-4.6.0 | MIT OR Apache-2.0 | yes |
+| clap_lex-1.1.0 | MIT OR Apache-2.0 | yes |
+| cli-table-0.5.0 | MIT OR Apache-2.0 | yes |
+| cli-table-derive-0.5.0 | MIT OR Apache-2.0 | yes |
+| colorchoice-1.0.5 | MIT OR Apache-2.0 | yes |
+| console-0.16.4 | MIT | yes |
+| const-random-0.1.18 | MIT OR Apache-2.0 | yes |
+| const-random-macro-0.1.16 | MIT OR Apache-2.0 | yes |
+| core-foundation-sys-0.8.7 | MIT OR Apache-2.0 | no (stub) |
+| crossbeam-deque-0.8.6 | MIT OR Apache-2.0 | yes |
+| crossbeam-epoch-0.9.18 | MIT OR Apache-2.0 | yes |
+| crossbeam-utils-0.8.21 | MIT OR Apache-2.0 | yes |
+| crunchy-0.2.4 | MIT | yes |
+| csv-1.4.0 | Unlicense OR MIT | yes |
+| csv-core-0.1.13 | Unlicense OR MIT | yes |
+| dashmap-6.2.1 | MIT | yes |
+| dialoguer-0.12.0 | MIT | yes |
+| difflib-0.4.0 | MIT | no (stub) |
+| displaydoc-0.2.5 | MIT OR Apache-2.0 | yes |
+| dlv-list-0.5.2 | MIT OR Apache-2.0 | yes |
+| encode_unicode-1.0.0 | Apache-2.0 OR MIT | no (stub) |
+| equivalent-1.0.2 | Apache-2.0 OR MIT | yes |
+| errno-0.3.14 | MIT OR Apache-2.0 | yes |
+| etcetera-0.11.0 | MIT OR Apache-2.0 | yes |
+| fastrand-2.3.0 | Apache-2.0 OR MIT | yes |
+| find-msvc-tools-0.1.9 | MIT OR Apache-2.0 | yes |
+| foldhash-0.1.5 | Zlib | no (stub) |
+| form_urlencoded-1.2.2 | MIT OR Apache-2.0 | yes |
+| futures-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-channel-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-core-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-io-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-macro-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-sink-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-task-0.3.32 | MIT OR Apache-2.0 | yes |
+| futures-util-0.3.32 | MIT OR Apache-2.0 | yes |
+| fuzzy-matcher-0.3.7 | MIT | yes |
+| gen-lsp-types-0.9.0 | MIT | yes |
+| getrandom-0.2.17 | MIT OR Apache-2.0 | yes |
+| getrandom-0.4.2 | MIT OR Apache-2.0 | yes |
+| glob-0.3.3 | MIT OR Apache-2.0 | yes |
+| globset-0.4.18 | Unlicense OR MIT | yes |
+| hashbrown-0.14.5 | MIT OR Apache-2.0 | yes |
+| hashbrown-0.15.5 | MIT OR Apache-2.0 | no (stub) |
+| hashbrown-0.16.1 | MIT OR Apache-2.0 | yes |
+| heck-0.5.0 | MIT OR Apache-2.0 | yes |
+| httparse-1.10.1 | MIT OR Apache-2.0 | yes |
+| iana-time-zone-0.1.65 | MIT OR Apache-2.0 | yes |
+| iana-time-zone-haiku-0.1.2 | MIT OR Apache-2.0 | no (stub) |
+| icu_collections-2.2.0 | Unicode-3.0 | yes |
+| icu_locale_core-2.2.0 | Unicode-3.0 | yes |
+| icu_normalizer-2.2.0 | Unicode-3.0 | yes |
+| icu_normalizer_data-2.2.0 | Unicode-3.0 | yes |
+| icu_properties-2.2.0 | Unicode-3.0 | yes |
+| icu_properties_data-2.2.0 | Unicode-3.0 | yes |
+| icu_provider-2.2.0 | Unicode-3.0 | yes |
+| id-arena-2.3.0 | MIT OR Apache-2.0 | no (stub) |
+| idna-1.1.0 | MIT OR Apache-2.0 | yes |
+| idna_adapter-1.2.2 | Apache-2.0 OR MIT | yes |
+| ignore-0.4.25 | Unlicense OR MIT | yes |
+| indexmap-2.13.0 | Apache-2.0 OR MIT | yes |
+| indoc-2.0.7 | MIT OR Apache-2.0 | no (stub) |
+| is_executable-1.0.5 | MIT OR Apache-2.0 | yes |
+| is_terminal_polyfill-1.70.2 | MIT OR Apache-2.0 | yes |
+| itoa-1.0.18 | MIT OR Apache-2.0 | yes |
+| js-sys-0.3.103 | MIT OR Apache-2.0 | no (stub) |
+| lazy_static-1.5.0 | MIT OR Apache-2.0 | yes |
+| leb128fmt-0.1.0 | MIT OR Apache-2.0 | no (stub) |
+| libc-0.2.184 | MIT OR Apache-2.0 | yes |
+| linux-raw-sys-0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | yes |
+| litemap-0.8.2 | Unicode-3.0 | yes |
+| lock_api-0.4.14 | MIT OR Apache-2.0 | yes |
+| log-0.4.29 | MIT OR Apache-2.0 | yes |
+| memchr-2.8.0 | Unlicense OR MIT | yes |
+| mio-1.2.0 | MIT | yes |
+| nu-ansi-term-0.50.3 | MIT | yes |
+| num-traits-0.2.19 | MIT OR Apache-2.0 | yes |
+| once_cell-1.21.4 | MIT OR Apache-2.0 | yes |
+| once_cell_polyfill-1.70.2 | MIT OR Apache-2.0 | no (stub) |
+| ordered-multimap-0.7.3 | MIT | yes |
+| parking_lot-0.12.5 | MIT OR Apache-2.0 | yes |
+| parking_lot_core-0.9.12 | MIT OR Apache-2.0 | yes |
+| path-absolutize-4.0.1 | MIT | no (stub) |
+| path-dedot-4.0.1 | MIT | no (stub) |
+| pathdiff-0.2.3 | MIT OR Apache-2.0 | yes |
+| percent-encoding-2.3.2 | MIT OR Apache-2.0 | yes |
+| pin-project-lite-0.2.17 | Apache-2.0 OR MIT | yes |
+| potential_utf-0.1.5 | Unicode-3.0 | yes |
+| predicates-3.1.4 | MIT OR Apache-2.0 | no (stub) |
+| predicates-core-1.0.10 | MIT OR Apache-2.0 | no (stub) |
+| predicates-tree-1.0.13 | MIT OR Apache-2.0 | no (stub) |
+| prettyplease-0.2.37 | MIT OR Apache-2.0 | no (stub) |
+| proc-macro2-1.0.106 | MIT OR Apache-2.0 | yes |
+| quote-1.0.45 | MIT OR Apache-2.0 | yes |
+| redox_syscall-0.5.18 | MIT | no (stub) |
+| r-efi-6.0.0 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | no (stub) |
+| regex-1.13.1 | MIT OR Apache-2.0 | yes |
+| regex-automata-0.4.16 | MIT OR Apache-2.0 | yes |
+| regex-syntax-0.8.11 | MIT OR Apache-2.0 | yes |
+| rust-ini-0.21.3 | MIT | yes |
+| rustix-1.1.4 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | yes |
+| rustversion-1.0.22 | MIT OR Apache-2.0 | no (stub) |
+| ryu-1.0.23 | Apache-2.0 OR BSL-1.0 | yes |
+| same-file-1.0.6 | Unlicense OR MIT | yes |
+| scopeguard-1.2.0 | MIT OR Apache-2.0 | yes |
+| semver-1.0.27 | MIT OR Apache-2.0 | no (stub) |
+| serde-1.0.228 | MIT OR Apache-2.0 | yes |
+| serde_core-1.0.228 | MIT OR Apache-2.0 | yes |
+| serde_derive-1.0.228 | MIT OR Apache-2.0 | yes |
+| serde_json-1.0.150 | MIT OR Apache-2.0 | yes |
+| serde_spanned-1.1.1 | MIT OR Apache-2.0 | yes |
+| sharded-slab-0.1.7 | MIT | yes |
+| shell-words-1.1.1 | MIT OR Apache-2.0 | yes |
+| shlex-1.3.0 | MIT OR Apache-2.0 | yes |
+| signal-hook-registry-1.4.8 | MIT OR Apache-2.0 | yes |
+| slab-0.4.12 | MIT | yes |
+| smallvec-1.15.1 | MIT OR Apache-2.0 | yes |
+| socket2-0.6.3 | MIT OR Apache-2.0 | yes |
+| stable_deref_trait-1.2.1 | MIT OR Apache-2.0 | yes |
+| streaming-iterator-0.1.9 | MIT OR Apache-2.0 | yes |
+| strsim-0.11.1 | MIT | yes |
+| syn-2.0.117 | MIT OR Apache-2.0 | yes |
+| sync_wrapper-1.0.2 | Apache-2.0 | yes |
+| synstructure-0.13.2 | MIT | yes |
+| tempfile-3.27.0 | MIT OR Apache-2.0 | yes |
+| termcolor-1.4.1 | Unlicense OR MIT | yes |
+| termtree-0.5.1 | MIT | no (stub) |
+| thread_local-1.1.9 | MIT OR Apache-2.0 | yes |
+| tiny-keccak-2.0.2 | CC0-1.0 | yes |
+| tinystr-0.8.3 | Unicode-3.0 | yes |
+| tokio-1.52.0 | MIT | yes |
+| tokio-macros-2.7.0 | MIT | yes |
+| tokio-util-0.7.18 | MIT | yes |
+| toml-1.1.2+spec-1.1.0 | MIT OR Apache-2.0 | yes |
+| toml_datetime-1.1.1+spec-1.1.0 | MIT OR Apache-2.0 | yes |
+| toml_parser-1.1.2+spec-1.1.0 | MIT OR Apache-2.0 | yes |
+| toml_writer-1.1.1+spec-1.1.0 | MIT OR Apache-2.0 | yes |
+| tower-0.5.3 | MIT | yes |
+| tower-layer-0.3.3 | MIT | yes |
+| tower-lsp-f-0.26.0 | MIT OR Apache-2.0 | yes |
+| tower-service-0.3.3 | MIT | yes |
+| tracing-0.1.44 | MIT | yes |
+| tracing-attributes-0.1.31 | MIT | yes |
+| tracing-core-0.1.36 | MIT | yes |
+| tracing-log-0.2.0 | MIT | yes |
+| tracing-subscriber-0.3.23 | MIT | yes |
+| tree-sitter-0.26.8 | MIT | yes |
+| tree-sitter-cmake-0.7.2 | MIT | yes |
+| treesitter_kind_collector-0.2.0 | MIT | yes |
+| tree-sitter-language-0.1.7 | MIT | yes |
+| unicode-ident-1.0.24 | (MIT OR Apache-2.0) AND Unicode-3.0 | yes |
+| unicode-width-0.2.2 | MIT OR Apache-2.0 | yes |
+| unicode-xid-0.2.6 | MIT OR Apache-2.0 | no (stub) |
+| url-2.5.8 | MIT OR Apache-2.0 | yes |
+| utf8_iter-1.0.4 | Apache-2.0 OR MIT | yes |
+| utf8parse-0.2.2 | Apache-2.0 OR MIT | yes |
+| valuable-0.1.1 | MIT | no (stub) |
+| wait-timeout-0.2.1 | MIT OR Apache-2.0 | no (stub) |
+| walkdir-2.5.0 | Unlicense OR MIT | yes |
+| wasi-0.11.1+wasi-snapshot-preview1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wasip2-1.0.2+wasi-0.2.9 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wasm-bindgen-0.2.126 | MIT OR Apache-2.0 | no (stub) |
+| wasm-bindgen-macro-0.2.126 | MIT OR Apache-2.0 | no (stub) |
+| wasm-bindgen-macro-support-0.2.126 | MIT OR Apache-2.0 | no (stub) |
+| wasm-bindgen-shared-0.2.126 | MIT OR Apache-2.0 | no (stub) |
+| wasm-encoder-0.244.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wasm-metadata-0.244.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wasmparser-0.244.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| winapi-util-0.1.11 | Unlicense OR MIT | no (stub) |
+| windows_aarch64_gnullvm-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows_aarch64_msvc-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows-core-0.62.2 | MIT OR Apache-2.0 | no (stub) |
+| windows_i686_gnu-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows_i686_gnullvm-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows_i686_msvc-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows-implement-0.60.2 | MIT OR Apache-2.0 | no (stub) |
+| windows-interface-0.59.3 | MIT OR Apache-2.0 | no (stub) |
+| windows-link-0.2.1 | MIT OR Apache-2.0 | no (stub) |
+| windows-result-0.4.1 | MIT OR Apache-2.0 | no (stub) |
+| windows-strings-0.5.1 | MIT OR Apache-2.0 | no (stub) |
+| windows-sys-0.60.2 | MIT OR Apache-2.0 | no (stub) |
+| windows-sys-0.61.2 | MIT OR Apache-2.0 | no (stub) |
+| windows-targets-0.53.5 | MIT OR Apache-2.0 | no (stub) |
+| windows_x86_64_gnu-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows_x86_64_gnullvm-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| windows_x86_64_msvc-0.53.1 | MIT OR Apache-2.0 | no (stub) |
+| winnow-1.0.1 | MIT | yes |
+| wit-bindgen-0.51.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wit-bindgen-core-0.51.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wit-bindgen-rust-0.51.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wit-bindgen-rust-macro-0.51.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wit-component-0.244.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| wit-parser-0.244.0 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | no (stub) |
+| writeable-0.6.3 | Unicode-3.0 | yes |
+| yoke-0.8.2 | Unicode-3.0 | yes |
+| yoke-derive-0.8.2 | Unicode-3.0 | yes |
+| zerofrom-0.1.8 | Unicode-3.0 | yes |
+| zerofrom-derive-0.1.7 | Unicode-3.0 | yes |
+| zeroize-1.9.0 | Apache-2.0 OR MIT | yes |
+| zerotrie-0.2.4 | Unicode-3.0 | yes |
+| zerovec-0.11.6 | Unicode-3.0 | yes |
+| zerovec-derive-0.11.3 | Unicode-3.0 | yes |
+| zmij-1.0.21 | MIT | yes |
+
+</details>
 
 <details><summary>Rust crates of ruff: 301 built, 187 manifest-only stubs (pinned by its Cargo.lock)</summary>
 

@@ -1,4 +1,5 @@
--- LSP: servers built from source by build.sh (ruff, ty),
+-- LSP: servers built from source by build.sh (ruff, ty, neocmakelsp) and from
+-- RHEL9 (clangd, see misw.cpp),
 -- configs from nvim-lspconfig, native vim.lsp.enable. A server whose binary is
 -- not on PATH is skipped. Keymaps are set per buffer for what the server
 -- supports.
@@ -6,7 +7,7 @@ local util = require("misw.util")
 local icons = util.icons
 local M = {}
 
-M.servers = { "ty", "ruff" }
+M.servers = { "ty", "ruff", "clangd", "neocmake" }
 
 local function keys()
   local P = function(name, opts)

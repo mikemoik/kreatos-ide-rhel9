@@ -1,0 +1,17 @@
+image: nixos/unstable
+packages:
+  - nixos.neovim
+  - nixos.jq
+sources:
+  - https://git.sr.ht/~chinmay/clangd_extensions.nvim
+environment:
+  NIX_CONFIG: "experimental-features = nix-command flakes"
+tasks:
+  - format: |
+      cd clangd_extensions.nvim
+      nix develop --command stylua --check .
+  - lint: |
+      cd clangd_extensions.nvim
+      nvim_runtime="$(nvim --clean --headless -c 'echo $VIMRUNTIME' -c 'q' 2>&1)/lua/"
+      jq --arg rt "$nvim_runtime" '.workspace.library = [$rt, "lua/"]' .emmyrc.json > .emmyrc.ci.json
+      nix develop --command emmylua_check --config .emmyrc.ci.json --warnings-as-errors .

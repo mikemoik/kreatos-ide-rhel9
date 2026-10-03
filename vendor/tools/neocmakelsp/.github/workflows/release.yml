@@ -1,0 +1,113 @@
+---
+name: Release
+
+permissions: {}
+
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  create-release:
+    if: github.repository_owner == 'neocmakelsp'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # required to create release
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: taiki-e/create-gh-release-action@eba8ea96c86cca8a37f1b56e94b4d13301fba651 # v1.11.0
+        with:
+          branch: master
+          changelog: CHANGELOG.md
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write # required to upload assets
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+            build-target: aarch64-unknown-linux-gnu.2.27
+            build-tool: cargo-zigbuild
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+            build-target: aarch64-unknown-linux-musl
+            build-tool: cargo-zigbuild
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-24.04
+            build-target: x86_64-unknown-linux-gnu.2.27
+            build-tool: cargo-zigbuild
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-24.04
+            build-target: x86_64-unknown-linux-musl
+            build-tool: cargo-zigbuild
+          - target: x86_64-pc-windows-msvc
+            os: windows-2025
+            build-target: x86_64-pc-windows-msvc
+            build-tool: cargo
+          - target: x86_64-pc-windows-msvc
+            os: windows-11-arm
+            build-target: aarch64-pc-windows-msvc
+            build-tool: cargo
+          - target: universal-apple-darwin
+            os: macos-14
+            build-target: universal-apple-darwin
+            build-tool: cargo
+      fail-fast: false
+    needs: create-release
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/upload-rust-binary-action@f0d45ae91ee7b8ee928de7a9d04d893a08bcbec6 # v1.30.2
+        with:
+          bin: neocmakelsp
+          build-tool: ${{ matrix.build-tool }}
+          target: ${{ matrix.build-target }}
+          checksum: sha256
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CARGO_PROFILE_RELEASE_LTO: true
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
+
+  publish-release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # required to create release
+      id-token: write # required for OIDC token exchange
+    needs: upload-assets
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Obtain crates.io token
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
+      - name: Publish to crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+      - name: Publish github release
+        run: |
+          if [[ $(echo "${GTIHUB_REF#refs/tags/v}" | grep '-' > /dev/null) ]]; then
+            gh release edit "${GITHUB_REF#refs/tags/}" --prerelease
+          fi
+          gh release edit "${GITHUB_REF#refs/tags/}" --draft=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

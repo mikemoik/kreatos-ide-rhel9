@@ -47,6 +47,12 @@ for _, name in ipairs({
   "nvim-dap-ui",
   "nvim-dap-python",
   "nvim-dap-virtual-text",
+  -- c/c++
+  "clangd_extensions.nvim",
+  "cmake-tools.nvim",
+  "neogen",
+  "neotest",
+  "neotest-gtest",
 }) do
   vim.cmd.packadd(name)
 end
@@ -59,6 +65,7 @@ require("misw.keymaps")
 require("misw.autocmds")
 require("misw.editor").setup()
 require("misw.treesitter").setup()
+require("misw.cpp").setup() -- before misw.lsp: it configures clangd
 require("misw.lsp").setup()
 require("misw.completion").setup()
 require("misw.format").setup()

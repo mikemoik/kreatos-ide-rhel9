@@ -1,0 +1,283 @@
+local list_contains = vim.list_contains
+local api = vim.api
+local conf = require("clangd_extensions.config").options.ast
+local utils = require("clangd_extensions.utils")
+
+local nvim_get_current_buf = api.nvim_get_current_buf
+local augroup = api.nvim_create_augroup
+local autocmd = api.nvim_create_autocmd
+
+---@class ClangdExt.AST
+local M = {}
+
+--- node_pos[source_buf][ast_buf][linenum] = { start = start, end = end }
+--- position of node in `source_buf` corresponding to line no. `linenum` in `ast_buf`
+M.node_pos = {}
+
+--- detail_pos[ast_buf][linenum] = { start = start, end = end }
+--- position of `detail` in line no. `linenum` of `ast_buf`
+M.detail_pos = {}
+
+M.nsid = api.nvim_create_namespace("clangd_extensions")
+
+---@param source_buf integer
+---@param ast_buf integer
+local function setup_hl_autocmd(source_buf, ast_buf)
+    utils.validate({
+        source_buf = { source_buf, { "number" } },
+        ast_buf = { ast_buf, { "number" } },
+    })
+
+    local group = augroup("ClangdExtensions", {})
+    autocmd("CursorMoved", {
+        group = group,
+        buffer = ast_buf,
+        callback = function() M.update_highlight(source_buf, ast_buf) end,
+    })
+    autocmd("BufLeave", {
+        group = group,
+        buffer = ast_buf,
+        callback = function() M.clear_highlight(source_buf) end,
+    })
+end
+
+---@param role string
+---@param kind string
+---@return string|"   "
+local function icon_prefix(role, kind)
+    utils.validate({
+        role = { role, { "string" } },
+        kind = { kind, { "string" } },
+    })
+
+    if conf.kind_icons[kind] then return conf.kind_icons[kind] .. "  " end
+
+    if conf.role_icons[role] then return conf.role_icons[role] .. "  " end
+
+    return "   "
+end
+
+---@param role string
+---@param kind string
+---@param detail? string
+---@return string description
+---@return nil|{ start: integer, end: integer } detailpos
+local function describe(role, kind, detail)
+    utils.validate({
+        role = { role, { "string" } },
+        kind = { kind, { "string" } },
+        detail = { detail, { "string", "nil" }, true },
+    })
+
+    local icon = icon_prefix(role, kind)
+    local detailpos = nil ---@type nil|{ start: integer, end: integer }
+    local role_dismiss = {
+        "expression",
+        "statement",
+        "declaration",
+        "template name",
+    }
+
+    local str = kind
+
+    if not list_contains(role_dismiss, role) then
+        str = ("%s %s"):format(str, role)
+    end
+
+    local str_len = str:len()
+    local icon_len = vim.fn.strlen(icon)
+
+    if detail then
+        detailpos = {
+            start = str_len + icon_len + 1,
+            ["end"] = str_len + icon_len + detail:len() + 1,
+        }
+        str = ("%s %s"):format(str, detail)
+    end
+
+    return (icon .. str), detailpos
+end
+
+---@param node Clangd.ASTNode
+---@param visited table
+---@param result string[]
+---@param padding string
+---@param hl_bufs { source_buf: integer, ast_buf: integer }
+---@return string[] result
+local function walk_tree(node, visited, result, padding, hl_bufs)
+    utils.validate({
+        node = { node, { "table" } },
+        visited = { visited, { "table" } },
+        result = { result, { "table" } },
+        padding = { padding, { "string" } },
+        hl_bufs = { hl_bufs, { "table" } },
+    })
+
+    visited[node] = true
+    local str, detpos = describe(node.role, node.kind, node.detail)
+    table.insert(result, padding .. str)
+
+    local len = padding:len()
+    local result_len = #result
+
+    if node.detail and detpos then
+        M.detail_pos[hl_bufs.ast_buf][result_len] = {
+            start = len + detpos.start,
+            ["end"] = len + detpos["end"],
+        }
+    end
+
+    if node.range then
+        M.node_pos[hl_bufs.source_buf][hl_bufs.ast_buf][result_len] = {
+            start = { node.range.start.line, node.range.start.character },
+            ["end"] = { node.range["end"].line, node.range["end"].character },
+        }
+    end
+
+    if node.children then
+        for _, child in ipairs(node.children) do
+            if not visited[child] then
+                walk_tree(child, visited, result, padding .. "  ", hl_bufs)
+            end
+        end
+    end
+
+    return result
+end
+
+---@param ast_buf integer
+local function highlight_detail(ast_buf)
+    utils.validate({ ast_buf = { ast_buf, { "number" } } })
+
+    for linenum, range in pairs(M.detail_pos[ast_buf]) do
+        vim.highlight.range(
+            ast_buf,
+            M.nsid,
+            conf.highlights.detail,
+            { linenum - 1, range.start },
+            { linenum - 1, range["end"] },
+            {
+                regtype = "v",
+                inclusive = false,
+                priority = 110,
+            }
+        )
+    end
+end
+
+---@param err? lsp.ResponseError
+---@param ASTNode? Clangd.ASTNode
+local function handler(err, ASTNode)
+    utils.validate({
+        err = { err, { "table", "nil" }, true },
+        ASTNode = { ASTNode, { "table", "nil" }, true },
+    })
+
+    if err or not ASTNode then return end
+
+    local source_buf = nvim_get_current_buf()
+    local ast_buf = api.nvim_create_buf(true, false)
+    api.nvim_buf_set_name(ast_buf, ("%s: AST"):format(ASTNode.detail))
+    api.nvim_set_option_value("filetype", "ClangdAST", { buf = ast_buf })
+
+    local ast_win = api.nvim_open_win(ast_buf, true, {
+        focusable = true,
+        vertical = true,
+    })
+
+    if not M.node_pos[source_buf] then M.node_pos[source_buf] = {} end
+
+    M.node_pos[source_buf][ast_buf] = {}
+    M.detail_pos[ast_buf] = {}
+
+    local lines = walk_tree(
+        ASTNode,
+        {},
+        {},
+        "",
+        { source_buf = source_buf, ast_buf = ast_buf }
+    )
+    api.nvim_buf_set_lines(ast_buf, 0, -1, true, lines)
+    api.nvim_set_option_value("buftype", "nofile", { buf = ast_buf })
+    api.nvim_set_option_value("bufhidden", "wipe", { buf = ast_buf })
+    api.nvim_set_option_value("modifiable", false, { buf = ast_buf })
+    api.nvim_set_option_value("shiftwidth", 2, { buf = ast_buf })
+
+    api.nvim_set_option_value("foldmethod", "indent", { win = ast_win })
+    api.nvim_set_option_value("number", false, { win = ast_win })
+    api.nvim_set_option_value("relativenumber", false, { win = ast_win })
+    api.nvim_set_option_value("spell", false, { win = ast_win })
+    api.nvim_set_option_value("cursorline", false, { win = ast_win })
+    setup_hl_autocmd(source_buf, ast_buf)
+    highlight_detail(ast_buf)
+
+    vim.keymap.set("n", "q", function()
+        pcall(vim.api.nvim_buf_delete, ast_buf, { force = true })
+        pcall(vim.api.nvim_win_close, ast_win, true)
+    end, { buffer = ast_buf })
+end
+
+---@param source_buf integer
+function M.clear_highlight(source_buf)
+    utils.validate({ source_buf = { source_buf, { "number" } } })
+
+    api.nvim_buf_clear_namespace(source_buf, M.nsid, 0, -1)
+end
+
+---@param source_buf integer
+---@param ast_buf integer
+function M.update_highlight(source_buf, ast_buf)
+    utils.validate({
+        source_buf = { source_buf, { "number" } },
+        ast_buf = { ast_buf, { "number" } },
+    })
+
+    M.clear_highlight(source_buf)
+
+    if nvim_get_current_buf() ~= ast_buf then return end
+
+    local curline = vim.fn.getcurpos()[2]
+    local curline_ranges = M.node_pos[source_buf][ast_buf][curline]
+    if not curline_ranges then return end
+
+    vim.highlight.range(
+        source_buf,
+        M.nsid,
+        "Search",
+        curline_ranges.start,
+        curline_ranges["end"],
+        {
+            regtype = "v",
+            inclusive = false,
+            priority = 110,
+        }
+    )
+end
+
+---@param line1 integer
+---@param line2 integer
+function M.display_ast(line1, line2)
+    utils.validate({
+        line1 = { line1, { "number" } },
+        line2 = { line2, { "number" } },
+    })
+
+    local bufnr = nvim_get_current_buf()
+
+    utils.buf_request_method("textDocument/ast", {
+        textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+        range = {
+            start = {
+                line = line1 - 1,
+                character = 0,
+            },
+            ["end"] = {
+                line = line2,
+                character = 0,
+            },
+        },
+    }, handler, bufnr)
+end
+
+return M
+-- vim: set ts=4 sts=4 sw=4 et ai si sta:

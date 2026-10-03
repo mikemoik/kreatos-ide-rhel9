@@ -10,6 +10,7 @@
 #   PREFIX/bin/nvim                   Neovim built from vendor/neovim
 #   PREFIX/bin/kide                   launcher: nvim + the bundled config and tools
 #   PREFIX/bin/{ruff,ty}              Python linter/formatter + type checker (LSP)
+#   PREFIX/bin/neocmakelsp            CMake LSP
 #   PREFIX/bin/shfmt                  shell formatter
 #   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
@@ -150,6 +151,12 @@ for rel, (old, new) in patches.items():
 PY
 cargo_build ruff -p ruff -p ty
 install -m755 "$TOOLS/ruff/target/release/ruff" "$TOOLS/ruff/target/release/ty" "$PREFIX/bin/"
+
+log "neocmakelsp"
+# v0.11.0: the newest release that really builds with Rust 1.92 (v0.11.1 uses
+# `if let` guards despite declaring rust-version 1.89)
+cargo_build neocmakelsp -p neocmakelsp
+install -m755 "$TOOLS/neocmakelsp/target/release/neocmakelsp" "$PREFIX/bin/"
 
 log "shfmt"
 cp -a "$ROOT/vendor/tools/shfmt" "$TOOLS/shfmt"

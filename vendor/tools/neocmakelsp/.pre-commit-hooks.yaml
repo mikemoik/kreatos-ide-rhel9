@@ -1,0 +1,12 @@
+---
+- id: neocmakelsp-format
+  name: neocmakelsp format
+  language: rust
+  description: >
+    use neocmakelsp as a formatter
+  entry: neocmakelsp
+  args:
+    - format
+    - -o
+  types:
+    - cmake

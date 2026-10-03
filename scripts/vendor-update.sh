@@ -44,9 +44,13 @@ go_vendor() {
   if command -v go >/dev/null; then
     (cd "$1" && GOFLAGS=-mod=mod GOTOOLCHAIN=local go mod vendor)
   else
-    # rootless docker: the container's root is the calling user on the host
-    docker run --rm -v "$1:/w" -w /w -e GOTOOLCHAIN=local \
+    # run as the calling user: with a root docker daemon the files would
+    # otherwise be root-owned on the host
+    docker run --rm -v "$1:/w" -w /w --user "$(id -u):$(id -g)" \
+      -e GOTOOLCHAIN=local -e HOME=/tmp -e GOPATH=/tmp/go -e GOCACHE=/tmp/gocache \
       "$(go_image)" go mod vendor
+    # module files come out read-only; keep them deletable for the next run
+    chmod -R u+w "$1/vendor"
   fi
 }
 go_image() {

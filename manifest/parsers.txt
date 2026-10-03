@@ -1,6 +1,9 @@
 bash
 c
+cmake
+cpp
 diff
+doxygen
 html
 javascript
 jsdoc
@@ -8,6 +11,7 @@ json
 lua
 luadoc
 luap
+make
 markdown
 markdown_inline
 printf

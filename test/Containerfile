@@ -1,6 +1,10 @@
-# Clean RHEL9 with only packages from the RHEL repos: the build toolchain plus
-# git (runtime: gitsigns). The build itself runs with --network=none (see
-# test/run.sh).
+# Clean RHEL9 with only packages from the RHEL repos. The build itself runs
+# with --network=none (see test/run.sh).
 FROM registry.access.redhat.com/ubi9/ubi:latest
-RUN dnf -y install gcc make cmake python3 rust-toolset golang git-core findutils diffutils \
+# build toolchain
+RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
+    && dnf clean all
+# runtime: git (gitsigns); C/C++ development tools RHEL ships itself, used by
+# kide instead of bundling them (clangd/clang-format/clang-tidy, gdb, lldb-dap)
+RUN dnf -y install git-core gcc-c++ clang-tools-extra gdb lldb \
     && dnf clean all

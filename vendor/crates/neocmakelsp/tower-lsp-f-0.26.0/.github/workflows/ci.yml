@@ -1,0 +1,66 @@
+name: rust ci
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  cargo-test:
+    name: cargo test ${{ matrix.os }}-${{ matrix.rust-version }}-${{ matrix.runtime }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        rust-version: [stable]
+        runtime: [runtime-tokio, runtime-agnostic]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust-version }}
+
+    - name: test tower-lsp with runtime ${{ matrix.runtime }}
+      run: |
+        cargo +${{ matrix.rust-version }} test --workspace --no-default-features --features ${{ matrix.runtime }}
+
+  cargo-audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - run: cargo install --locked cargo-audit
+
+    - run: cargo audit
+
+  cargo-clippy:
+    name: cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy
+
+    - run: cargo clippy --all-targets  -- -D warnings
+
+  cargo-fmt:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt
+
+    - name: Run cargo fmt
+      run: cargo fmt --all -- --check

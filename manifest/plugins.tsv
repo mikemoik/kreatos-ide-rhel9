@@ -28,3 +28,8 @@ snacks.nvim	https://github.com/folke/snacks.nvim	fe7cfe9800a182274d0f868a74b7263
 todo-comments.nvim	https://github.com/folke/todo-comments.nvim	31e3c38ce9b29781e4422fc0322eb0a21f4e8668
 trouble.nvim	https://github.com/folke/trouble.nvim	bd67efe408d4816e25e8491cc5ad4088e708a69a
 which-key.nvim	https://github.com/folke/which-key.nvim	3aab2147e74890957785941f0c1ad87d0a44c15a
+clangd_extensions.nvim	https://github.com/p00f/clangd_extensions.nvim	78c2ecd659d54972be17aa6ba2deac3c53223b80
+cmake-tools.nvim	https://github.com/Civitasv/cmake-tools.nvim	ee807ac4e62591720de2f6ad0abbfb966c4c7b97
+neogen	https://github.com/danymat/neogen	23e7e9f883d01289ebd90e98025acc860ea26366
+neotest	https://github.com/nvim-neotest/neotest	27bf921498043f7ecd821d6db68d05de244bbd02
+neotest-gtest	https://github.com/alfaix/neotest-gtest	bdffb45731ed2a6f40ca94ed662cadb8add73b30

@@ -1,0 +1,31 @@
+---@enum Clangd.SymbolKind
+local symbol_kind = {
+    "File",
+    "Module",
+    "Namespace",
+    "Package",
+    "Class",
+    "Method",
+    "Property",
+    "Field",
+    "Constructor",
+    "Enum",
+    "Interface",
+    "Function",
+    "Variable",
+    "Constant",
+    "String",
+    "Number",
+    "Boolean",
+    "Array",
+    "Object",
+    "Key",
+    "Null",
+    "EnumMember",
+    "Struct",
+    "Event",
+    "Operator",
+    "TypeParameter",
+}
+return symbol_kind
+-- vim: set ts=4 sts=4 sw=4 et ai si sta:

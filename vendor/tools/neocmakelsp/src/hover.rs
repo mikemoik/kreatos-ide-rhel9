@@ -1,0 +1,128 @@
+use lsp_types::Position;
+use tower_lsp::lsp_types;
+use tree_sitter::Node;
+
+use crate::fileapi;
+use crate::fileapi::get_target_hover;
+use crate::jump::JUMP_CACHE;
+#[cfg(unix)]
+use crate::utils::packagepkgconfig::PKG_CONFIG_PACKAGES_WITHKEY;
+#[cfg(unix)]
+use crate::utils::packagepkgconfig::PkgConfig;
+use crate::utils::treehelper::CurrentNodeInfo;
+use crate::utils::treehelper::{MESSAGE_STORAGE, PositionType, ToPoint};
+use crate::utils::{CACHE_CMAKE_PACKAGES_WITHKEYS, CMakePackage, PackageType, get_the_packagename};
+
+#[inline]
+#[cfg(unix)]
+fn vcpkg_document_fmt(context: &PkgConfig) -> String {
+    format!(
+        "
+PackageName: {}
+PackagePath: {}
+",
+        context.libname, context.path,
+    )
+}
+
+#[inline]
+fn cmakepackage_document_fmt(context: &CMakePackage) -> String {
+    let package_type = if context.packagetype == PackageType::Dir {
+        "PackageDir"
+    } else {
+        "PackagePath"
+    };
+    format!(
+        "
+PackageName: {}
+{}: {}
+PackageVersion: {}
+",
+        context.name,
+        package_type,
+        context.location.path(),
+        context.version.clone().unwrap_or("Undefined".to_string())
+    )
+}
+
+/// get the doc for on hover
+pub async fn get_hovered_doc(location: Position, root: Node<'_>, source: &str) -> Option<String> {
+    let current_node_info = CurrentNodeInfo::get(source, root, location.to_point());
+    let message = current_node_info.content()?;
+    let inner_result = match current_node_info.pos_type() {
+        #[cfg(unix)]
+        PositionType::FindPkgConfig => {
+            let package = get_the_packagename(message);
+            let value = PKG_CONFIG_PACKAGES_WITHKEY.get(package);
+            value.map(vcpkg_document_fmt)
+        }
+        PositionType::FindPackageSpace(spacename) => {
+            let space_package_name = format!("{spacename}{message}");
+            let mut value = CACHE_CMAKE_PACKAGES_WITHKEYS.get(&space_package_name);
+            if value.is_none() {
+                value = CACHE_CMAKE_PACKAGES_WITHKEYS.get(message);
+            }
+            value.map(cmakepackage_document_fmt)
+        }
+        PositionType::FindPackage | PositionType::TargetInclude | PositionType::TargetLink => {
+            let package = get_the_packagename(message);
+            let mut value = CACHE_CMAKE_PACKAGES_WITHKEYS.get(package);
+            if value.is_none() {
+                value = CACHE_CMAKE_PACKAGES_WITHKEYS.get(&package.to_lowercase());
+            }
+            value.map(cmakepackage_document_fmt)
+        }
+        PositionType::Target => get_target_hover(message),
+        _ => {
+            let mut value = MESSAGE_STORAGE.get(message);
+            if value.is_none() {
+                value = MESSAGE_STORAGE.get(&message.to_lowercase());
+            }
+            value.map(|context| context.to_string())
+        }
+    };
+    if inner_result.is_some() {
+        return inner_result;
+    }
+
+    let jump_cache = JUMP_CACHE.lock().await;
+    let cached_info = jump_cache.get(message)?.document_info.clone();
+    // use cache_data to show info first
+    if let Some(cache_data) = fileapi::get_entries_data()
+        && let Some(value) = cache_data.get(message)
+    {
+        return Some(format!("current cached value : {value}\n\n{cached_info}"));
+    }
+    Some(cached_info)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::utils::{FindPackageFunsFake, FindPackageFunsTrait};
+
+    #[tokio::test]
+    async fn test_hover() {
+        let fake_data = FindPackageFunsFake.get_cmake_packages_withkeys();
+        let fake_package = fake_data.get("bash-completion-fake").unwrap();
+        let content = r"
+find_package(bash-completion-fake)
+    ";
+        let mut parse = tree_sitter::Parser::new();
+        parse
+            .set_language(&tree_sitter_cmake::LANGUAGE.into())
+            .unwrap();
+        let thetree = parse.parse(content, None).unwrap();
+        let document = get_hovered_doc(
+            Position {
+                line: 1,
+                character: 15,
+            },
+            thetree.root_node(),
+            content,
+        )
+        .await
+        .unwrap();
+        assert_eq!(document, cmakepackage_document_fmt(fake_package));
+    }
+}

@@ -1,5 +1,6 @@
 -- Debugging (misw's own setup): nvim-dap + dap-ui + virtual text + dap-python
--- (debugpy bundled by build.sh, started through kide-python; tests via pytest).
+-- (debugpy bundled by build.sh, started through kide-python; tests via pytest),
+-- gdb + lldb-dap for C/C++ (see misw.cpp).
 local M = {}
 
 function M.setup()
@@ -14,6 +15,7 @@ function M.setup()
 
   dap_python.setup(vim.fn.executable("kide-python") == 1 and "kide-python" or "python3")
   dap_python.test_runner = "pytest"
+  require("misw.cpp").dap()
 
   vim.fn.sign_define("DapBreakpoint", {
     text = "",

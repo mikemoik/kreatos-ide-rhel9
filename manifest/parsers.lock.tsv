@@ -1,6 +1,9 @@
 bash	https://github.com/tree-sitter/tree-sitter-bash	a06c2e4415e9bc0346c6b86d401879ffb44058f7	-
 c	https://github.com/tree-sitter/tree-sitter-c	ae19b676b13bdcc13b7665397e6d9b14975473dd	-
+cmake	https://github.com/uyha/tree-sitter-cmake	c7b2a71e7f8ecb167fad4c97227c838439280175	-
+cpp	https://github.com/tree-sitter/tree-sitter-cpp	12bd6f7e96080d2e70ec51d4068f2f66120dde35	-
 diff	https://github.com/tree-sitter-grammars/tree-sitter-diff	2520c3f934b3179bb540d23e0ef45f75304b5fed	-
+doxygen	https://github.com/tree-sitter-grammars/tree-sitter-doxygen	ccd998f378c3f9345ea4eeb223f56d7b84d16687	-
 dtd	https://github.com/tree-sitter-grammars/tree-sitter-xml	5000ae8f22d11fbe93939b05c1e37cf21117162d	dtd
 ecma	-	-	-
 html	https://github.com/tree-sitter/tree-sitter-html	73a3947324f6efddf9e17c0ea58d454843590cc0	-
@@ -12,6 +15,7 @@ jsx	-	-	-
 lua	https://github.com/tree-sitter-grammars/tree-sitter-lua	e40f5b6e6df9c2d1d6d664ff5d346a75d71ee6b2	-
 luadoc	https://github.com/tree-sitter-grammars/tree-sitter-luadoc	873612aadd3f684dd4e631bdf42ea8990c57634e	-
 luap	https://github.com/tree-sitter-grammars/tree-sitter-luap	c134aaec6acf4fa95fe4aa0dc9aba3eacdbbe55a	-
+make	https://github.com/tree-sitter-grammars/tree-sitter-make	5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d	-
 markdown	https://github.com/tree-sitter-grammars/tree-sitter-markdown	da063e1ba4303ff08781eb440cc9a7bd41e55dd8	tree-sitter-markdown
 markdown_inline	https://github.com/tree-sitter-grammars/tree-sitter-markdown	da063e1ba4303ff08781eb440cc9a7bd41e55dd8	tree-sitter-markdown-inline
 printf	https://github.com/tree-sitter-grammars/tree-sitter-printf	ec4e5674573d5554fccb87a887c97d4aec489da7	-

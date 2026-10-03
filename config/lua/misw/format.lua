@@ -1,6 +1,7 @@
 -- Formatting: conform.nvim, format on save (toggle <leader>uf / <leader>uF).
--- shfmt (sh), fish_indent (fish); everything else falls back to the LSP
--- formatter (ruff for Python). No Lua formatter is bundled.
+-- shfmt (sh), fish_indent (fish), clang-format (c/cpp, from RHEL9);
+-- everything else falls back to the LSP formatter (ruff for Python,
+-- neocmakelsp for CMake). No Lua formatter is bundled.
 local util = require("misw.util")
 local M = {}
 
@@ -15,6 +16,8 @@ function M.setup()
     formatters_by_ft = {
       fish = { "fish_indent" },
       sh = { "shfmt" },
+      c = { "clang-format" },
+      cpp = { "clang-format" },
     },
     formatters = {
       injected = { options = { ignore_errors = true } },

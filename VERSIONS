@@ -1,3 +1,228 @@
+crate/neocmakelsp/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/android_system_properties-0.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/anstream-1.0.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/anstyle-1.0.14 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/anstyle-parse-1.0.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/anstyle-query-1.1.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/anstyle-wincon-3.0.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/anyhow-1.0.102 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/assert_cmd-2.2.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/autocfg-1.5.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/auto_impl-1.3.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/bitflags-2.11.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/bstr-1.12.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/bumpalo-3.20.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/bytes-1.11.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/cc-1.2.58  https://crates.io                                            Cargo.lock
+crate/neocmakelsp/cfg-if-1.0.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/chrono-0.4.45 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/clap-4.6.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/clap_builder-4.6.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/clap_complete-4.6.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/clap_derive-4.6.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/clap_lex-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/cli-table-0.5.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/cli-table-derive-0.5.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/colorchoice-1.0.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/console-0.16.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/const-random-0.1.18 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/const-random-macro-0.1.16 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/core-foundation-sys-0.8.7 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/crossbeam-deque-0.8.6 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/crossbeam-epoch-0.9.18 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/crossbeam-utils-0.8.21 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/crunchy-0.2.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/csv-1.4.0  https://crates.io                                            Cargo.lock
+crate/neocmakelsp/csv-core-0.1.13 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/dashmap-6.2.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/dialoguer-0.12.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/difflib-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/displaydoc-0.2.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/dlv-list-0.5.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/encode_unicode-1.0.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/equivalent-1.0.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/errno-0.3.14 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/etcetera-0.11.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/fastrand-2.3.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/find-msvc-tools-0.1.9 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/foldhash-0.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/form_urlencoded-1.2.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-channel-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-core-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-io-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-macro-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-sink-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-task-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/futures-util-0.3.32 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/fuzzy-matcher-0.3.7 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/gen-lsp-types-0.9.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/getrandom-0.2.17 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/getrandom-0.4.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/glob-0.3.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/globset-0.4.18 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/hashbrown-0.14.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/hashbrown-0.15.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/hashbrown-0.16.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/heck-0.5.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/httparse-1.10.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/iana-time-zone-0.1.65 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/iana-time-zone-haiku-0.1.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/icu_collections-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_locale_core-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_normalizer-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_normalizer_data-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_properties-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_properties_data-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/icu_provider-2.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/id-arena-2.3.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/idna-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/idna_adapter-1.2.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/ignore-0.4.25 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/indexmap-2.13.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/indoc-2.0.7 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/is_executable-1.0.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/is_terminal_polyfill-1.70.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/itoa-1.0.18 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/js-sys-0.3.103 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/lazy_static-1.5.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/leb128fmt-0.1.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/libc-0.2.184 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/linux-raw-sys-0.12.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/litemap-0.8.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/lock_api-0.4.14 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/log-0.4.29 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/memchr-2.8.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/mio-1.2.0  https://crates.io                                            Cargo.lock
+crate/neocmakelsp/nu-ansi-term-0.50.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/num-traits-0.2.19 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/once_cell-1.21.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/once_cell_polyfill-1.70.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/ordered-multimap-0.7.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/parking_lot-0.12.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/parking_lot_core-0.9.12 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/path-absolutize-4.0.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/path-dedot-4.0.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/pathdiff-0.2.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/percent-encoding-2.3.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/pin-project-lite-0.2.17 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/potential_utf-0.1.5 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/predicates-3.1.4 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/predicates-core-1.0.10 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/predicates-tree-1.0.13 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/prettyplease-0.2.37 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/proc-macro2-1.0.106 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/quote-1.0.45 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/redox_syscall-0.5.18 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/r-efi-6.0.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/regex-1.13.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/regex-automata-0.4.16 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/regex-syntax-0.8.11 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/rust-ini-0.21.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/rustix-1.1.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/rustversion-1.0.22 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/ryu-1.0.23 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/same-file-1.0.6 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/scopeguard-1.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/semver-1.0.27 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/serde-1.0.228 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/serde_core-1.0.228 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/serde_derive-1.0.228 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/serde_json-1.0.150 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/serde_spanned-1.1.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/sharded-slab-0.1.7 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/shell-words-1.1.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/shlex-1.3.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/signal-hook-registry-1.4.8 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/slab-0.4.12 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/smallvec-1.15.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/socket2-0.6.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/stable_deref_trait-1.2.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/streaming-iterator-0.1.9 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/strsim-0.11.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/syn-2.0.117 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/sync_wrapper-1.0.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/synstructure-0.13.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tempfile-3.27.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/termcolor-1.4.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/termtree-0.5.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/thread_local-1.1.9 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tiny-keccak-2.0.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tinystr-0.8.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tokio-1.52.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tokio-macros-2.7.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tokio-util-0.7.18 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/toml-1.1.2+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/toml_datetime-1.1.1+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/toml_parser-1.1.2+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/toml_writer-1.1.1+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tower-0.5.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tower-layer-0.3.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tower-lsp-f-0.26.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tower-service-0.3.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tracing-0.1.44 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tracing-attributes-0.1.31 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tracing-core-0.1.36 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tracing-log-0.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tracing-subscriber-0.3.23 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tree-sitter-0.26.8 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tree-sitter-cmake-0.7.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/treesitter_kind_collector-0.2.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/tree-sitter-language-0.1.7 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/unicode-ident-1.0.24 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/unicode-width-0.2.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/unicode-xid-0.2.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/url-2.5.8  https://crates.io                                            Cargo.lock
+crate/neocmakelsp/utf8_iter-1.0.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/utf8parse-0.2.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/valuable-0.1.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wait-timeout-0.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/walkdir-2.5.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/wasi-0.11.1+wasi-snapshot-preview1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasip2-1.0.2+wasi-0.2.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-bindgen-0.2.126 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-bindgen-macro-0.2.126 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-bindgen-macro-support-0.2.126 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-bindgen-shared-0.2.126 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-encoder-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasm-metadata-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wasmparser-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/winapi-util-0.1.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_aarch64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_aarch64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-core-0.62.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_i686_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_i686_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_i686_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-implement-0.60.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-interface-0.59.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-link-0.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-result-0.4.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-strings-0.5.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-sys-0.60.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-sys-0.61.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows-targets-0.53.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_x86_64_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_x86_64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/windows_x86_64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/winnow-1.0.1 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/wit-bindgen-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wit-bindgen-core-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wit-bindgen-rust-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wit-bindgen-rust-macro-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wit-component-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/wit-parser-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/neocmakelsp/writeable-0.6.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/yoke-0.8.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/yoke-derive-0.8.2 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zerofrom-0.1.8 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zerofrom-derive-0.1.7 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zeroize-1.9.0 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zerotrie-0.2.4 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zerovec-0.11.6 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zerovec-derive-0.11.3 https://crates.io                                            Cargo.lock
+crate/neocmakelsp/zmij-1.0.21 https://crates.io                                            Cargo.lock
 crate/ruff/adler2-2.0.1      https://crates.io                                            Cargo.lock
 crate/ruff/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
 crate/ruff/alloca-0.4.0      https://crates.io                                            Cargo.lock (stub: not built on Linux)
@@ -501,7 +726,10 @@ gomod/shfmt/golang.org/x/tools https://golang.org/x/tools                       
 gomod/shfmt/mvdan.cc/editorconfig https://mvdan.cc/editorconfig                                v0.3.0
 grammar/tree-sitter-bash     https://github.com/tree-sitter/tree-sitter-bash              a06c2e4415e9bc0346c6b86d401879ffb44058f7
 grammar/tree-sitter-c        https://github.com/tree-sitter/tree-sitter-c                 ae19b676b13bdcc13b7665397e6d9b14975473dd
+grammar/tree-sitter-cmake    https://github.com/uyha/tree-sitter-cmake                    c7b2a71e7f8ecb167fad4c97227c838439280175
+grammar/tree-sitter-cpp      https://github.com/tree-sitter/tree-sitter-cpp               12bd6f7e96080d2e70ec51d4068f2f66120dde35
 grammar/tree-sitter-diff     https://github.com/tree-sitter-grammars/tree-sitter-diff     2520c3f934b3179bb540d23e0ef45f75304b5fed
+grammar/tree-sitter-doxygen  https://github.com/tree-sitter-grammars/tree-sitter-doxygen  ccd998f378c3f9345ea4eeb223f56d7b84d16687
 grammar/tree-sitter-html     https://github.com/tree-sitter/tree-sitter-html              73a3947324f6efddf9e17c0ea58d454843590cc0
 grammar/tree-sitter-javascript https://github.com/tree-sitter/tree-sitter-javascript        58404d8cf191d69f2674a8fd507bd5776f46cb11
 grammar/tree-sitter-jsdoc    https://github.com/tree-sitter/tree-sitter-jsdoc             658d18dcdddb75c760363faa4963427a7c6b52db
@@ -509,6 +737,7 @@ grammar/tree-sitter-json     https://github.com/tree-sitter/tree-sitter-json    
 grammar/tree-sitter-luadoc   https://github.com/tree-sitter-grammars/tree-sitter-luadoc   873612aadd3f684dd4e631bdf42ea8990c57634e
 grammar/tree-sitter-lua      https://github.com/tree-sitter-grammars/tree-sitter-lua      e40f5b6e6df9c2d1d6d664ff5d346a75d71ee6b2
 grammar/tree-sitter-luap     https://github.com/tree-sitter-grammars/tree-sitter-luap     c134aaec6acf4fa95fe4aa0dc9aba3eacdbbe55a
+grammar/tree-sitter-make     https://github.com/tree-sitter-grammars/tree-sitter-make     5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d
 grammar/tree-sitter-markdown https://github.com/tree-sitter-grammars/tree-sitter-markdown da063e1ba4303ff08781eb440cc9a7bd41e55dd8
 grammar/tree-sitter-printf   https://github.com/tree-sitter-grammars/tree-sitter-printf   ec4e5674573d5554fccb87a887c97d4aec489da7
 grammar/tree-sitter-python   https://github.com/tree-sitter/tree-sitter-python            v0.25.0
@@ -537,6 +766,8 @@ neovim-dep/utf8proc          https://github.com/juliastrings/utf8proc/archive/v2
 neovim                       https://github.com/neovim/neovim                             v0.12.5
 plugin/blink.cmp             https://github.com/saghen/blink.cmp                          b19413d214068f316c78978b08264ed1c41830ec
 plugin/bufferline.nvim       https://github.com/akinsho/bufferline.nvim                   655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3
+plugin/clangd_extensions.nvim https://github.com/p00f/clangd_extensions.nvim               78c2ecd659d54972be17aa6ba2deac3c53223b80
+plugin/cmake-tools.nvim      https://github.com/Civitasv/cmake-tools.nvim                 ee807ac4e62591720de2f6ad0abbfb966c4c7b97
 plugin/conform.nvim          https://github.com/stevearc/conform.nvim                     c2526f1cde528a66e086ab1668e996d162c75f4f
 plugin/ethereal.nvim         https://github.com/bjarneo/ethereal.nvim                     a0ec73332e537228981b6a4f465cef82bb3e1d36
 plugin/flash.nvim            https://github.com/folke/flash.nvim                          fcea7ff883235d9024dc41e638f164a450c14ca2
@@ -548,6 +779,9 @@ plugin/lualine.nvim          https://github.com/nvim-lualine/lualine.nvim       
 plugin/mini.ai               https://github.com/nvim-mini/mini.ai                         9eae720f2b20f6ad28cbfa0ddc524e10dc2c3201
 plugin/mini.icons            https://github.com/nvim-mini/mini.icons                      efc85e42262cd0c9e1fdbf806c25cb0be6de115c
 plugin/mini.pairs            https://github.com/nvim-mini/mini.pairs                      4089aa6ea6423e02e1a8326a7a7a00159f6f5e04
+plugin/neogen                https://github.com/danymat/neogen                            23e7e9f883d01289ebd90e98025acc860ea26366
+plugin/neotest-gtest         https://github.com/alfaix/neotest-gtest                      bdffb45731ed2a6f40ca94ed662cadb8add73b30
+plugin/neotest               https://github.com/nvim-neotest/neotest                      27bf921498043f7ecd821d6db68d05de244bbd02
 plugin/neo-tree.nvim         https://github.com/nvim-neo-tree/neo-tree.nvim               1bd82358e516e3043796e207e64f50a11574af6e
 plugin/noice.nvim            https://github.com/folke/noice.nvim                          7bfd942445fb63089b59f97ca487d605e715f155
 plugin/nui.nvim              https://github.com/MunifTanjim/nui.nvim                      de740991c12411b663994b2860f1a4fd0937c130
@@ -566,5 +800,6 @@ plugin/todo-comments.nvim    https://github.com/folke/todo-comments.nvim        
 plugin/trouble.nvim          https://github.com/folke/trouble.nvim                        bd67efe408d4816e25e8491cc5ad4088e708a69a
 plugin/which-key.nvim        https://github.com/folke/which-key.nvim                      3aab2147e74890957785941f0c1ad87d0a44c15a
 tool/debugpy                 https://pypi.org/project/debugpy                             1.8.21
+tool/neocmakelsp             https://github.com/neocmakelsp/neocmakelsp                   v0.11.0
 tool/ruff                    https://github.com/astral-sh/ruff                            0.15.11
 tool/shfmt                   https://github.com/mvdan/sh                                  v3.13.1

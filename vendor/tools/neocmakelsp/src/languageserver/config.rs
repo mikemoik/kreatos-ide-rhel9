@@ -1,0 +1,94 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
+pub struct Config {
+    #[serde(default)]
+    pub format: FormatConfig,
+    #[serde(default = "scan_cmake_in_package_default")]
+    pub scan_cmake_in_package: bool,
+    #[serde(default)]
+    pub semantic_token: bool,
+    #[serde(default)]
+    pub lint: LintConfig,
+    #[serde(default)]
+    pub use_snippets: bool,
+}
+
+const fn scan_cmake_in_package_default() -> bool {
+    true
+}
+
+impl Config {
+    pub const fn is_format_enabled(&self) -> bool {
+        self.format.enable
+    }
+    pub const fn is_scan_cmake_in_package(&self) -> bool {
+        self.scan_cmake_in_package
+    }
+
+    pub const fn enable_semantic_token(&self) -> bool {
+        self.semantic_token
+    }
+
+    pub const fn is_lint_enabled(&self) -> bool {
+        self.lint.enable
+    }
+
+    pub const fn use_snippets(&self) -> bool {
+        self.use_snippets
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            format: FormatConfig::default(),
+            scan_cmake_in_package: true,
+            semantic_token: false,
+            lint: LintConfig::default(),
+            use_snippets: false,
+        }
+    }
+}
+
+const fn default_enable() -> bool {
+    true
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
+pub struct FormatConfig {
+    #[serde(default = "default_enable")]
+    pub enable: bool,
+}
+
+impl Default for FormatConfig {
+    fn default() -> Self {
+        Self { enable: true }
+    }
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
+pub struct LintConfig {
+    #[serde(default = "default_enable")]
+    pub enable: bool,
+}
+
+impl Default for LintConfig {
+    fn default() -> Self {
+        Self { enable: true }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Config;
+    #[test]
+    fn config_test() {
+        let data = r"{}";
+        let config: Config = serde_json::from_str(data).unwrap();
+        assert!(config.scan_cmake_in_package);
+        assert!(!config.use_snippets);
+        assert!(config.is_lint_enabled());
+        assert!(config.is_format_enabled());
+    }
+}
