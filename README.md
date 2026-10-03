@@ -12,9 +12,14 @@ Toolchain, from the RHEL repos only:
 
 Then:
 
-    ./build.sh                 # installs into ~/.local/opt/kreatos-ide
+    ./build.sh                 # installs into ~/.local/kreatos-ide
     ./build.sh /opt/kide       # or any prefix
-    ~/.local/opt/kreatos-ide/bin/kide
+    kide                       # in a new shell
+
+Everything is installed inside `PREFIX`. The only change outside it is one
+line `build.sh` adds to `~/.bashrc` (once), sourcing `PREFIX/bashrc`, which
+puts `PREFIX/bin` at the front of `PATH`, so `kide` and the bundled tools are
+found first in every new shell.
 
 `kide` runs the bundled nvim with the bundled config, with the bundled LSP
 servers and formatters (`PREFIX/bin`) first on `PATH`. Its data, state and

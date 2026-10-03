@@ -16,10 +16,13 @@
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/site     pack/vendor/opt plugins, parser/, queries/
+#   PREFIX/bashrc                     puts PREFIX/bin first on PATH; sourced by
+#                                     one line in ~/.bashrc (the only change
+#                                     outside PREFIX)
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")" && pwd)
-PREFIX=$(realpath -m "${1:-$HOME/.local/opt/kreatos-ide}")
+PREFIX=$(realpath -m "${1:-$HOME/.local/kreatos-ide}")
 BUILD=$(realpath -m "${KIDE_BUILD_DIR:-${TMPDIR:-/tmp}/kide-build}")
 JOBS=${JOBS:-$(nproc)}
 SHARE=$PREFIX/share/kreatos-ide
@@ -193,4 +196,19 @@ exec "$bin/nvim" -u "$bin/../share/kreatos-ide/config/init.lua" "$@"
 EOF
 chmod +x "$PREFIX/bin/kide"
 
-log "done: $PREFIX/bin/kide"
+# --- PATH --------------------------------------------------------------------
+# PREFIX/bashrc puts PREFIX/bin at the front of PATH; the only change outside
+# PREFIX is one line in ~/.bashrc sourcing it (added once)
+log "PATH: $PREFIX/bin first ($PREFIX/bashrc, sourced from ~/.bashrc)"
+cat >"$PREFIX/bashrc" <<EOF
+# kreatos-ide (written by build.sh): its executables come first
+case "\$PATH" in
+  "$PREFIX/bin:"*) ;;
+  *) PATH="$PREFIX/bin:\$PATH" ;;
+esac
+export PATH
+EOF
+source_line="[ -f '$PREFIX/bashrc' ] && . '$PREFIX/bashrc'  # kreatos-ide"
+grep -qxF "$source_line" "$HOME/.bashrc" 2>/dev/null || printf '%s\n' "$source_line" >>"$HOME/.bashrc"
+
+log "done: $PREFIX/bin/kide — open a new shell, then run: kide"
