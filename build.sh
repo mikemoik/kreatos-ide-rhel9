@@ -208,7 +208,10 @@ grep -q 'default-features = false' "$TOOLS/yazi-prebuilt/Cargo.toml" || { echo "
 sed -i 's/dump_to_file/dump_to_uncompressed_file/g' "$TOOLS/yazi-prebuilt/generate.rs"
 grep -q 'dump_to_uncompressed_file(' "$TOOLS/yazi-prebuilt/generate.rs" || { echo "yazi-prebuilt: dump_to_file not found" >&2; exit 1; }
 cargo_build yazi-prebuilt --features build_deps --bin generate
-(cd "$TOOLS/yazi-prebuilt" && ./target/release/generate)
+# Sublime syntaxes newer than syntect supports are skipped (as upstream)
+(cd "$TOOLS/yazi-prebuilt" && ./target/release/generate >generate.log)
+skipped=$(grep -c '^Failed to load syntax' "$TOOLS/yazi-prebuilt/generate.log" || true)
+echo "  syntax set built; $skipped syntaxes skipped (too new for syntect: HTML, TypeScript, PHP, embeddings)"
 yazi_crates=$TOOLS/yazi-crates
 mkdir -p "$yazi_crates"
 for crate in "$ROOT/vendor/crates/yazi"/*/; do ln -s "$crate" "$yazi_crates/$(basename "$crate")"; done
@@ -220,6 +223,7 @@ for crate in "$prebuilt" "$ring"; do
 done
 cp "$TOOLS/yazi-prebuilt/built/syntaxes" "$yazi_crates/$prebuilt/built/syntaxes"
 while read -r file hex; do
+  mkdir -p "$(dirname "$yazi_crates/$ring/$file")" # src/data held only the stripped file
   printf "$(sed 's/../\\x&/g' <<<"$hex")" >"$yazi_crates/$ring/$file"
 done <<'EOF'
 src/ec/curve25519/ed25519/ed25519_pkcs8_v2_template.der 3051020101300506032b657004220420812100

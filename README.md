@@ -167,7 +167,9 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 
 `test/run.sh` builds a clean `registry.access.redhat.com/ubi9/ubi` image with
 only the toolchain RPMs, then runs `build.sh` and `test/smoke.lua` in it with
-`--network=none` and the repo mounted read-only. The smoke test checks: clean
+`--network=none` and a read-only copy of the files git tracks (what the
+install tarball holds: no untracked or ignored files, no empty directories;
+`git add` new files first). The smoke test checks: clean
 startup, every plugin on the runtimepath, every parser loads and its
 highlights query compiles, treesitter highlighting on Lua/Python/sh/TypeScript
 files, each LSP server attaches to a small project and reports a diagnostic,
