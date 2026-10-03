@@ -4,7 +4,8 @@ FROM registry.access.redhat.com/ubi9/ubi:latest
 # build toolchain
 RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
     && dnf clean all
-# runtime: git (gitsigns); C/C++ development tools RHEL ships itself, used by
-# kide instead of bundling them (clangd/clang-format/clang-tidy, gdb, lldb-dap)
-RUN dnf -y install git-core gcc-c++ clang-tools-extra gdb lldb \
+# runtime: git (gitsigns, lazygit), file (yazi); C/C++ development tools RHEL
+# ships itself, used by kide instead of bundling them (clangd/clang-format/
+# clang-tidy, gdb, lldb-dap)
+RUN dnf -y install git-core file gcc-c++ clang-tools-extra gdb lldb \
     && dnf clean all

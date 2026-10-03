@@ -1,3 +1,132 @@
+crate/fd/aho-corasick-1.1.4  https://crates.io                                            Cargo.lock
+crate/fd/anstream-1.0.0      https://crates.io                                            Cargo.lock
+crate/fd/anstyle-1.0.13      https://crates.io                                            Cargo.lock
+crate/fd/anstyle-parse-1.0.0 https://crates.io                                            Cargo.lock
+crate/fd/anstyle-query-1.1.5 https://crates.io                                            Cargo.lock
+crate/fd/anstyle-wincon-3.0.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/anyhow-1.0.104      https://crates.io                                            Cargo.lock
+crate/fd/argmax-0.4.0        https://crates.io                                            Cargo.lock
+crate/fd/bitflags-1.3.2      https://crates.io                                            Cargo.lock
+crate/fd/bitflags-2.11.0     https://crates.io                                            Cargo.lock
+crate/fd/block2-0.6.2        https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/bstr-1.12.1         https://crates.io                                            Cargo.lock
+crate/fd/cc-1.2.56           https://crates.io                                            Cargo.lock
+crate/fd/cfg_aliases-0.2.1   https://crates.io                                            Cargo.lock
+crate/fd/cfg-if-1.0.4        https://crates.io                                            Cargo.lock
+crate/fd/clap-4.6.1          https://crates.io                                            Cargo.lock
+crate/fd/clap_builder-4.6.0  https://crates.io                                            Cargo.lock
+crate/fd/clap_complete-4.6.5 https://crates.io                                            Cargo.lock
+crate/fd/clap_derive-4.6.1   https://crates.io                                            Cargo.lock
+crate/fd/clap_lex-1.0.0      https://crates.io                                            Cargo.lock
+crate/fd/colorchoice-1.0.4   https://crates.io                                            Cargo.lock
+crate/fd/crossbeam-channel-0.5.16 https://crates.io                                            Cargo.lock
+crate/fd/crossbeam-deque-0.8.6 https://crates.io                                            Cargo.lock
+crate/fd/crossbeam-epoch-0.9.18 https://crates.io                                            Cargo.lock
+crate/fd/crossbeam-utils-0.8.21 https://crates.io                                            Cargo.lock
+crate/fd/ctrlc-3.5.2         https://crates.io                                            Cargo.lock
+crate/fd/defmt-1.1.0         https://crates.io                                            Cargo.lock
+crate/fd/defmt-macros-1.1.0  https://crates.io                                            Cargo.lock
+crate/fd/defmt-parser-1.0.0  https://crates.io                                            Cargo.lock
+crate/fd/diff-0.1.13         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/dispatch2-0.3.1     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/equivalent-1.0.2    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/errno-0.3.14        https://crates.io                                            Cargo.lock
+crate/fd/etcetera-0.11.0     https://crates.io                                            Cargo.lock
+crate/fd/faccess-0.2.4       https://crates.io                                            Cargo.lock
+crate/fd/fastrand-2.3.0      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/filetime-0.2.29     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/find-msvc-tools-0.1.9 https://crates.io                                            Cargo.lock
+crate/fd/foldhash-0.1.5      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/getrandom-0.4.2     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/globset-0.4.19      https://crates.io                                            Cargo.lock
+crate/fd/hashbrown-0.15.5    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/hashbrown-0.16.1    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/heck-0.5.0          https://crates.io                                            Cargo.lock
+crate/fd/id-arena-2.3.0      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/ignore-0.4.31       https://crates.io                                            Cargo.lock
+crate/fd/indexmap-2.13.0     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/is_terminal_polyfill-1.70.2 https://crates.io                                            Cargo.lock
+crate/fd/itoa-1.0.17         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/jiff-0.2.29         https://crates.io                                            Cargo.lock
+crate/fd/jiff-static-0.2.29  https://crates.io                                            Cargo.lock
+crate/fd/jiff-tzdb-0.1.6     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/jiff-tzdb-platform-0.1.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/leb128fmt-0.1.0     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/libc-0.2.189        https://crates.io                                            Cargo.lock
+crate/fd/linux-raw-sys-0.12.1 https://crates.io                                            Cargo.lock
+crate/fd/log-0.4.29          https://crates.io                                            Cargo.lock
+crate/fd/lscolors-0.21.0     https://crates.io                                            Cargo.lock
+crate/fd/memchr-2.8.0        https://crates.io                                            Cargo.lock
+crate/fd/nix-0.30.1          https://crates.io                                            Cargo.lock
+crate/fd/nix-0.31.3          https://crates.io                                            Cargo.lock
+crate/fd/normpath-1.5.1      https://crates.io                                            Cargo.lock
+crate/fd/nu-ansi-term-0.50.3 https://crates.io                                            Cargo.lock
+crate/fd/objc2-0.6.4         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/objc2-encode-4.1.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/once_cell-1.21.3    https://crates.io                                            Cargo.lock
+crate/fd/once_cell_polyfill-1.70.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/portable-atomic-1.13.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/portable-atomic-util-0.2.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/prettyplease-0.2.37 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/proc-macro2-1.0.106 https://crates.io                                            Cargo.lock
+crate/fd/proc-macro-error2-2.0.1 https://crates.io                                            Cargo.lock
+crate/fd/proc-macro-error-attr2-2.0.0 https://crates.io                                            Cargo.lock
+crate/fd/quote-1.0.45        https://crates.io                                            Cargo.lock
+crate/fd/r-efi-6.0.0         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/regex-1.12.4        https://crates.io                                            Cargo.lock
+crate/fd/regex-automata-0.4.14 https://crates.io                                            Cargo.lock
+crate/fd/regex-syntax-0.8.11 https://crates.io                                            Cargo.lock
+crate/fd/rustix-1.1.4        https://crates.io                                            Cargo.lock
+crate/fd/same-file-1.0.6     https://crates.io                                            Cargo.lock
+crate/fd/semver-1.0.27       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/serde-1.0.228       https://crates.io                                            Cargo.lock
+crate/fd/serde_core-1.0.228  https://crates.io                                            Cargo.lock
+crate/fd/serde_derive-1.0.228 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/serde_json-1.0.149  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/shlex-1.3.0         https://crates.io                                            Cargo.lock
+crate/fd/strsim-0.11.1       https://crates.io                                            Cargo.lock
+crate/fd/syn-2.0.117         https://crates.io                                            Cargo.lock
+crate/fd/tempfile-3.27.0     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/terminal_size-0.4.3 https://crates.io                                            Cargo.lock
+crate/fd/test-case-3.3.1     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/test-case-core-3.3.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/test-case-macros-3.3.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/thiserror-2.0.18    https://crates.io                                            Cargo.lock
+crate/fd/thiserror-impl-2.0.18 https://crates.io                                            Cargo.lock
+crate/fd/tikv-jemallocator-0.7.0 https://crates.io                                            Cargo.lock
+crate/fd/tikv-jemalloc-sys-0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8 https://crates.io                                            Cargo.lock
+crate/fd/unicode-ident-1.0.24 https://crates.io                                            Cargo.lock
+crate/fd/unicode-xid-0.2.6   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/utf8parse-0.2.2     https://crates.io                                            Cargo.lock
+crate/fd/walkdir-2.5.0       https://crates.io                                            Cargo.lock
+crate/fd/wasip2-1.0.2+wasi-0.2.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wasm-encoder-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wasm-metadata-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wasmparser-0.244.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/winapi-0.3.9        https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/winapi-i686-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/winapi-util-0.1.11  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/winapi-x86_64-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_aarch64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_aarch64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_i686_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_i686_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_i686_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows-link-0.2.1  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows-sys-0.60.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows-sys-0.61.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows-targets-0.53.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_x86_64_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_x86_64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/windows_x86_64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-bindgen-0.51.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-bindgen-core-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-bindgen-rust-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-bindgen-rust-macro-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-component-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/wit-parser-0.244.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fd/zmij-1.0.21         https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/neocmakelsp/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
 crate/neocmakelsp/android_system_properties-0.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/neocmakelsp/anstream-1.0.0 https://crates.io                                            Cargo.lock
@@ -711,6 +840,687 @@ crate/ruff/zmij-1.0.10       https://crates.io                                  
 crate/ruff/zstd-0.11.2+zstd.1.5.2 https://crates.io                                            Cargo.lock
 crate/ruff/zstd-safe-5.0.2+zstd.1.5.2 https://crates.io                                            Cargo.lock
 crate/ruff/zstd-sys-2.0.16+zstd.1.5.7 https://crates.io                                            Cargo.lock
+crate/yazi/addr2line-0.25.1  https://crates.io                                            Cargo.lock
+crate/yazi/adler2-2.0.1      https://crates.io                                            Cargo.lock
+crate/yazi/aead-0.5.2        https://crates.io                                            Cargo.lock
+crate/yazi/aes-0.8.4         https://crates.io                                            Cargo.lock
+crate/yazi/aes-gcm-0.10.3    https://crates.io                                            Cargo.lock
+crate/yazi/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
+crate/yazi/aligned-0.4.3     https://crates.io                                            Cargo.lock
+crate/yazi/aligned-vec-0.6.4 https://crates.io                                            Cargo.lock
+crate/yazi/allocator-api2-0.2.21 https://crates.io                                            Cargo.lock
+crate/yazi/android_system_properties-0.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/ansi-to-tui-8.0.1 https://crates.io                                            Cargo.lock
+crate/yazi/anstream-0.6.21   https://crates.io                                            Cargo.lock
+crate/yazi/anstyle-1.0.13    https://crates.io                                            Cargo.lock
+crate/yazi/anstyle-parse-0.2.7 https://crates.io                                            Cargo.lock
+crate/yazi/anstyle-query-1.1.5 https://crates.io                                            Cargo.lock
+crate/yazi/anstyle-wincon-3.0.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/anyhow-1.0.100    https://crates.io                                            Cargo.lock
+crate/yazi/arbitrary-1.4.2   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/arc-swap-1.8.0    https://crates.io                                            Cargo.lock
+crate/yazi/arg_enum_proc_macro-0.3.4 https://crates.io                                            Cargo.lock
+crate/yazi/argon2-0.5.3      https://crates.io                                            Cargo.lock
+crate/yazi/arrayvec-0.7.6    https://crates.io                                            Cargo.lock
+crate/yazi/as-slice-0.2.1    https://crates.io                                            Cargo.lock
+crate/yazi/async-priority-channel-0.2.0 https://crates.io                                            Cargo.lock
+crate/yazi/atomic-0.6.1      https://crates.io                                            Cargo.lock
+crate/yazi/autocfg-1.5.0     https://crates.io                                            Cargo.lock
+crate/yazi/av1-grain-0.2.5   https://crates.io                                            Cargo.lock
+crate/yazi/avif-serialize-0.8.6 https://crates.io                                            Cargo.lock
+crate/yazi/av-scenechange-0.14.1 https://crates.io                                            Cargo.lock
+crate/yazi/backtrace-0.3.76  https://crates.io                                            Cargo.lock
+crate/yazi/base16ct-0.2.0    https://crates.io                                            Cargo.lock
+crate/yazi/base16ct-1.0.0    https://crates.io                                            Cargo.lock
+crate/yazi/base64-0.22.1     https://crates.io                                            Cargo.lock
+crate/yazi/base64ct-1.8.3    https://crates.io                                            Cargo.lock
+crate/yazi/bcrypt-pbkdf-0.10.0 https://crates.io                                            Cargo.lock
+crate/yazi/better-panic-0.3.0 https://crates.io                                            Cargo.lock
+crate/yazi/bincode-1.3.3     https://crates.io                                            Cargo.lock
+crate/yazi/bit_field-0.10.3  https://crates.io                                            Cargo.lock
+crate/yazi/bitflags-1.3.2    https://crates.io                                            Cargo.lock
+crate/yazi/bitflags-2.10.0   https://crates.io                                            Cargo.lock
+crate/yazi/bit-set-0.5.3     https://crates.io                                            Cargo.lock
+crate/yazi/bitstream-io-4.9.0 https://crates.io                                            Cargo.lock
+crate/yazi/bit-vec-0.6.3     https://crates.io                                            Cargo.lock
+crate/yazi/bitvec-1.0.1      https://crates.io                                            Cargo.lock
+crate/yazi/blake2-0.10.6     https://crates.io                                            Cargo.lock
+crate/yazi/block-buffer-0.10.4 https://crates.io                                            Cargo.lock
+crate/yazi/block-buffer-0.11.0 https://crates.io                                            Cargo.lock
+crate/yazi/block-padding-0.3.3 https://crates.io                                            Cargo.lock
+crate/yazi/blowfish-0.9.1    https://crates.io                                            Cargo.lock
+crate/yazi/bstr-1.12.1       https://crates.io                                            Cargo.lock
+crate/yazi/built-0.8.0       https://crates.io                                            Cargo.lock
+crate/yazi/bumpalo-3.19.1    https://crates.io                                            Cargo.lock
+crate/yazi/by_address-1.2.1  https://crates.io                                            Cargo.lock
+crate/yazi/bytemuck-1.24.0   https://crates.io                                            Cargo.lock
+crate/yazi/bytemuck_derive-1.10.2 https://crates.io                                            Cargo.lock
+crate/yazi/byteorder-1.5.0   https://crates.io                                            Cargo.lock
+crate/yazi/byteorder-lite-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/bytes-1.11.0      https://crates.io                                            Cargo.lock
+crate/yazi/castaway-0.2.4    https://crates.io                                            Cargo.lock
+crate/yazi/cbc-0.1.2         https://crates.io                                            Cargo.lock
+crate/yazi/cc-1.2.53         https://crates.io                                            Cargo.lock
+crate/yazi/cfg_aliases-0.2.1 https://crates.io                                            Cargo.lock
+crate/yazi/cfg-if-1.0.4      https://crates.io                                            Cargo.lock
+crate/yazi/chacha20-0.9.1    https://crates.io                                            Cargo.lock
+crate/yazi/chrono-0.4.43     https://crates.io                                            Cargo.lock
+crate/yazi/cipher-0.4.4      https://crates.io                                            Cargo.lock
+crate/yazi/clap-4.5.54       https://crates.io                                            Cargo.lock
+crate/yazi/clap_builder-4.5.54 https://crates.io                                            Cargo.lock
+crate/yazi/clap_complete-4.5.65 https://crates.io                                            Cargo.lock
+crate/yazi/clap_complete_fig-4.5.2 https://crates.io                                            Cargo.lock
+crate/yazi/clap_complete_nushell-4.5.10 https://crates.io                                            Cargo.lock
+crate/yazi/clap_derive-4.5.49 https://crates.io                                            Cargo.lock
+crate/yazi/clap_lex-0.7.7    https://crates.io                                            Cargo.lock
+crate/yazi/clipboard-win-5.4.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/cmov-0.5.0-pre.0  https://crates.io                                            Cargo.lock
+crate/yazi/colorchoice-1.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/color_quant-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/compact_str-0.9.0 https://crates.io                                            Cargo.lock
+crate/yazi/concurrent-queue-2.5.0 https://crates.io                                            Cargo.lock
+crate/yazi/console-0.15.11   https://crates.io                                            Cargo.lock
+crate/yazi/const-oid-0.10.2  https://crates.io                                            Cargo.lock
+crate/yazi/const-oid-0.9.6   https://crates.io                                            Cargo.lock
+crate/yazi/convert_case-0.10.0 https://crates.io                                            Cargo.lock
+crate/yazi/core2-0.4.0       https://crates.io                                            Cargo.lock
+crate/yazi/core-foundation-sys-0.8.7 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/core-models-0.0.4 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/cpufeatures-0.2.17 https://crates.io                                            Cargo.lock
+crate/yazi/crc32fast-1.5.0   https://crates.io                                            Cargo.lock
+crate/yazi/crossbeam-channel-0.5.15 https://crates.io                                            Cargo.lock
+crate/yazi/crossbeam-deque-0.8.6 https://crates.io                                            Cargo.lock
+crate/yazi/crossbeam-epoch-0.9.18 https://crates.io                                            Cargo.lock
+crate/yazi/crossbeam-utils-0.8.21 https://crates.io                                            Cargo.lock
+crate/yazi/crossterm-0.28.1  https://crates.io                                            Cargo.lock
+crate/yazi/crossterm-0.29.0  https://crates.io                                            Cargo.lock
+crate/yazi/crossterm_winapi-0.9.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/crunchy-0.2.4     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/crypto-bigint-0.5.5 https://crates.io                                            Cargo.lock
+crate/yazi/crypto-bigint-0.7.0-rc.18 https://crates.io                                            Cargo.lock
+crate/yazi/crypto-common-0.1.7 https://crates.io                                            Cargo.lock
+crate/yazi/crypto-common-0.2.0-rc.10 https://crates.io                                            Cargo.lock
+crate/yazi/crypto-primes-0.7.0-pre.6 https://crates.io                                            Cargo.lock
+crate/yazi/csscolorparser-0.6.2 https://crates.io                                            Cargo.lock
+crate/yazi/ctr-0.9.2         https://crates.io                                            Cargo.lock
+crate/yazi/ctutils-0.3.2     https://crates.io                                            Cargo.lock
+crate/yazi/curve25519-dalek-4.1.3 https://crates.io                                            Cargo.lock
+crate/yazi/curve25519-dalek-derive-0.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/darling-0.20.11   https://crates.io                                            Cargo.lock
+crate/yazi/darling-0.23.0    https://crates.io                                            Cargo.lock
+crate/yazi/darling_core-0.20.11 https://crates.io                                            Cargo.lock
+crate/yazi/darling_core-0.23.0 https://crates.io                                            Cargo.lock
+crate/yazi/darling_macro-0.20.11 https://crates.io                                            Cargo.lock
+crate/yazi/darling_macro-0.23.0 https://crates.io                                            Cargo.lock
+crate/yazi/data-encoding-2.10.0 https://crates.io                                            Cargo.lock
+crate/yazi/deadpool-0.12.3   https://crates.io                                            Cargo.lock
+crate/yazi/deadpool-runtime-0.1.4 https://crates.io                                            Cargo.lock
+crate/yazi/delegate-0.13.5   https://crates.io                                            Cargo.lock
+crate/yazi/deltae-0.3.2      https://crates.io                                            Cargo.lock
+crate/yazi/der-0.7.10        https://crates.io                                            Cargo.lock
+crate/yazi/der-0.8.0-rc.10   https://crates.io                                            Cargo.lock
+crate/yazi/deranged-0.5.5    https://crates.io                                            Cargo.lock
+crate/yazi/derive_builder-0.20.2 https://crates.io                                            Cargo.lock
+crate/yazi/derive_builder_core-0.20.2 https://crates.io                                            Cargo.lock
+crate/yazi/derive_builder_macro-0.20.2 https://crates.io                                            Cargo.lock
+crate/yazi/derive_more-2.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/derive_more-impl-2.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/digest-0.10.7     https://crates.io                                            Cargo.lock
+crate/yazi/digest-0.11.0-rc.6 https://crates.io                                            Cargo.lock
+crate/yazi/dirs-6.0.0        https://crates.io                                            Cargo.lock
+crate/yazi/dirs-sys-0.5.0    https://crates.io                                            Cargo.lock
+crate/yazi/document-features-0.2.12 https://crates.io                                            Cargo.lock
+crate/yazi/ecdsa-0.16.9      https://crates.io                                            Cargo.lock
+crate/yazi/ed25519-2.2.3     https://crates.io                                            Cargo.lock
+crate/yazi/ed25519-dalek-2.2.0 https://crates.io                                            Cargo.lock
+crate/yazi/either-1.15.0     https://crates.io                                            Cargo.lock
+crate/yazi/elliptic-curve-0.13.8 https://crates.io                                            Cargo.lock
+crate/yazi/encode_unicode-1.0.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/enum_dispatch-0.3.13 https://crates.io                                            Cargo.lock
+crate/yazi/env_home-0.1.0    https://crates.io                                            Cargo.lock
+crate/yazi/equator-0.4.2     https://crates.io                                            Cargo.lock
+crate/yazi/equator-macro-0.4.2 https://crates.io                                            Cargo.lock
+crate/yazi/equivalent-1.0.2  https://crates.io                                            Cargo.lock
+crate/yazi/erased-serde-0.4.9 https://crates.io                                            Cargo.lock
+crate/yazi/errno-0.3.14      https://crates.io                                            Cargo.lock
+crate/yazi/error-code-3.3.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/euclid-0.22.13    https://crates.io                                            Cargo.lock
+crate/yazi/event-listener-4.0.3 https://crates.io                                            Cargo.lock
+crate/yazi/exr-1.74.0        https://crates.io                                            Cargo.lock
+crate/yazi/fancy-regex-0.11.0 https://crates.io                                            Cargo.lock
+crate/yazi/fast-srgb8-1.0.0  https://crates.io                                            Cargo.lock
+crate/yazi/fax-0.2.6         https://crates.io                                            Cargo.lock
+crate/yazi/fax_derive-0.2.0  https://crates.io                                            Cargo.lock
+crate/yazi/fdeflate-0.3.7    https://crates.io                                            Cargo.lock
+crate/yazi/fdlimit-0.3.0     https://crates.io                                            Cargo.lock
+crate/yazi/ff-0.13.1         https://crates.io                                            Cargo.lock
+crate/yazi/fiat-crypto-0.2.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/filedescriptor-0.8.3 https://crates.io                                            Cargo.lock
+crate/yazi/find-msvc-tools-0.1.8 https://crates.io                                            Cargo.lock
+crate/yazi/finl_unicode-1.4.0 https://crates.io                                            Cargo.lock
+crate/yazi/fixedbitset-0.4.2 https://crates.io                                            Cargo.lock
+crate/yazi/flate2-1.1.8      https://crates.io                                            Cargo.lock
+crate/yazi/fnv-1.0.7         https://crates.io                                            Cargo.lock
+crate/yazi/foldhash-0.2.0    https://crates.io                                            Cargo.lock
+crate/yazi/fsevent-sys-4.1.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/funty-2.0.0       https://crates.io                                            Cargo.lock
+crate/yazi/futures-0.3.31    https://crates.io                                            Cargo.lock
+crate/yazi/futures-channel-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-core-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-executor-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-io-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-macro-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-sink-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-task-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/futures-util-0.3.31 https://crates.io                                            Cargo.lock
+crate/yazi/generic-array-0.14.7 https://crates.io                                            Cargo.lock
+crate/yazi/generic-array-1.3.5 https://crates.io                                            Cargo.lock
+crate/yazi/getrandom-0.2.17  https://crates.io                                            Cargo.lock
+crate/yazi/getrandom-0.3.4   https://crates.io                                            Cargo.lock
+crate/yazi/ghash-0.5.1       https://crates.io                                            Cargo.lock
+crate/yazi/gif-0.14.1        https://crates.io                                            Cargo.lock
+crate/yazi/gimli-0.32.3      https://crates.io                                            Cargo.lock
+crate/yazi/globset-0.4.18    https://crates.io                                            Cargo.lock
+crate/yazi/group-0.13.0      https://crates.io                                            Cargo.lock
+crate/yazi/half-2.7.1        https://crates.io                                            Cargo.lock
+crate/yazi/hashbrown-0.16.1  https://crates.io                                            Cargo.lock
+crate/yazi/hax-lib-0.3.5     https://crates.io                                            Cargo.lock
+crate/yazi/hax-lib-macros-0.3.5 https://crates.io                                            Cargo.lock
+crate/yazi/hax-lib-macros-types-0.3.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/heck-0.5.0        https://crates.io                                            Cargo.lock
+crate/yazi/hermit-abi-0.5.2  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/hex-0.4.3         https://crates.io                                            Cargo.lock
+crate/yazi/hex-literal-0.4.1 https://crates.io                                            Cargo.lock
+crate/yazi/hkdf-0.12.4       https://crates.io                                            Cargo.lock
+crate/yazi/hmac-0.12.1       https://crates.io                                            Cargo.lock
+crate/yazi/home-0.5.12       https://crates.io                                            Cargo.lock
+crate/yazi/hybrid-array-0.4.5 https://crates.io                                            Cargo.lock
+crate/yazi/iana-time-zone-0.1.64 https://crates.io                                            Cargo.lock
+crate/yazi/iana-time-zone-haiku-0.1.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/ident_case-1.0.1  https://crates.io                                            Cargo.lock
+crate/yazi/image-0.25.9      https://crates.io                                            Cargo.lock
+crate/yazi/image-webp-0.2.4  https://crates.io                                            Cargo.lock
+crate/yazi/imgref-1.12.0     https://crates.io                                            Cargo.lock
+crate/yazi/indexmap-2.13.0   https://crates.io                                            Cargo.lock
+crate/yazi/indoc-2.0.7       https://crates.io                                            Cargo.lock
+crate/yazi/inotify-0.11.0    https://crates.io                                            Cargo.lock
+crate/yazi/inotify-sys-0.1.5 https://crates.io                                            Cargo.lock
+crate/yazi/inout-0.1.4       https://crates.io                                            Cargo.lock
+crate/yazi/instability-0.3.11 https://crates.io                                            Cargo.lock
+crate/yazi/internal-russh-forked-ssh-key-0.6.16+upstream-0.6.7 https://crates.io                                            Cargo.lock
+crate/yazi/interpolate_name-0.2.4 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/is_terminal_polyfill-1.70.2 https://crates.io                                            Cargo.lock
+crate/yazi/itertools-0.14.0  https://crates.io                                            Cargo.lock
+crate/yazi/itoa-1.0.17       https://crates.io                                            Cargo.lock
+crate/yazi/jobserver-0.1.34  https://crates.io                                            Cargo.lock
+crate/yazi/js-sys-0.3.85     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/kasuari-0.4.11    https://crates.io                                            Cargo.lock
+crate/yazi/kqueue-1.1.1      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/kqueue-sys-1.0.4  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/lab-0.11.0        https://crates.io                                            Cargo.lock
+crate/yazi/lazy_static-1.5.0 https://crates.io                                            Cargo.lock
+crate/yazi/lebe-0.5.3        https://crates.io                                            Cargo.lock
+crate/yazi/libc-0.2.180      https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-intrinsics-0.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-ml-kem-0.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-platform-0.0.2 https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-secrets-0.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-sha3-0.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/libcrux-traits-0.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/libfuzzer-sys-0.4.10 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/libm-0.2.15       https://crates.io                                            Cargo.lock
+crate/yazi/libredox-0.1.12   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/line-clipping-0.3.5 https://crates.io                                            Cargo.lock
+crate/yazi/linux-raw-sys-0.11.0 https://crates.io                                            Cargo.lock
+crate/yazi/linux-raw-sys-0.4.15 https://crates.io                                            Cargo.lock
+crate/yazi/litrs-1.0.0       https://crates.io                                            Cargo.lock
+crate/yazi/lock_api-0.4.14   https://crates.io                                            Cargo.lock
+crate/yazi/log-0.4.29        https://crates.io                                            Cargo.lock
+crate/yazi/loop9-0.1.5       https://crates.io                                            Cargo.lock
+crate/yazi/lru-0.16.3        https://crates.io                                            Cargo.lock
+crate/yazi/luajit-src-210.6.6+707c12b https://crates.io                                            Cargo.lock
+crate/yazi/lua-src-548.1.2   https://crates.io                                            Cargo.lock
+crate/yazi/mac_address-1.1.8 https://crates.io                                            Cargo.lock
+crate/yazi/matchers-0.2.0    https://crates.io                                            Cargo.lock
+crate/yazi/maybe-rayon-0.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/md5-0.7.0         https://crates.io                                            Cargo.lock
+crate/yazi/memchr-2.7.6      https://crates.io                                            Cargo.lock
+crate/yazi/memmem-0.1.1      https://crates.io                                            Cargo.lock
+crate/yazi/memoffset-0.9.1   https://crates.io                                            Cargo.lock
+crate/yazi/minimal-lexical-0.2.1 https://crates.io                                            Cargo.lock
+crate/yazi/miniz_oxide-0.8.9 https://crates.io                                            Cargo.lock
+crate/yazi/mio-1.1.1         https://crates.io                                            Cargo.lock
+crate/yazi/mlua-0.11.5       https://crates.io                                            Cargo.lock
+crate/yazi/mlua_derive-0.11.0 https://crates.io                                            Cargo.lock
+crate/yazi/mlua-sys-0.9.0    https://crates.io                                            Cargo.lock
+crate/yazi/moxcms-0.7.11     https://crates.io                                            Cargo.lock
+crate/yazi/moxcms-0.8.0      https://crates.io                                            Cargo.lock
+crate/yazi/new_debug_unreachable-1.0.6 https://crates.io                                            Cargo.lock
+crate/yazi/nix-0.29.0        https://crates.io                                            Cargo.lock
+crate/yazi/nom-7.1.3         https://crates.io                                            Cargo.lock
+crate/yazi/nom-8.0.0         https://crates.io                                            Cargo.lock
+crate/yazi/noop_proc_macro-0.3.0 https://crates.io                                            Cargo.lock
+crate/yazi/notify-8.2.0      https://crates.io                                            Cargo.lock
+crate/yazi/notify-types-2.0.0 https://crates.io                                            Cargo.lock
+crate/yazi/nu-ansi-term-0.50.3 https://crates.io                                            Cargo.lock
+crate/yazi/num-bigint-0.4.6  https://crates.io                                            Cargo.lock
+crate/yazi/num-bigint-dig-0.8.6 https://crates.io                                            Cargo.lock
+crate/yazi/num-conv-0.1.0    https://crates.io                                            Cargo.lock
+crate/yazi/num_cpus-1.17.0   https://crates.io                                            Cargo.lock
+crate/yazi/num-derive-0.4.2  https://crates.io                                            Cargo.lock
+crate/yazi/num-integer-0.1.46 https://crates.io                                            Cargo.lock
+crate/yazi/num-iter-0.1.45   https://crates.io                                            Cargo.lock
+crate/yazi/num-rational-0.4.2 https://crates.io                                            Cargo.lock
+crate/yazi/num_threads-0.1.7 https://crates.io                                            Cargo.lock
+crate/yazi/numtoa-0.2.4      https://crates.io                                            Cargo.lock
+crate/yazi/num-traits-0.2.19 https://crates.io                                            Cargo.lock
+crate/yazi/objc2-0.6.3       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/objc2-encode-4.1.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/objc2-foundation-0.3.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/object-0.37.3     https://crates.io                                            Cargo.lock
+crate/yazi/once_cell-1.21.3  https://crates.io                                            Cargo.lock
+crate/yazi/once_cell_polyfill-1.70.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/onig-6.5.1        https://crates.io                                            Cargo.lock
+crate/yazi/onig_sys-69.9.1   https://crates.io                                            Cargo.lock
+crate/yazi/opaque-debug-0.3.1 https://crates.io                                            Cargo.lock
+crate/yazi/option-ext-0.2.0  https://crates.io                                            Cargo.lock
+crate/yazi/ordered-float-2.10.1 https://crates.io                                            Cargo.lock
+crate/yazi/ordered-float-4.6.0 https://crates.io                                            Cargo.lock
+crate/yazi/ordered-float-5.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/p256-0.13.2       https://crates.io                                            Cargo.lock
+crate/yazi/p384-0.13.1       https://crates.io                                            Cargo.lock
+crate/yazi/p521-0.13.3       https://crates.io                                            Cargo.lock
+crate/yazi/pageant-0.2.0     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/palette-0.7.6     https://crates.io                                            Cargo.lock
+crate/yazi/palette_derive-0.7.6 https://crates.io                                            Cargo.lock
+crate/yazi/parking-2.2.1     https://crates.io                                            Cargo.lock
+crate/yazi/parking_lot-0.12.5 https://crates.io                                            Cargo.lock
+crate/yazi/parking_lot_core-0.9.12 https://crates.io                                            Cargo.lock
+crate/yazi/password-hash-0.5.0 https://crates.io                                            Cargo.lock
+crate/yazi/paste-1.0.15      https://crates.io                                            Cargo.lock
+crate/yazi/pastey-0.1.1      https://crates.io                                            Cargo.lock
+crate/yazi/pbkdf2-0.12.2     https://crates.io                                            Cargo.lock
+crate/yazi/pem-rfc7468-0.7.0 https://crates.io                                            Cargo.lock
+crate/yazi/pem-rfc7468-1.0.0 https://crates.io                                            Cargo.lock
+crate/yazi/percent-encoding-2.3.2 https://crates.io                                            Cargo.lock
+crate/yazi/pest-2.8.5        https://crates.io                                            Cargo.lock
+crate/yazi/pest_derive-2.8.5 https://crates.io                                            Cargo.lock
+crate/yazi/pest_generator-2.8.5 https://crates.io                                            Cargo.lock
+crate/yazi/pest_meta-2.8.5   https://crates.io                                            Cargo.lock
+crate/yazi/phf-0.11.3        https://crates.io                                            Cargo.lock
+crate/yazi/phf_codegen-0.11.3 https://crates.io                                            Cargo.lock
+crate/yazi/phf_generator-0.11.3 https://crates.io                                            Cargo.lock
+crate/yazi/phf_macros-0.11.3 https://crates.io                                            Cargo.lock
+crate/yazi/phf_shared-0.11.3 https://crates.io                                            Cargo.lock
+crate/yazi/pin-project-lite-0.2.16 https://crates.io                                            Cargo.lock
+crate/yazi/pin-utils-0.1.0   https://crates.io                                            Cargo.lock
+crate/yazi/pkcs1-0.8.0-rc.4  https://crates.io                                            Cargo.lock
+crate/yazi/pkcs5-0.7.1       https://crates.io                                            Cargo.lock
+crate/yazi/pkcs8-0.10.2      https://crates.io                                            Cargo.lock
+crate/yazi/pkcs8-0.11.0-rc.9 https://crates.io                                            Cargo.lock
+crate/yazi/pkg-config-0.3.32 https://crates.io                                            Cargo.lock
+crate/yazi/plist-1.8.0       https://crates.io                                            Cargo.lock
+crate/yazi/png-0.18.0        https://crates.io                                            Cargo.lock
+crate/yazi/poly1305-0.8.0    https://crates.io                                            Cargo.lock
+crate/yazi/polyval-0.6.2     https://crates.io                                            Cargo.lock
+crate/yazi/portable-atomic-1.13.0 https://crates.io                                            Cargo.lock
+crate/yazi/powerfmt-0.2.0    https://crates.io                                            Cargo.lock
+crate/yazi/ppv-lite86-0.2.21 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/adler2-2.0.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/anyhow-1.0.97 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/base64-0.22.1 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/bincode-1.3.3 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/bitflags-1.3.2 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/cc-1.2.16 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/cfg-if-1.0.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/crc32fast-1.4.2 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/deranged-0.4.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/equivalent-1.0.2 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/flate2-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/fnv-1.0.7 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/hashbrown-0.15.2 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/indexmap-2.8.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/itoa-1.0.15 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/libc-0.2.171 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/linked-hash-map-0.5.6 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/memchr-2.7.4 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/miniz_oxide-0.8.5 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/num-conv-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/once_cell-1.21.1 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/onig-6.4.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/onig_sys-69.8.1 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/pkg-config-0.3.32 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/plist-1.7.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/powerfmt-0.2.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/proc-macro2-1.0.94 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/quick-xml-0.32.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/quote-1.0.40 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/regex-syntax-0.8.5 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/ryu-1.0.20 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/same-file-1.0.6 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/serde-1.0.219 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/serde_derive-1.0.219 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/serde_json-1.0.140 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/shlex-1.3.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/syn-2.0.100 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/syntect-5.2.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/thiserror-1.0.69 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/thiserror-impl-1.0.69 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/time-0.3.40 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/time-core-0.1.4 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/time-macros-0.2.21 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/unicode-ident-1.0.18 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/walkdir-2.5.0 https://crates.io                                            Cargo.lock
+crate/yazi-prebuilt/winapi-util-0.1.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_aarch64_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_aarch64_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_i686_gnu-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_i686_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_i686_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows-sys-0.59.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows-targets-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_x86_64_gnu-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_x86_64_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/windows_x86_64_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi-prebuilt/yaml-rust-0.4.5 https://crates.io                                            Cargo.lock
+crate/yazi/primeorder-0.13.6 https://crates.io                                            Cargo.lock
+crate/yazi/proc-macro2-1.0.106 https://crates.io                                            Cargo.lock
+crate/yazi/proc-macro-error2-2.0.1 https://crates.io                                            Cargo.lock
+crate/yazi/proc-macro-error-attr2-2.0.0 https://crates.io                                            Cargo.lock
+crate/yazi/profiling-1.0.17  https://crates.io                                            Cargo.lock
+crate/yazi/profiling-procmacros-1.0.17 https://crates.io                                            Cargo.lock
+crate/yazi/pxfm-0.1.27       https://crates.io                                            Cargo.lock
+crate/yazi/qoi-0.4.1         https://crates.io                                            Cargo.lock
+crate/yazi/quantette-0.5.1   https://crates.io                                            Cargo.lock
+crate/yazi/quick-error-2.0.1 https://crates.io                                            Cargo.lock
+crate/yazi/quick-xml-0.38.4  https://crates.io                                            Cargo.lock
+crate/yazi/quote-1.0.43      https://crates.io                                            Cargo.lock
+crate/yazi/radium-0.7.0      https://crates.io                                            Cargo.lock
+crate/yazi/rand-0.8.5        https://crates.io                                            Cargo.lock
+crate/yazi/rand-0.9.2        https://crates.io                                            Cargo.lock
+crate/yazi/rand_chacha-0.3.1 https://crates.io                                            Cargo.lock
+crate/yazi/rand_chacha-0.9.0 https://crates.io                                            Cargo.lock
+crate/yazi/rand_core-0.10.0-rc-3 https://crates.io                                            Cargo.lock
+crate/yazi/rand_core-0.6.4   https://crates.io                                            Cargo.lock
+crate/yazi/rand_core-0.9.5   https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-0.30.0    https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-core-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-crossterm-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-macros-0.7.0 https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-termion-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-termwiz-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/ratatui-widgets-0.3.0 https://crates.io                                            Cargo.lock
+crate/yazi/rav1e-0.8.1       https://crates.io                                            Cargo.lock
+crate/yazi/ravif-0.12.0      https://crates.io                                            Cargo.lock
+crate/yazi/rayon-1.11.0      https://crates.io                                            Cargo.lock
+crate/yazi/rayon-core-1.13.0 https://crates.io                                            Cargo.lock
+crate/yazi/redox_syscall-0.5.18 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/redox_users-0.5.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/ref-cast-1.0.25   https://crates.io                                            Cargo.lock
+crate/yazi/ref-cast-impl-1.0.25 https://crates.io                                            Cargo.lock
+crate/yazi/r-efi-5.3.0       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/regex-1.12.2      https://crates.io                                            Cargo.lock
+crate/yazi/regex-automata-0.4.13 https://crates.io                                            Cargo.lock
+crate/yazi/regex-syntax-0.8.8 https://crates.io                                            Cargo.lock
+crate/yazi/rfc6979-0.4.0     https://crates.io                                            Cargo.lock
+crate/yazi/rgb-0.8.52        https://crates.io                                            Cargo.lock
+crate/yazi/ring-0.17.14      https://crates.io                                            Cargo.lock
+crate/yazi/rsa-0.10.0-rc.12  https://crates.io                                            Cargo.lock
+crate/yazi/russh-0.56.0      https://crates.io                                            Cargo.lock
+crate/yazi/russh-cryptovec-0.52.0 https://crates.io                                            Cargo.lock
+crate/yazi/russh-util-0.52.0 https://crates.io                                            Cargo.lock
+crate/yazi/rustc-demangle-0.1.27 https://crates.io                                            Cargo.lock
+crate/yazi/rustc-hash-2.1.1  https://crates.io                                            Cargo.lock
+crate/yazi/rustc_version-0.4.1 https://crates.io                                            Cargo.lock
+crate/yazi/rustix-0.38.44    https://crates.io                                            Cargo.lock
+crate/yazi/rustix-1.1.3      https://crates.io                                            Cargo.lock
+crate/yazi/rustversion-1.0.22 https://crates.io                                            Cargo.lock
+crate/yazi/ryu-1.0.22        https://crates.io                                            Cargo.lock
+crate/yazi/safe_arch-0.9.3   https://crates.io                                            Cargo.lock
+crate/yazi/salsa20-0.10.2    https://crates.io                                            Cargo.lock
+crate/yazi/same-file-1.0.6   https://crates.io                                            Cargo.lock
+crate/yazi/scopeguard-1.2.0  https://crates.io                                            Cargo.lock
+crate/yazi/scrypt-0.11.0     https://crates.io                                            Cargo.lock
+crate/yazi/sec1-0.7.3        https://crates.io                                            Cargo.lock
+crate/yazi/semver-1.0.27     https://crates.io                                            Cargo.lock
+crate/yazi/serde-1.0.228     https://crates.io                                            Cargo.lock
+crate/yazi/serde_core-1.0.228 https://crates.io                                            Cargo.lock
+crate/yazi/serdect-0.4.2     https://crates.io                                            Cargo.lock
+crate/yazi/serde_derive-1.0.228 https://crates.io                                            Cargo.lock
+crate/yazi/serde_json-1.0.149 https://crates.io                                            Cargo.lock
+crate/yazi/serde_spanned-1.0.4 https://crates.io                                            Cargo.lock
+crate/yazi/serde-value-0.7.0 https://crates.io                                            Cargo.lock
+crate/yazi/sha1-0.10.6       https://crates.io                                            Cargo.lock
+crate/yazi/sha1-0.11.0-rc.3  https://crates.io                                            Cargo.lock
+crate/yazi/sha2-0.10.9       https://crates.io                                            Cargo.lock
+crate/yazi/sha2-0.11.0-rc.3  https://crates.io                                            Cargo.lock
+crate/yazi/sharded-slab-0.1.7 https://crates.io                                            Cargo.lock
+crate/yazi/shlex-1.3.0       https://crates.io                                            Cargo.lock
+crate/yazi/signal-hook-0.3.18 https://crates.io                                            Cargo.lock
+crate/yazi/signal-hook-0.4.1 https://crates.io                                            Cargo.lock
+crate/yazi/signal-hook-mio-0.2.5 https://crates.io                                            Cargo.lock
+crate/yazi/signal-hook-registry-1.4.8 https://crates.io                                            Cargo.lock
+crate/yazi/signal-hook-tokio-0.4.0 https://crates.io                                            Cargo.lock
+crate/yazi/signature-2.2.0   https://crates.io                                            Cargo.lock
+crate/yazi/signature-3.0.0-rc.6 https://crates.io                                            Cargo.lock
+crate/yazi/simd-adler32-0.3.8 https://crates.io                                            Cargo.lock
+crate/yazi/simd_helpers-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/simdutf8-0.1.5    https://crates.io                                            Cargo.lock
+crate/yazi/siphasher-1.0.1   https://crates.io                                            Cargo.lock
+crate/yazi/slab-0.4.11       https://crates.io                                            Cargo.lock
+crate/yazi/smallvec-1.15.1   https://crates.io                                            Cargo.lock
+crate/yazi/socket2-0.6.1     https://crates.io                                            Cargo.lock
+crate/yazi/spin-0.9.8        https://crates.io                                            Cargo.lock
+crate/yazi/spki-0.7.3        https://crates.io                                            Cargo.lock
+crate/yazi/spki-0.8.0-rc.4   https://crates.io                                            Cargo.lock
+crate/yazi/ssh-cipher-0.2.0  https://crates.io                                            Cargo.lock
+crate/yazi/ssh-encoding-0.2.0 https://crates.io                                            Cargo.lock
+crate/yazi/stable_deref_trait-1.2.1 https://crates.io                                            Cargo.lock
+crate/yazi/static_assertions-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/strsim-0.11.1     https://crates.io                                            Cargo.lock
+crate/yazi/strum-0.27.2      https://crates.io                                            Cargo.lock
+crate/yazi/strum_macros-0.27.2 https://crates.io                                            Cargo.lock
+crate/yazi/subtle-2.6.1      https://crates.io                                            Cargo.lock
+crate/yazi/syn-1.0.109       https://crates.io                                            Cargo.lock
+crate/yazi/syn-2.0.114       https://crates.io                                            Cargo.lock
+crate/yazi/syntect-5.3.0     https://crates.io                                            Cargo.lock
+crate/yazi/tap-1.0.1         https://crates.io                                            Cargo.lock
+crate/yazi/terminfo-0.9.0    https://crates.io                                            Cargo.lock
+crate/yazi/termion-4.0.6     https://crates.io                                            Cargo.lock
+crate/yazi/termios-0.3.3     https://crates.io                                            Cargo.lock
+crate/yazi/termwiz-0.23.3    https://crates.io                                            Cargo.lock
+crate/yazi/thiserror-1.0.69  https://crates.io                                            Cargo.lock
+crate/yazi/thiserror-2.0.18  https://crates.io                                            Cargo.lock
+crate/yazi/thiserror-impl-1.0.69 https://crates.io                                            Cargo.lock
+crate/yazi/thiserror-impl-2.0.18 https://crates.io                                            Cargo.lock
+crate/yazi/thread_local-1.1.9 https://crates.io                                            Cargo.lock
+crate/yazi/tiff-0.10.3       https://crates.io                                            Cargo.lock
+crate/yazi/tikv-jemallocator-0.6.1 https://crates.io                                            Cargo.lock
+crate/yazi/tikv-jemalloc-sys-0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7 https://crates.io                                            Cargo.lock
+crate/yazi/time-0.3.45       https://crates.io                                            Cargo.lock
+crate/yazi/time-core-0.1.7   https://crates.io                                            Cargo.lock
+crate/yazi/time-macros-0.2.25 https://crates.io                                            Cargo.lock
+crate/yazi/tls_codec-0.4.2   https://crates.io                                            Cargo.lock
+crate/yazi/tls_codec_derive-0.4.2 https://crates.io                                            Cargo.lock
+crate/yazi/tokio-1.49.0      https://crates.io                                            Cargo.lock
+crate/yazi/tokio-macros-2.6.0 https://crates.io                                            Cargo.lock
+crate/yazi/tokio-stream-0.1.18 https://crates.io                                            Cargo.lock
+crate/yazi/tokio-util-0.7.18 https://crates.io                                            Cargo.lock
+crate/yazi/toml-0.9.11+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/toml_datetime-0.7.5+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/toml_parser-1.0.6+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/toml_writer-1.0.6+spec-1.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/tracing-0.1.44    https://crates.io                                            Cargo.lock
+crate/yazi/tracing-appender-0.2.4 https://crates.io                                            Cargo.lock
+crate/yazi/tracing-attributes-0.1.31 https://crates.io                                            Cargo.lock
+crate/yazi/tracing-core-0.1.36 https://crates.io                                            Cargo.lock
+crate/yazi/tracing-log-0.2.0 https://crates.io                                            Cargo.lock
+crate/yazi/tracing-subscriber-0.3.22 https://crates.io                                            Cargo.lock
+crate/yazi/trash-5.2.5       https://crates.io                                            Cargo.lock
+crate/yazi/twox-hash-2.1.2   https://crates.io                                            Cargo.lock
+crate/yazi/typed-path-0.12.0 https://crates.io                                            Cargo.lock
+crate/yazi/typeid-1.0.3      https://crates.io                                            Cargo.lock
+crate/yazi/typenum-1.19.0    https://crates.io                                            Cargo.lock
+crate/yazi/ucd-trie-0.1.7    https://crates.io                                            Cargo.lock
+crate/yazi/unicode-ident-1.0.22 https://crates.io                                            Cargo.lock
+crate/yazi/unicode-segmentation-1.12.0 https://crates.io                                            Cargo.lock
+crate/yazi/unicode-truncate-2.0.1 https://crates.io                                            Cargo.lock
+crate/yazi/unicode-width-0.2.2 https://crates.io                                            Cargo.lock
+crate/yazi/universal-hash-0.5.1 https://crates.io                                            Cargo.lock
+crate/yazi/untrusted-0.9.0   https://crates.io                                            Cargo.lock
+crate/yazi/urlencoding-2.1.3 https://crates.io                                            Cargo.lock
+crate/yazi/utf8parse-0.2.2   https://crates.io                                            Cargo.lock
+crate/yazi/uuid-1.19.0       https://crates.io                                            Cargo.lock
+crate/yazi/uzers-0.12.2      https://crates.io                                            Cargo.lock
+crate/yazi/valuable-0.1.1    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/vergen-9.1.0      https://crates.io                                            Cargo.lock
+crate/yazi/vergen-gitcl-9.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/vergen-lib-9.1.0  https://crates.io                                            Cargo.lock
+crate/yazi/version_check-0.9.5 https://crates.io                                            Cargo.lock
+crate/yazi/v_frame-0.3.9     https://crates.io                                            Cargo.lock
+crate/yazi/vtparse-0.6.2     https://crates.io                                            Cargo.lock
+crate/yazi/walkdir-2.5.0     https://crates.io                                            Cargo.lock
+crate/yazi/wasi-0.11.1+wasi-snapshot-preview1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/wasip2-1.0.2+wasi-0.2.9 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/wasm-bindgen-0.2.108 https://crates.io                                            Cargo.lock
+crate/yazi/wasm-bindgen-futures-0.4.58 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/wasm-bindgen-macro-0.2.108 https://crates.io                                            Cargo.lock
+crate/yazi/wasm-bindgen-macro-support-0.2.108 https://crates.io                                            Cargo.lock
+crate/yazi/wasm-bindgen-shared-0.2.108 https://crates.io                                            Cargo.lock
+crate/yazi/web-sys-0.3.85    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/weezl-0.1.12      https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-bidi-0.2.3 https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-blob-leases-0.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-color-types-0.3.0 https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-dynamic-0.2.1 https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-dynamic-derive-0.1.1 https://crates.io                                            Cargo.lock
+crate/yazi/wezterm-input-types-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/which-8.0.0       https://crates.io                                            Cargo.lock
+crate/yazi/wide-0.8.3        https://crates.io                                            Cargo.lock
+crate/yazi/winapi-0.3.9      https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/winapi-i686-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/winapi-util-0.1.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/winapi-x86_64-pc-windows-gnu-0.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-0.56.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-0.62.2    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_aarch64_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_aarch64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_aarch64_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_aarch64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-collections-0.3.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-core-0.56.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-core-0.62.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-future-0.3.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_gnu-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_i686_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-implement-0.56.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-implement-0.60.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-interface-0.56.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-interface-0.59.3 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-link-0.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-numerics-0.3.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-result-0.1.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-result-0.4.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-strings-0.5.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-sys-0.52.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-sys-0.59.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-sys-0.60.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-sys-0.61.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-targets-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-targets-0.53.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows-threading-0.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_gnu-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_gnullvm-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_msvc-0.52.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/windows_x86_64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/winnow-0.7.14     https://crates.io                                            Cargo.lock
+crate/yazi/winsafe-0.0.19    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/wit-bindgen-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/yazi/wyz-0.5.1         https://crates.io                                            Cargo.lock
+crate/yazi/y4m-0.8.0         https://crates.io                                            Cargo.lock
+crate/yazi/yazi-prebuilt-0.1.0 https://crates.io                                            Cargo.lock
+crate/yazi/zerocopy-0.8.33   https://crates.io                                            Cargo.lock
+crate/yazi/zerocopy-derive-0.8.33 https://crates.io                                            Cargo.lock
+crate/yazi/zeroize-1.8.2     https://crates.io                                            Cargo.lock
+crate/yazi/zeroize_derive-1.4.3 https://crates.io                                            Cargo.lock
+crate/yazi/zmij-1.0.16       https://crates.io                                            Cargo.lock
+crate/yazi/zune-core-0.4.12  https://crates.io                                            Cargo.lock
+crate/yazi/zune-core-0.5.1   https://crates.io                                            Cargo.lock
+crate/yazi/zune-inflate-0.2.54 https://crates.io                                            Cargo.lock
+crate/yazi/zune-jpeg-0.4.21  https://crates.io                                            Cargo.lock
+crate/yazi/zune-jpeg-0.5.11  https://crates.io                                            Cargo.lock
+gomod/fzf/github.com/charlievieth/fastwalk https://github.com/charlievieth/fastwalk                     v1.0.14
+gomod/fzf/github.com/gdamore/encoding https://github.com/gdamore/encoding                          v1.0.1
+gomod/fzf/github.com/gdamore/tcell/v2 https://github.com/gdamore/tcell/v2                          v2.9.0
+gomod/fzf/github.com/junegunn/go-shellwords https://github.com/junegunn/go-shellwords                    v0.0.0-20250127100254-2aa3b3277741
+gomod/fzf/github.com/lucasb-eyer/go-colorful https://github.com/lucasb-eyer/go-colorful                   v1.2.0
+gomod/fzf/github.com/mattn/go-isatty https://github.com/mattn/go-isatty                           v0.0.24
+gomod/fzf/github.com/mattn/go-runewidth https://github.com/mattn/go-runewidth                        v0.0.16
+gomod/fzf/github.com/rivo/uniseg https://github.com/rivo/uniseg                               v0.4.7
+gomod/fzf/golang.org/x/sys   https://golang.org/x/sys                                     v0.35.0
+gomod/fzf/golang.org/x/term  https://golang.org/x/term                                    v0.34.0
+gomod/fzf/golang.org/x/text  https://golang.org/x/text                                    v0.28.0
+gomod/lazygit/dario.cat/mergo https://dario.cat/mergo                                      v1.0.2
+gomod/lazygit/github.com/adrg/xdg https://github.com/adrg/xdg                                  v0.5.3
+gomod/lazygit/github.com/atotto/clipboard https://github.com/atotto/clipboard                          v0.1.4
+gomod/lazygit/github.com/aybabtme/humanlog https://github.com/aybabtme/humanlog                         v0.4.1
+gomod/lazygit/github.com/bahlo/generic-list-go https://github.com/bahlo/generic-list-go                     v0.2.0
+gomod/lazygit/github.com/buger/jsonparser https://github.com/buger/jsonparser                          v1.1.2
+gomod/lazygit/github.com/cli/go-gh/v2 https://github.com/cli/go-gh/v2                              v2.13.0
+gomod/lazygit/github.com/clipperhouse/displaywidth https://github.com/clipperhouse/displaywidth                 v0.11.0
+gomod/lazygit/github.com/clipperhouse/uax29/v2 https://github.com/clipperhouse/uax29/v2                     v2.7.0
+gomod/lazygit/github.com/cli/safeexec https://github.com/cli/safeexec                              v1.0.1
+gomod/lazygit/github.com/cloudfoundry/jibber_jabber https://github.com/cloudfoundry/jibber_jabber                v0.0.0-20151120183258-bcc4c8345a21
+gomod/lazygit/github.com/creack/pty https://github.com/creack/pty                                v1.1.24
+gomod/lazygit/github.com/fatih/color https://github.com/fatih/color                               v1.9.0
+gomod/lazygit/github.com/gdamore/encoding https://github.com/gdamore/encoding                          v1.0.1
+gomod/lazygit/github.com/gdamore/tcell/v3 https://github.com/gdamore/tcell/v3                          v3.5.0
+gomod/lazygit/github.com/go-errors/errors https://github.com/go-errors/errors                          v1.5.1
+gomod/lazygit/github.com/go-logfmt/logfmt https://github.com/go-logfmt/logfmt                          v0.5.0
+gomod/lazygit/github.com/gookit/color https://github.com/gookit/color                              v1.6.1
+gomod/lazygit/github.com/integrii/flaggy https://github.com/integrii/flaggy                           v1.8.0
+gomod/lazygit/github.com/jesseduffield/generics https://github.com/jesseduffield/generics                    v0.0.0-20250517122708-b0b4a53a6f5c
+gomod/lazygit/github.com/jesseduffield/lazycore https://github.com/jesseduffield/lazycore                    v0.0.0-20221012050358-03d2e40243c5
+gomod/lazygit/github.com/kardianos/osext https://github.com/kardianos/osext                           v0.0.0-20190222173326-2bc1f35cddc0
+gomod/lazygit/github.com/karimkhaleel/jsonschema https://github.com/karimkhaleel/jsonschema                   v0.0.0-20231001195015-d933f0d94ea3
+gomod/lazygit/github.com/kr/logfmt https://github.com/kr/logfmt                                 v0.0.0-20140226030751-b84e30acd515
+gomod/lazygit/github.com/kyokomi/emoji/v2 https://github.com/kyokomi/emoji/v2                          v2.2.14
+gomod/lazygit/github.com/lucasb-eyer/go-colorful https://github.com/lucasb-eyer/go-colorful                   v1.4.1
+gomod/lazygit/github.com/mailru/easyjson https://github.com/mailru/easyjson                           v0.7.7
+gomod/lazygit/github.com/mattn/go-colorable https://github.com/mattn/go-colorable                        v0.1.13
+gomod/lazygit/github.com/mattn/go-isatty https://github.com/mattn/go-isatty                           v0.0.20
+gomod/lazygit/github.com/mgutz/str https://github.com/mgutz/str                                 v1.2.0
+gomod/lazygit/github.com/mitchellh/go-ps https://github.com/mitchellh/go-ps                           v1.0.0
+gomod/lazygit/github.com/petermattis/goid https://github.com/petermattis/goid                          v0.0.0-20250813065127-a731cc31b4fe
+gomod/lazygit/github.com/rivo/uniseg https://github.com/rivo/uniseg                               v0.4.7
+gomod/lazygit/github.com/sahilm/fuzzy https://github.com/sahilm/fuzzy                              v0.1.3
+gomod/lazygit/github.com/samber/lo https://github.com/samber/lo                                 v1.53.0
+gomod/lazygit/github.com/sanity-io/litter https://github.com/sanity-io/litter                          v1.5.8
+gomod/lazygit/github.com/sasha-s/go-deadlock https://github.com/sasha-s/go-deadlock                       v0.3.9
+gomod/lazygit/github.com/sirupsen/logrus https://github.com/sirupsen/logrus                           v1.10.2
+gomod/lazygit/github.com/spf13/afero https://github.com/spf13/afero                               v1.15.0
+gomod/lazygit/github.com/spkg/bom https://github.com/spkg/bom                                  v1.0.1
+gomod/lazygit/github.com/stefanhaller/git-todo-parser https://github.com/stefanhaller/git-todo-parser              v0.0.7-0.20250905083220-c50528f08304
+gomod/lazygit/github.com/stretchr/testify https://github.com/stretchr/testify                          v1.12.1
+gomod/lazygit/github.com/wk8/go-ordered-map/v2 https://github.com/wk8/go-ordered-map/v2                     v2.1.8
+gomod/lazygit/github.com/xo/terminfo https://github.com/xo/terminfo                               v1.0.0
+gomod/lazygit/golang.org/x/exp https://golang.org/x/exp                                     v0.0.0-20240719175910-8a7402abbf56
+gomod/lazygit/golang.org/x/mod https://golang.org/x/mod                                     v0.38.0
+gomod/lazygit/golang.org/x/sync https://golang.org/x/sync                                    v0.22.0
+gomod/lazygit/golang.org/x/sys https://golang.org/x/sys                                     v0.47.0
+gomod/lazygit/golang.org/x/term https://golang.org/x/term                                    v0.45.0
+gomod/lazygit/golang.org/x/text https://golang.org/x/text                                    v0.41.0
+gomod/lazygit/golang.org/x/tools https://golang.org/x/tools                                   v0.48.0
+gomod/lazygit/gopkg.in/ozeidan/fuzzy-patricia.v3 https://gopkg.in/ozeidan/fuzzy-patricia.v3                   v3.0.0
+gomod/lazygit/gopkg.in/yaml.v3 https://gopkg.in/yaml.v3                                     v3.0.1
+gomod/lazygit/go.yaml.in/yaml/v3 https://go.yaml.in/yaml/v3                                   v3.0.5
+gomod/lazygit/mvdan.cc/gofumpt https://mvdan.cc/gofumpt                                     v0.11.0
 gomod/shfmt/github.com/creack/pty https://github.com/creack/pty                                v1.1.24
 gomod/shfmt/github.com/google/go-cmp https://github.com/google/go-cmp                             v0.7.0
 gomod/shfmt/github.com/google/renameio/v2 https://github.com/google/renameio/v2                        v2.0.2
@@ -800,6 +1610,15 @@ plugin/todo-comments.nvim    https://github.com/folke/todo-comments.nvim        
 plugin/trouble.nvim          https://github.com/folke/trouble.nvim                        bd67efe408d4816e25e8491cc5ad4088e708a69a
 plugin/which-key.nvim        https://github.com/folke/which-key.nvim                      3aab2147e74890957785941f0c1ad87d0a44c15a
 tool/debugpy                 https://pypi.org/project/debugpy                             1.8.21
+tool/fd                      https://github.com/sharkdp/fd                                v10.5.0
+tool/fzf                     https://github.com/junegunn/fzf                              v0.74.4
+tool/lazygit                 https://github.com/jesseduffield/lazygit                     v0.65.1
 tool/neocmakelsp             https://github.com/neocmakelsp/neocmakelsp                   v0.11.0
 tool/ruff                    https://github.com/astral-sh/ruff                            0.15.11
 tool/shfmt                   https://github.com/mvdan/sh                                  v3.13.1
+tool/yazi                    https://github.com/sxyazi/yazi                               v26.1.22
+tool/yazi-prebuilt           https://github.com/yazi-rs/prebuilt                          2d52c0b8b399aa476bfeff36a6256cffe76eb2a5
+tool/yazi-prebuilt/syntaxes/cmake https://github.com/zyxar/Sublime-CMakeLists.git              eb40ede56c2d4d5a4a129b2a5bc7095a2df46bb1
+tool/yazi-prebuilt/syntaxes/docker https://github.com/asbjornenge/Docker.tmbundle.git           0f6b7bc87acf684f7b0790fd480731ffb4615b87
+tool/yazi-prebuilt/syntaxes/official https://github.com/sublimehq/Packages.git                    0a97be539c2732d7258ba4ec1450f7a3f4881b73
+tool/yazi-prebuilt/syntaxes/toml https://github.com/jasonwilliams/sublime_toml_highlighting.git fd0bf3e5d6c9e6397c0dc9639a0514d9bf55b800

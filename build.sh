@@ -12,6 +12,8 @@
 #   PREFIX/bin/{ruff,ty}              Python linter/formatter + type checker (LSP)
 #   PREFIX/bin/neocmakelsp            CMake LSP
 #   PREFIX/bin/shfmt                  shell formatter
+#   PREFIX/bin/{fd,fzf,lazygit}       file finder, fuzzy finder, git TUI
+#   PREFIX/bin/{yazi,ya}              file manager + its CLI
 #   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
@@ -109,13 +111,14 @@ rm -rf "$TOOLS"
 mkdir -p "$TOOLS"
 
 # cargo_build NAME [cargo args…] — offline build against vendor/crates/NAME
+# (or $CRATES, a patched copy of it)
 cargo_build() {
-  local name=$1
+  local name=$1 crates=${CRATES:-$ROOT/vendor/crates/$1}
   shift
   # sources may already be in place (patched copy)
   [[ -d $TOOLS/$name ]] || cp -a "$ROOT/vendor/tools/$name" "$TOOLS/$name"
   mkdir -p "$TOOLS/$name/.cargo"
-  sed "s|@CRATES@|$ROOT/vendor/crates/$name|" "$ROOT/vendor/crates/$name.cargo-config.toml" \
+  sed "s|@CRATES@|$crates|" "$ROOT/vendor/crates/$name.cargo-config.toml" \
     >"$TOOLS/$name/.cargo/config.toml"
   (cd "$TOOLS/$name" && CARGO_HOME="$TOOLS/cargo-home" cargo build --release --frozen "$@")
 }
@@ -162,10 +165,72 @@ log "neocmakelsp"
 cargo_build neocmakelsp -p neocmakelsp
 install -m755 "$TOOLS/neocmakelsp/target/release/neocmakelsp" "$PREFIX/bin/"
 
+# go_build NAME OUT PKG [go build args…] — offline build against the tool's vendor/
+go_build() {
+  local name=$1 out=$2 pkg=$3
+  shift 3
+  cp -a "$ROOT/vendor/tools/$name" "$TOOLS/$name"
+  (cd "$TOOLS/$name" && GOFLAGS='-mod=vendor -modcacherw' GOTOOLCHAIN=local GOPROXY=off \
+    GOCACHE="$TOOLS/gocache" GOPATH="$TOOLS/gopath" go build -trimpath "$@" -o "$out" "$pkg")
+}
+
 log "shfmt"
-cp -a "$ROOT/vendor/tools/shfmt" "$TOOLS/shfmt"
-(cd "$TOOLS/shfmt" && GOFLAGS='-mod=vendor -modcacherw' GOTOOLCHAIN=local GOPROXY=off \
-  GOCACHE="$TOOLS/gocache" GOPATH="$TOOLS/gopath" go build -trimpath -o "$PREFIX/bin/shfmt" ./cmd/shfmt)
+go_build shfmt "$PREFIX/bin/shfmt" ./cmd/shfmt
+
+log "fd"
+cargo_build fd -p fd-find
+install -m755 "$TOOLS/fd/target/release/fd" "$PREFIX/bin/"
+
+log "fzf"
+go_build fzf "$PREFIX/bin/fzf" . -ldflags "-X main.version=$(awk '$1 == "fzf" { print substr($4, 2) }' "$ROOT/manifest/tools.tsv") -X main.revision=kide"
+
+log "lazygit"
+go_build lazygit "$PREFIX/bin/lazygit" . -ldflags "-X main.version=$(awk '$1 == "lazygit" { print substr($4, 2) }' "$ROOT/manifest/tools.tsv") -X main.buildSource=kide"
+
+# yazi needs two binary inputs that the source-only rule strips:
+# - yazi-prebuilt's built/syntaxes, the compiled syntax set for code previews:
+#   rebuilt here with yazi-prebuilt's own generator from the .sublime-syntax
+#   files in vendor/tools/yazi-prebuilt/syntaxes
+# - four DER templates ring (SFTP via russh) includes, 13–41 bytes each:
+#   written from the hex below (the PKCS#8 headers for Ed25519, P-256, P-384
+#   and the rsaEncryption AlgorithmIdentifier, as in ring 0.17.14)
+# Both go into a copy of the crate dir; the other crates are symlinked.
+log "yazi: syntax set"
+cp -a "$ROOT/vendor/tools/yazi-prebuilt" "$TOOLS/yazi-prebuilt"
+: >"$TOOLS/yazi-prebuilt/built/syntaxes" # lib.rs includes it; the generator does not use it
+# syntect's defaults embed its own prebuilt dumps (default-syntaxes,
+# default-themes; stripped, and unused by the generator; no crates of their own)
+sed -i 's|^syntect = { version = "^5", optional = true }$|syntect = { version = "^5", optional = true, default-features = false, features = ["parsing", "html", "plist-load", "yaml-load", "dump-load", "dump-create", "regex-onig"] }|' \
+  "$TOOLS/yazi-prebuilt/Cargo.toml"
+grep -q 'default-features = false' "$TOOLS/yazi-prebuilt/Cargo.toml" || { echo "yazi-prebuilt: syntect line not found" >&2; exit 1; }
+# yazi 26.1.22 loads the set with from_uncompressed_data; generate.rs at the
+# pinned commit still writes it compressed (dump_to_file)
+sed -i 's/dump_to_file/dump_to_uncompressed_file/g' "$TOOLS/yazi-prebuilt/generate.rs"
+grep -q 'dump_to_uncompressed_file(' "$TOOLS/yazi-prebuilt/generate.rs" || { echo "yazi-prebuilt: dump_to_file not found" >&2; exit 1; }
+cargo_build yazi-prebuilt --features build_deps --bin generate
+(cd "$TOOLS/yazi-prebuilt" && ./target/release/generate)
+yazi_crates=$TOOLS/yazi-crates
+mkdir -p "$yazi_crates"
+for crate in "$ROOT/vendor/crates/yazi"/*/; do ln -s "$crate" "$yazi_crates/$(basename "$crate")"; done
+prebuilt=$(cd "$ROOT/vendor/crates/yazi" && echo yazi-prebuilt-*)
+ring=$(cd "$ROOT/vendor/crates/yazi" && echo ring-0.17.*)
+for crate in "$prebuilt" "$ring"; do
+  rm "$yazi_crates/$crate"
+  cp -a "$ROOT/vendor/crates/yazi/$crate" "$yazi_crates/$crate"
+done
+cp "$TOOLS/yazi-prebuilt/built/syntaxes" "$yazi_crates/$prebuilt/built/syntaxes"
+while read -r file hex; do
+  printf "$(sed 's/../\\x&/g' <<<"$hex")" >"$yazi_crates/$ring/$file"
+done <<'EOF'
+src/ec/curve25519/ed25519/ed25519_pkcs8_v2_template.der 3051020101300506032b657004220420812100
+src/ec/suite_b/ecdsa/ecPublicKey_p256_pkcs8_v1_template.der 308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420a144034200
+src/ec/suite_b/ecdsa/ecPublicKey_p384_pkcs8_v1_template.der 3081b6020100301006072a8648ce3d020106052b8104002204819e30819b0201010430a164036200
+src/data/alg-rsa-encryption.der 06092a864886f70d0101010500
+EOF
+
+log "yazi"
+CRATES=$yazi_crates cargo_build yazi -p yazi-fm -p yazi-cli
+install -m755 "$TOOLS/yazi/target/release/yazi" "$TOOLS/yazi/target/release/ya" "$PREFIX/bin/"
 
 # debugpy runs from its source tree (pure Python; the optional Cython
 # speedups are not built). nvim-dap-python starts it via kide-python.

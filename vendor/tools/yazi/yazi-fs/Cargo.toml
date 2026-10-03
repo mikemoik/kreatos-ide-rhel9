@@ -1,0 +1,49 @@
+[package]
+name        = "yazi-fs"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi file system"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[dependencies]
+yazi-ffi    = { path = "../yazi-ffi", version = "26.1.22" }
+yazi-macro  = { path = "../yazi-macro", version = "26.1.22" }
+yazi-shared = { path = "../yazi-shared", version = "26.1.22" }
+yazi-shim   = { path = "../yazi-shim", version = "26.1.22" }
+
+# External dependencies
+anyhow           = { workspace = true }
+arc-swap         = "1.8.0"
+bitflags         = { workspace = true }
+dirs             = { workspace = true }
+foldhash         = { workspace = true }
+hashbrown        = { workspace = true }
+parking_lot      = { workspace = true }
+percent-encoding = { workspace = true }
+rand             = { workspace = true }
+regex            = { workspace = true }
+scopeguard       = { workspace = true }
+serde            = { workspace = true }
+tokio            = { workspace = true }
+tracing          = { workspace = true }
+typed-path       = { workspace = true }
+
+[target."cfg(unix)".dependencies]
+libc  = { workspace = true }
+uzers = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [ "Win32_Storage_FileSystem" ] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation-sys = { workspace = true }
+objc2               = { workspace = true }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+trash = "5.2.5"

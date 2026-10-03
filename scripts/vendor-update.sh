@@ -13,7 +13,8 @@
 #   manifest/tools.tsv     name <TAB> kind <TAB> url <TAB> tag <TAB> packages
 #                          (LSP servers, formatters, build helpers); for kind
 #                          cargo, packages = the crates build.sh builds
-#                          (comma-separated); needs `cargo`
+#                          (comma-separated); needs `cargo`. A git tool
+#                          with packages (not -) gets its crates vendored too
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
@@ -60,6 +61,11 @@ RUN dnf -y install golang && dnf clean all
 EOF
   echo kreatos-ide-rhel9-go
 }
+
+# the syntax repos (submodules of yazi-prebuilt) yazi's code previews are
+# highlighted with; official = Sublime Text's Packages (Python, C/C++, shell,
+# Lua, JSON, YAML, Markdown, Makefile, HTML/JS/TS, Rust, Go, …)
+YAZI_SYNTAXES=(official cmake toml docker)
 
 # github_archive URL COMMIT — tarball URL for a commit of a github repo
 github_archive() { echo "${1%.git}/archive/$2.tar.gz"; }
@@ -118,7 +124,9 @@ done <"$TMP/parsers.lock.tsv"
 
 # --- tools (LSP servers, formatters, build helpers) ----------------------------
 # kind tarball: release tarball of a tag
-# kind git:     shallow clone with all submodules (their commits go to VERSIONS)
+# kind git:     shallow clone of a tag, branch or commit with all submodules
+#               (their commits go to VERSIONS); a submodule whose upstream is
+#               gone is skipped with a warning
 # kind cargo:   tarball + `cargo vendor` of its locked crates into vendor/crates
 # kind gomod:   tarball + `go mod vendor` (modules land in the tool's own vendor/)
 # kind pypi:    the sdist of a PyPI release (url = https://pypi.org/project/NAME)
@@ -142,13 +150,37 @@ print(u["url"], u["digests"]["sha256"])')
       record "tool/$name" "$url" "$ref"
       ;;
     git)
-      git -c advice.detachedHead=false clone -q --depth 1 --branch "$ref" \
-        --recurse-submodules --shallow-submodules "$url" "$dest"
+      git init -q "$dest"
+      git -C "$dest" fetch -q --depth 1 "$url" "$ref"
+      git -C "$dest" -c advice.detachedHead=false checkout -q FETCH_HEAD
       record "tool/$name" "$url" "$ref"
+      git -C "$dest" config -f .gitmodules --get-regexp '^submodule\..*\.path$' |
+        while read -r _ path; do
+          if [[ $name == yazi-prebuilt && " ${YAZI_SYNTAXES[*]} " != *" ${path#syntaxes/} "* ]]; then
+            continue
+          fi
+          git -C "$dest" submodule -q update --init --recursive --depth 1 -- "$path" </dev/null 2>/dev/null ||
+            echo "WARNING: $name: submodule $path not fetchable, skipped" >&2
+        done
       git -C "$dest" submodule --quiet foreach --recursive \
-        'printf "%s\t%s\t%s\n" "$displaypath" "$(git config --get remote.origin.url)" "$sha1"' |
-        while IFS=$'\t' read -r path surl sha; do record "tool/$name/$path" "$surl" "$sha"; done
+        'printf "%s\t%s\t%s\n" "$displaypath" "$(git config --get remote.origin.url)" "$sha1"' \
+        >"$TMP/submodules"
       find "$dest" -name .git -prune -exec rm -rf {} +
+      # yazi's syntax set is compiled by build.sh from the .sublime-syntax
+      # files alone (yazi-prebuilt's generate.rs); drop the repos' tests etc.
+      if [[ $name == yazi-prebuilt ]]; then
+        find "$dest/syntaxes" -type f ! -name '*.sublime-syntax' \
+          ! -iregex '.*/\(licen[cs]e\|copying\|copyright\|unlicense\)\([-._][^/]*\)?' -delete
+        find "$dest/syntaxes" -type d -empty -delete
+        # repos with no .sublime-syntax at all (only .tmLanguage) add nothing
+        for dir in "$dest/syntaxes"/*/; do
+          [[ -n $(find "$dir" -name '*.sublime-syntax' -print -quit) ]] || rm -rf "$dir"
+        done
+      fi
+      # submodules removed by that contribute nothing and are not recorded
+      while IFS=$'\t' read -r path surl sha; do
+        [[ -d $dest/$path ]] && record "tool/$name/$path" "$surl" "$sha"
+      done <"$TMP/submodules"
       ;;
     *)
       echo "unknown tool kind: $kind" >&2
@@ -160,11 +192,14 @@ print(u["url"], u["digests"]["sha256"])')
     # Windows/Plan 9 parts of golang.org/x/sys are never compiled on Linux
     find "$dest/vendor/golang.org/x/sys" -mindepth 1 -maxdepth 1 -type d \
       \( -name windows -o -name plan9 \) -exec rm -rf {} + 2>/dev/null || true
-    # "# <module> <version>" lines of modules.txt are the pins (from go.sum)
-    awk '$1 == "#" && $2 !~ /^=>/ { print $2, $3 }' "$dest/vendor/modules.txt" |
+    # "# <module> <version>" lines of modules.txt are the pins (from go.sum);
+    # only modules with package lines below them were vendored (the others
+    # are test-only or unused indirect requirements)
+    awk '$1 == "#" && $2 !~ /^=>/ { mod = $2 " " $3; next }
+         $1 !~ /^#/ && mod != "" { print mod; mod = "" }' "$dest/vendor/modules.txt" |
       while read -r mod ver; do record "gomod/$name/$mod" "https://$mod" "$ver"; done
   fi
-  if [[ $kind == cargo ]]; then
+  if [[ $kind == cargo || ($kind == git && $packages != -) ]]; then
     # the source replacement config cargo prints, with the crate dir as a
     # placeholder that build.sh fills in
     (cd "$dest" && cargo vendor --locked --versioned-dirs "$V/crates/$name" 2>/dev/null) |

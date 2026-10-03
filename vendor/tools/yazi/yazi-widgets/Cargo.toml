@@ -1,0 +1,36 @@
+[package]
+name        = "yazi-widgets"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi user interface widgets"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[dependencies]
+yazi-binding = { path = "../yazi-binding", version = "26.1.22" }
+yazi-config  = { path = "../yazi-config", version = "26.1.22" }
+yazi-macro   = { path = "../yazi-macro", version = "26.1.22" }
+yazi-parser  = { path = "../yazi-parser", version = "26.1.22" }
+yazi-shared  = { path = "../yazi-shared", version = "26.1.22" }
+yazi-term    = { path = "../yazi-term", version = "26.1.22" }
+
+# External dependencies
+anyhow        = { workspace = true }
+base64        = { workspace = true }
+crossterm     = { workspace = true }
+futures       = { workspace = true }
+parking_lot   = { workspace = true }
+ratatui       = { workspace = true }
+tokio         = { workspace = true }
+unicode-width = { workspace = true }
+
+[target."cfg(windows)".dependencies]
+clipboard-win = "5.4.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+crossterm = { workspace = true, features = [ "use-dev-tty", "libc" ] }

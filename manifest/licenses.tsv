@@ -19,3 +19,6 @@ tool/lua-language-server/meta/3rd/luassert	NOASSERTION	no license upstream (LuaC
 tool/lua-language-server/meta/3rd/luv	NOASSERTION	no license upstream (LuaCATS definitions)
 tool/lua-language-server/meta/3rd/OpenResty	NOASSERTION	no license upstream (LuaCATS definitions)
 tool/lua-language-server/meta/3rd/skynet	NOASSERTION	no license upstream (LuaCATS definitions)
+gomod/lazygit/github.com/kr/logfmt	MIT	Readme (MIT text), LICENSE on GitHub
+tool/yazi-prebuilt	MIT	Cargo.toml license field (no license file)
+tool/yazi-prebuilt/syntaxes/official	LicenseRef-SublimeHQ-Packages	LICENSE: permissive (copy, use, modify, sell, distribute), files with own license excepted

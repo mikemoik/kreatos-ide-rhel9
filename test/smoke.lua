@@ -219,6 +219,21 @@ local function run()
   local text = table.concat(vim.api.nvim_buf_get_lines(nbuf, 0, -1, false), "\n")
   check("neogen doxygen comment", gok and text:find("@param a", 1, true) ~= nil, gerr or text)
 
+  -- the bundled CLI tools run and report the pinned version
+  local versions = {}
+  for _, row in ipairs(read_tsv(src .. "/manifest/tools.tsv")) do
+    versions[row[1]] = row[4]:gsub("^v", "")
+  end
+  for _, t in ipairs({ { "fd", "fd" }, { "fzf", "fzf" }, { "lazygit", "lazygit" }, { "yazi", "yazi" }, { "ya", "yazi" } }) do
+    local res = vim.system({ t[1], "--version" }, { text = true }):wait()
+    local version = (res.stdout or "") .. (res.stderr or "")
+    check(t[1] .. " " .. versions[t[2]], res.code == 0 and version:find(versions[t[2]], 1, true) ~= nil, version)
+  end
+  local found = vim.fn.system({ "fd", "--type", "f", "CMakeLists", src .. "/test/proj/customers-cpp" })
+  check("fd finds files", vim.v.shell_error == 0 and found:find("app/CMakeLists.txt", 1, true) ~= nil, found)
+  local picked = vim.fn.system({ "fzf", "--filter", "cstdb" }, "customer_db.cpp\nreport.cpp\n")
+  check("fzf filters", vim.trim(picked) == "customer_db.cpp", picked)
+
   -- completion engine starts with the Lua fuzzy matcher
   vim.api.nvim_exec_autocmds("InsertEnter", {})
   local ok, err = pcall(function()

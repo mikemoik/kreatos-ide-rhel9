@@ -1,0 +1,52 @@
+[package]
+name        = "yazi-actor"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi actor model"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[features]
+default      = [ "vendored-lua" ]
+vendored-lua = [ "mlua/vendored" ]
+
+[dependencies]
+yazi-binding   = { path = "../yazi-binding", version = "26.1.22" }
+yazi-boot      = { path = "../yazi-boot", version = "26.1.22" }
+yazi-config    = { path = "../yazi-config", version = "26.1.22" }
+yazi-core      = { path = "../yazi-core", version = "26.1.22" }
+yazi-dds       = { path = "../yazi-dds", version = "26.1.22" }
+yazi-fs        = { path = "../yazi-fs", version = "26.1.22" }
+yazi-macro     = { path = "../yazi-macro", version = "26.1.22" }
+yazi-parser    = { path = "../yazi-parser", version = "26.1.22" }
+yazi-plugin    = { path = "../yazi-plugin", version = "26.1.22" }
+yazi-proxy     = { path = "../yazi-proxy", version = "26.1.22" }
+yazi-scheduler = { path = "../yazi-scheduler", version = "26.1.22" }
+yazi-shared    = { path = "../yazi-shared", version = "26.1.22" }
+yazi-term      = { path = "../yazi-term", version = "26.1.22" }
+yazi-vfs       = { path = "../yazi-vfs", version = "26.1.22" }
+yazi-watcher   = { path = "../yazi-watcher", version = "26.1.22" }
+yazi-widgets   = { path = "../yazi-widgets", version = "26.1.22" }
+
+# External dependencies
+anyhow       = { workspace = true }
+crossterm    = { workspace = true }
+futures      = { workspace = true }
+hashbrown    = { workspace = true }
+mlua         = { workspace = true }
+paste        = { workspace = true }
+scopeguard   = { workspace = true }
+tokio        = { workspace = true }
+tokio-stream = { workspace = true }
+tracing      = { workspace = true }
+
+[target."cfg(unix)".dependencies]
+libc = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+crossterm = { workspace = true, features = [ "use-dev-tty", "libc" ] }

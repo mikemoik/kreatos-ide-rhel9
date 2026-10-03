@@ -1,0 +1,14 @@
+target/
+yazi-*/completions
+node_modules/
+
+.DS_Store
+
+result
+result-*
+.direnv
+
+.idea/
+.vscode/
+
+*.snap

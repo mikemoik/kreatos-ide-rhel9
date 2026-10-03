@@ -1,0 +1,25 @@
+[package]
+name        = "yazi-ffi"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi foreign function interface"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[dependencies]
+yazi-macro = { path = "../yazi-macro", version = "26.1.22" }
+
+# External dependencies
+anyhow = { workspace = true }
+
+[target."cfg(unix)".dependencies]
+libc = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation-sys = { workspace = true }
+objc2               = { workspace = true }

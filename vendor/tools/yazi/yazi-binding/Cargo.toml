@@ -1,0 +1,37 @@
+[package]
+name        = "yazi-binding"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi Lua bindings"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[features]
+default      = [ "vendored-lua" ]
+vendored-lua = [ "mlua/vendored" ]
+
+[dependencies]
+yazi-adapter = { path = "../yazi-adapter", version = "26.1.22" }
+yazi-config  = { path = "../yazi-config", version = "26.1.22" }
+yazi-fs      = { path = "../yazi-fs", version = "26.1.22" }
+yazi-macro   = { path = "../yazi-macro", version = "26.1.22" }
+yazi-shared  = { path = "../yazi-shared", version = "26.1.22" }
+
+# External dependencies
+ansi-to-tui   = { workspace = true }
+futures       = { workspace = true }
+hashbrown     = { workspace = true }
+mlua          = { workspace = true }
+paste         = { workspace = true }
+ratatui       = { workspace = true }
+serde_json    = { workspace = true }
+tokio  	      = { workspace = true }
+unicode-width = { workspace = true }
+
+# Logging
+tracing = { workspace = true }

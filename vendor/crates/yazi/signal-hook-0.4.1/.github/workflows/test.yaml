@@ -1,0 +1,190 @@
+name: test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
+jobs:
+  test:
+    name: Build & test
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        rust:
+          - stable
+          - beta
+          - nightly
+          # Introduced the OwnedFd
+          # (current MRSV)
+          - 1.66.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: |
+          rustup toolchain add ${{ matrix.rust }} --profile minimal
+          rustup default ${{ matrix.rust }}
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Build & test
+        env:
+          RUST_VERSION: ${{ matrix.rust }}
+          OS: ${{ matrix.os }}
+        run: ./ci-check.sh
+        shell: bash
+
+  rustfmt:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: |
+          rustup update stable
+          rustup component add rustfmt
+
+      - run: cargo fmt --all -- --check
+
+  links:
+    name: Check documentation links
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: rustup update stable
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Install cargo-deadlinks
+        run: cargo install cargo-deadlinks
+
+      - name: Check links
+        run: |
+          # Prepare "full" build including dependencies for deadlinks
+          cargo doc --all --all-features
+          for package in $(cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | .name'); do
+            dname=$(echo "$package" | tr '-' '_')
+            cargo deadlinks --dir "target/doc/$dname" --check-http --ignore-fragments
+          done
+          # Try building each separately with enabling warnings as errors
+          for package in $(cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | .name'); do
+            cargo rustdoc -p "$package" --all-features -- -D warnings
+          done
+
+  ancient-registry:
+    name: Check compilation of signal-hook-registry on old compilers
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          # no macos-latest because that's aarch64 and old Rust lacks that target
+          # no macos-15-intel because of weird linker errors
+        rust:
+          - 1.26.0
+          - 1.31.0
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: |
+          rustup toolchain add ${{ matrix.rust }} --profile minimal
+          rustup default ${{ matrix.rust }}
+
+      - name: Check compilation
+        run: |
+          rm Cargo.toml
+          cd signal-hook-registry
+          sed -i -e '/signal-hook =/d' Cargo.toml
+          sed -i -e 's/libc = "^0.2"/libc = "=0.2.156"/' Cargo.toml
+          sed -i -e 's/errno = ">=0.2, <0.4"/errno = "0.2"/' Cargo.toml
+          cargo check
+
+  clippy:
+    name: Clippy lints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: rustup toolchain update stable --profile minimal --component clippy
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run clippy linter
+        # cfg(clippy) is necessary in signal-hook-registry because Rust 1.26 doesn't support allow(clippy::foo)
+        run: cargo clippy --all --all-features --tests -- -D clippy::all -D warnings -A clippy::unnecessary_clippy_cfg
+
+  # There's bunch of platforms that have some weird quirks (or we don't know
+  # that they don't). While fully compiling and testing on them is a bit of a
+  # challenge, running cargo check on them should be easy enough and should
+  # catch at least some problems (like different sizes of types).
+  weird_platforms:
+    name: Check weird platforms
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - x86_64-linux-android
+          - aarch64-linux-android
+          - arm-linux-androideabi
+          - s390x-unknown-linux-gnu
+          - x86_64-unknown-netbsd
+          - x86_64-unknown-freebsd
+        extra-args:
+          - "--all --all-features"
+        include:
+          # - wasm32-wasi (not yet? Or not ever?)
+          # - x86_64-unknown-redox (Is that platform even usable on stable?)
+          - { target: x86_64-unknown-fuchsia, extra-args: "--all-features" }
+          # Seems we have some trouble with properly running C compiler on these. Might as well be problem with cross-compilation setup, but who knows
+          # So we avoid the exfiltrator part/signal-hook-sys :-(
+          - { target: x86_64-apple-darwin, extra-args: "--features=iterator --all --exclude signal-hook-sys" }
+          - { target: x86_64-apple-ios, extra-args: "--features=iterator --all --exclude signal-hook-sys" }
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: |
+          rustup update stable
+          rustup target add ${{ matrix.target }}
+
+      - name: Install cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross@0.2.5
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run the check
+        run: cross check ${{ matrix.extra-args }} --tests --target=${{ matrix.target }}

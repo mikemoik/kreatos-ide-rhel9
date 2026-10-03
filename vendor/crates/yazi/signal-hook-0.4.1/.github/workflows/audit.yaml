@@ -1,0 +1,20 @@
+name: Security audit
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  security_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # ignoring RUSTSEC-2024-0019 because it's behind an opt-in feature and
+          # the affected types (named pipes) are not used
+          ignore: RUSTSEC-2024-0019

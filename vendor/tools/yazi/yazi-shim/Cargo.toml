@@ -1,0 +1,18 @@
+[package]
+name        = "yazi-shim"
+version     = "26.1.22"
+edition     = "2024"
+license     = "MIT"
+authors     = [ "sxyazi <sxyazi@gmail.com>" ]
+description = "Yazi crate shims"
+homepage    = "https://yazi-rs.github.io"
+repository  = "https://github.com/sxyazi/yazi"
+
+[lints]
+workspace = true
+
+[dependencies]
+yazi-macro = { path = "../yazi-macro", version = "26.1.22" }
+
+# External dependencies
+twox-hash = { workspace = true }

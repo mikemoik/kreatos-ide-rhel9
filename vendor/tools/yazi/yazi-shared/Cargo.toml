@@ -1,0 +1,41 @@
+[package]
+name         = "yazi-shared"
+version      = "26.1.22"
+edition      = "2024"
+license      = "MIT"
+authors      = [ "sxyazi <sxyazi@gmail.com>" ]
+description  = "Yazi shared library"
+homepage     = "https://yazi-rs.github.io"
+repository   = "https://github.com/sxyazi/yazi"
+rust-version = "1.92.0"
+
+[lints]
+workspace = true
+
+[dependencies]
+yazi-macro = { path = "../yazi-macro", version = "26.1.22" }
+
+# External dependencies
+anyhow           = { workspace = true }
+crossterm        = { workspace = true }
+foldhash         = { workspace = true }
+futures          = { workspace = true }
+hashbrown        = { workspace = true }
+memchr           = "2.7.6"
+ordered-float    = { workspace = true }
+parking_lot      = { workspace = true }
+percent-encoding = { workspace = true }
+serde            = { workspace = true }
+thiserror        = { workspace = true }
+tokio            = { workspace = true }
+typed-path       = { workspace = true }
+
+[target."cfg(unix)".dependencies]
+libc  = { workspace = true }
+uzers = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [ "Win32_UI_Shell" ] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+crossterm = { workspace = true, features = [ "use-dev-tty", "libc" ] }

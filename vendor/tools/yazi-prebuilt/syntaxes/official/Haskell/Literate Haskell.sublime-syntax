@@ -1,0 +1,33 @@
+%YAML 1.2
+---
+# https://www.sublimetext.com/docs/syntax.html
+name: Literate Haskell
+scope: text.tex.latex.haskell
+
+extends: Packages/LaTeX/LaTeX.sublime-syntax
+
+file_extensions:
+  - lhs
+
+contexts:
+  plain-tex:
+    - meta_prepend: true
+    - include: haskell-code
+
+  haskell-code:
+    - match: ((\\)begin)(\{)(code)(\})
+      captures:
+        1: support.function.begin.latex keyword.control.block.begin.latex
+        2: punctuation.definition.backslash.latex
+        3: punctuation.definition.group.brace.begin.latex
+        4: variable.parameter.function.latex
+        5: punctuation.definition.group.brace.end.latex
+      embed: scope:source.haskell
+      embed_scope: source.haskell.embedded.latex
+      escape: ((\\)end)(\{)(code)(\})
+      escape_captures:
+        1: support.function.end.latex keyword.control.block.end.latex
+        2: punctuation.definition.backslash.latex
+        3: punctuation.definition.group.brace.begin.latex
+        4: variable.parameter.function.latex
+        5: punctuation.definition.group.brace.end.latex
