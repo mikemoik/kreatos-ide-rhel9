@@ -1,5 +1,5 @@
 -- Debugging (misw's own setup): nvim-dap + dap-ui + virtual text + dap-python
--- (system python3 with python-debugpy, tests via pytest).
+-- (debugpy bundled by build.sh, started through kide-python; tests via pytest).
 local M = {}
 
 function M.setup()
@@ -12,7 +12,7 @@ function M.setup()
     commented = true, -- show virtual text alongside comment
   })
 
-  dap_python.setup("python3")
+  dap_python.setup(vim.fn.executable("kide-python") == 1 and "kide-python" or "python3")
   dap_python.test_runner = "pytest"
 
   vim.fn.sign_define("DapBreakpoint", {

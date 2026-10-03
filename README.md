@@ -8,7 +8,7 @@ network, and the repo holds no binaries (checked by `scripts/check-sources.py`).
 
 Toolchain, from the RHEL repos only:
 
-    dnf install gcc make cmake python3 rust-toolset git-core
+    dnf install gcc make cmake python3 rust-toolset golang git-core
 
 Then:
 
@@ -30,7 +30,7 @@ go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
 | `vendor/neovim-deps` | its bundled deps as source trees (libuv, LuaJIT, luv, lpeg, unibilium, utf8proc, tree-sitter, bundled parsers), pinned + sha256-checked by Neovim's `cmake.deps/deps.txt` |
 | `vendor/plugins` | the plugins, plain source at pinned commits (`manifest/plugins.tsv`) |
 | `vendor/grammars` | treesitter grammar repos (`grammar.js` + generated `src/parser.c`) |
-| `vendor/tools` | LSP servers and formatters (`manifest/tools.tsv`): ruff + ty |
+| `vendor/tools` | LSP servers, formatters, debugger (`manifest/tools.tsv`): ruff + ty, shfmt (with its Go modules in `vendor/tools/shfmt/vendor`), debugpy |
 | `vendor/crates` | the Rust crates of each cargo tool (`cargo vendor --locked`), plus the cargo source config |
 | `config` | the nvim config (kreatos `home/nvim`, adapted, see below) |
 | `manifest/` | the pins; `parsers.lock.tsv` is generated from `parsers.txt`; `licenses.tsv` holds license facts the inventory cannot detect |
@@ -65,6 +65,8 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 - blink.cmp uses its pure-Lua fuzzy matcher (the Rust one needs nightly Rust).
 - Treesitter parsers are compiled by `build.sh`; nvim-treesitter never
   installs anything.
+- nvim-dap-python starts the bundled debugpy through `kide-python` (python3
+  with the bundled debugpy on `PYTHONPATH`) instead of a system debugpy.
 - LSP servers: `ty`, `ruff` (no `lua_ls`); no Lua formatter (no stylua).
   Lua files still get treesitter highlighting, indent and folds. A server
   whose binary is missing is skipped.
@@ -76,13 +78,14 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 | 1 | Neovim + plugins + parsers | done, passes in UBI9 offline |
 | 2 | lua-language-server, stylua | built and tested, then dropped: no Lua development on the target |
 | 3 | ruff + ty 0.15.11 (newest tag that builds with Rust 1.92) | done, passes in UBI9 offline |
-| 4 | shfmt, debugpy | open |
+| 4 | shfmt 3.13.1, debugpy 1.8.21 (last release for Python 3.9) | done, passes in UBI9 offline |
 
 ## Updating the pins (on a connected machine)
 
 1. Edit `manifest/` (Neovim tag, plugin commits, parser list).
 2. `scripts/vendor-update.sh` — the only step that downloads; needs curl, tar,
-   sha256sum, git, cargo, Python >= 3.11 and an nvim to resolve the parser list.
+   sha256sum, git, cargo, Python >= 3.11, an nvim to resolve the parser list,
+   and Go (if not installed, RHEL's Go runs in a UBI9 container via docker).
 3. `test/run.sh` — must pass before committing.
 4. Review `git status` / `VERSIONS` and the regenerated "Third-party
    software" section below (a new component with an unrecognised license
@@ -96,7 +99,8 @@ only the toolchain RPMs, then runs `build.sh` and `test/smoke.lua` in it with
 startup, every plugin on the runtimepath, every parser loads and its
 highlights query compiles, treesitter highlighting on Lua/Python/sh/TypeScript
 files, each LSP server attaches to a small project and reports a diagnostic,
-each formatter formats through conform, blink.cmp running with the Lua
+each formatter formats through conform, a debugpy session started through
+nvim-dap-python stops at a breakpoint, blink.cmp running with the Lua
 matcher.
 
 <!-- inventory:start -->
@@ -109,6 +113,19 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 
 | Component | Upstream | Version / commit | License |
 |---|---|---|---|
+| gomod/shfmt/github.com/creack/pty | <https://github.com/creack/pty> | `v1.1.24` | MIT |
+| gomod/shfmt/github.com/google/go-cmp | <https://github.com/google/go-cmp> | `v0.7.0` | BSD-3-Clause |
+| gomod/shfmt/github.com/google/renameio/v2 | <https://github.com/google/renameio/v2> | `v2.0.2` | Apache-2.0 |
+| gomod/shfmt/github.com/go-quicktest/qt | <https://github.com/go-quicktest/qt> | `v1.101.0` | MIT |
+| gomod/shfmt/github.com/kr/pretty | <https://github.com/kr/pretty> | `v0.3.1` | MIT |
+| gomod/shfmt/github.com/kr/text | <https://github.com/kr/text> | `v0.2.0` | MIT |
+| gomod/shfmt/github.com/rogpeppe/go-internal | <https://github.com/rogpeppe/go-internal> | `v1.14.1` | BSD-3-Clause |
+| gomod/shfmt/golang.org/x/mod | <https://golang.org/x/mod> | `v0.29.0` | BSD-3-Clause |
+| gomod/shfmt/golang.org/x/sync | <https://golang.org/x/sync> | `v0.17.0` | BSD-3-Clause |
+| gomod/shfmt/golang.org/x/sys | <https://golang.org/x/sys> | `v0.42.0` | BSD-3-Clause |
+| gomod/shfmt/golang.org/x/term | <https://golang.org/x/term> | `v0.41.0` | BSD-3-Clause |
+| gomod/shfmt/golang.org/x/tools | <https://golang.org/x/tools> | `v0.38.0` | BSD-3-Clause |
+| gomod/shfmt/mvdan.cc/editorconfig | <https://mvdan.cc/editorconfig> | `v0.3.0` | BSD-3-Clause |
 | grammar/tree-sitter-bash | <https://github.com/tree-sitter/tree-sitter-bash> | `a06c2e4415e9` | MIT |
 | grammar/tree-sitter-c | <https://github.com/tree-sitter/tree-sitter-c> | `ae19b676b13b` | MIT |
 | grammar/tree-sitter-diff | <https://github.com/tree-sitter-grammars/tree-sitter-diff> | `2520c3f934b3` | MIT |
@@ -175,7 +192,9 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 | plugin/todo-comments.nvim | <https://github.com/folke/todo-comments.nvim> | `31e3c38ce9b2` | Apache-2.0 |
 | plugin/trouble.nvim | <https://github.com/folke/trouble.nvim> | `bd67efe408d4` | Apache-2.0 |
 | plugin/which-key.nvim | <https://github.com/folke/which-key.nvim> | `3aab2147e748` | Apache-2.0 |
+| tool/debugpy | <https://pypi.org/project/debugpy> | `1.8.21` | MIT |
 | tool/ruff | <https://github.com/astral-sh/ruff> | `0.15.11` | MIT |
+| tool/shfmt | <https://github.com/mvdan/sh> | `v3.13.1` | BSD-3-Clause |
 
 <details><summary>Rust crates of ruff: 301 built, 187 manifest-only stubs (pinned by its Cargo.lock)</summary>
 

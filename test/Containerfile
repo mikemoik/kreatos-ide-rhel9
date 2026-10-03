@@ -2,5 +2,5 @@
 # git (runtime: gitsigns). The build itself runs with --network=none (see
 # test/run.sh).
 FROM registry.access.redhat.com/ubi9/ubi:latest
-RUN dnf -y install gcc make cmake python3 rust-toolset git-core findutils diffutils \
+RUN dnf -y install gcc make cmake python3 rust-toolset golang git-core findutils diffutils \
     && dnf clean all

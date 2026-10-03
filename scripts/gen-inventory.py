@@ -112,6 +112,8 @@ def source_dir(name):
         "grammar": lambda: os.path.join(V, "grammars", rest),
         "tool": lambda: os.path.join(V, "tools", rest),
         "crate": lambda: os.path.join(V, "crates", rest),
+        # gomod/<tool>/<module path>: inside the tool's own vendor/ dir
+        "gomod": lambda: os.path.join(V, "tools", rest.split("/", 1)[0], "vendor", rest.split("/", 1)[1]),
     }[kind]()
 
 

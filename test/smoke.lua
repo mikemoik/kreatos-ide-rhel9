@@ -105,6 +105,7 @@ local function run()
   -- filetype, else the LSP formatter (ruff)
   local fmt_cases = {
     { name = "ruff (lsp)", lsp = "ruff", marker = "pyproject.toml", ext = "py", text = "x=[1,2]", want = "x = [1, 2]" },
+    { name = "shfmt", marker = "marker.txt", ext = "sh", text = "if true;then echo hi;fi", want = "if true; then echo hi; fi" },
   }
   for i, case in ipairs(fmt_cases) do
     local buf = open_in_project("fmt_" .. i, case.marker, case.ext, { case.text })
@@ -115,6 +116,31 @@ local function run()
     local got = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1]
     check("format " .. case.name, fok and got == case.want, ferr or got)
   end
+
+  -- debugging: nvim-dap-python + the bundled debugpy stop at a breakpoint
+  local dap = require("dap")
+  local dbuf = open_in_project("dap", "pyproject.toml", "py", { "x = 1", "y = x + 1", "print(y)" })
+  require("dap.breakpoints").set({}, dbuf, 2)
+  local stopped_line
+  dap.listeners.after.event_stopped["smoke"] = function(session, body)
+    session:request("stackTrace", { threadId = body.threadId }, function(_, resp)
+      stopped_line = resp and resp.stackFrames[1].line
+    end)
+  end
+  local dok, derr = pcall(dap.run, {
+    type = "python",
+    request = "launch",
+    name = "smoke",
+    program = vim.api.nvim_buf_get_name(dbuf),
+  })
+  local stopped = dok and vim.wait(30000, function()
+    return stopped_line ~= nil
+  end, 200)
+  check("debugpy stops at breakpoint", stopped and stopped_line == 2, derr or tostring(stopped_line))
+  pcall(dap.terminate)
+  vim.wait(5000, function()
+    return dap.session() == nil
+  end, 100)
 
   -- completion engine starts with the Lua fuzzy matcher
   vim.api.nvim_exec_autocmds("InsertEnter", {})

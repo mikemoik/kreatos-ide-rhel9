@@ -2,7 +2,7 @@
 # build.sh [PREFIX] — offline build of kreatos-ide from vendor/ (no network).
 #
 # Needs only the RHEL9 toolchain: gcc, make, cmake, python3, rust-toolset
-# (cargo). The repo itself is never written to (it can be mounted
+# (cargo), golang. The repo itself is never written to (it can be mounted
 # read-only); intermediate files go to $KIDE_BUILD_DIR (default:
 # $TMPDIR/kide-build).
 #
@@ -10,6 +10,9 @@
 #   PREFIX/bin/nvim                   Neovim built from vendor/neovim
 #   PREFIX/bin/kide                   launcher: nvim + the bundled config and tools
 #   PREFIX/bin/{ruff,ty}              Python linter/formatter + type checker (LSP)
+#   PREFIX/bin/shfmt                  shell formatter
+#   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
+#   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/site     pack/vendor/opt plugins, parser/, queries/
 set -euo pipefail
@@ -23,7 +26,7 @@ SITE=$SHARE/site
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 
-for tool in cc make cmake python3 cargo; do
+for tool in cc make cmake python3 cargo go; do
   command -v "$tool" >/dev/null || { echo "missing build tool: $tool" >&2; exit 1; }
 done
 
@@ -147,6 +150,27 @@ for rel, (old, new) in patches.items():
 PY
 cargo_build ruff -p ruff -p ty
 install -m755 "$TOOLS/ruff/target/release/ruff" "$TOOLS/ruff/target/release/ty" "$PREFIX/bin/"
+
+log "shfmt"
+cp -a "$ROOT/vendor/tools/shfmt" "$TOOLS/shfmt"
+(cd "$TOOLS/shfmt" && GOFLAGS=-mod=vendor GOTOOLCHAIN=local GOPROXY=off \
+  GOCACHE="$TOOLS/gocache" GOPATH="$TOOLS/gopath" go build -trimpath -o "$PREFIX/bin/shfmt" ./cmd/shfmt)
+
+# debugpy runs from its source tree (pure Python; the optional Cython
+# speedups are not built). nvim-dap-python starts it via kide-python.
+log "debugpy"
+PYLIB=$PREFIX/lib/kreatos-ide/python
+rm -rf "$PYLIB"
+mkdir -p "$PYLIB"
+cp -a "$ROOT/vendor/tools/debugpy/src/debugpy" "$PYLIB/"
+cat >"$PREFIX/bin/kide-python" <<'WRAPPER'
+#!/bin/sh
+# python3 with the bundled debugpy importable
+lib=$(dirname "$(readlink -f "$0")")/../lib/kreatos-ide/python
+export PYTHONPATH="$lib${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 "$@"
+WRAPPER
+chmod +x "$PREFIX/bin/kide-python"
 
 # --- launcher ----------------------------------------------------------------
 log "launcher"
