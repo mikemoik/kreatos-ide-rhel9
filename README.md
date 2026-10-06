@@ -86,11 +86,32 @@ No install on the host at all, only podman: `podman/Containerfile` builds a
 UBI9 image with kide in `/opt/kide` plus the RHEL packages it uses (details
 and limits: [podman/README.md](podman/README.md)).
 
-Build the image (~5–10 min; the `dnf` steps need the RHEL/UBI repos, see
-below for an offline box):
+Build the image (~5–10 min). The build does not use the tarball itself: it
+copies the repo **directory** you point it at into the image (`COPY . /src`)
+and runs `build.sh` there. The last argument of `podman build` is that
+directory (the "build context"); `-f` names the Containerfile inside it.
+Two ways to give it the repo:
 
-    podman build -t kide -f podman/Containerfile .        # from a checkout / unpacked tarball
-    podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+- **From the unpacked tarball (or a git checkout).** Unpack anywhere and run
+  the build from the top directory of the repo, where `install.sh` and
+  `podman/` are; the `.` at the end means "this directory":
+
+      tar -xzf kreatos-ide-rhel9-main.tar.gz
+      cd kreatos-ide-rhel9-main
+      podman build -t kide -f podman/Containerfile .
+
+  Run from anywhere else, give the path instead of `.`:
+  `podman build -t kide -f ~/kreatos-ide-rhel9-main/podman/Containerfile ~/kreatos-ide-rhel9-main`.
+  The directory is only read and can be deleted once the image is built.
+
+- **Straight from GitHub** (no tarball, no checkout; podman clones the repo
+  itself):
+
+      podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+
+Either way the `dnf install` steps in the Containerfile download RHEL
+packages, so the build needs the RHEL/UBI repos (internet or a mirror). For a
+box without either, see the end of this section.
 
 Run it on the current directory (rootless podman, as your normal user — not
 `sudo podman` — so files kide writes stay yours):

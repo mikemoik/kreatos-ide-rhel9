@@ -8,8 +8,13 @@ toolchains stay in the build stage and are not in the final image.
 
 ## Build
 
-From a checkout (repo root; ~5–10 min):
+The last argument of `podman build` is the repo directory (the build
+context); the Containerfile copies all of it into the image and runs
+`build.sh`. From an unpacked tarball or a git checkout, run it in the repo's
+top directory (where `install.sh` and `podman/` are; ~5–10 min):
 
+    tar -xzf kreatos-ide-rhel9-main.tar.gz
+    cd kreatos-ide-rhel9-main
     podman build -t kide -f podman/Containerfile .
 
 Without a checkout, straight from GitHub (no curl needed):
