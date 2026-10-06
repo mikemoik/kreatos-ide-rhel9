@@ -373,6 +373,41 @@ with its history:
     git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --all
     git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --tags
 
+**Only the default branch** (`main` as on GitHub, with its history; no
+other branches, no tags). Use a normal single-branch clone instead of the
+mirror:
+
+    git clone --single-branch https://github.com/mikemoik/kreatos-ide-rhel9.git
+    cd kreatos-ide-rhel9
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git HEAD:refs/heads/main
+
+As a bundle for the offline case (`HEAD` included, so a clone of it checks
+out `main`):
+
+    git bundle create "$PWD/../kreatos-ide-rhel9-main.bundle" HEAD main
+    # inside:
+    git clone kreatos-ide-rhel9-main.bundle kreatos-ide-rhel9
+    cd kreatos-ide-rhel9
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git HEAD:refs/heads/main
+
+**Only the latest state, no history** (one fresh commit holding today's
+files; it saves little, ~100 MB instead of ~115 MB, since the vendored
+sources are most of the size, but the GitLab then holds no GitHub history):
+
+    git clone --depth 1 https://github.com/mikemoik/kreatos-ide-rhel9.git
+    cd kreatos-ide-rhel9
+    git checkout --orphan snapshot
+    git commit -m "kreatos-ide-rhel9 snapshot of $(git rev-parse --short origin/main)"
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git snapshot:refs/heads/main
+    # or for the offline case: git bundle create "$PWD/../kreatos-ide-rhel9-snapshot.bundle" snapshot
+    # inside: git clone -b snapshot …-snapshot.bundle kreatos-ide-rhel9, then push as above
+
+(`git commit` needs a git identity; on a fresh machine add
+`-c user.name=… -c user.email=…` after `git`.) A later snapshot is unrelated
+to the earlier one, so updating this way means pushing with `--force` or
+starting a new project; for regular updates take the default branch with
+history instead.
+
 If a push over HTTPS fails with `413` / `RPC failed`, the server's upload
 limit is too small for the first push: push over SSH (`git@…` URL as above)
 instead.
