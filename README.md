@@ -21,9 +21,8 @@ One call does everything:
    database in Python and C++/CMake to try kide on (see their READMEs).
 5. Opens a new shell in which `kide` works. Every later shell finds it too.
 
-Without network (repo copied over), run `./install.sh` from the checkout: it
-skips the download. Another prefix: `./install.sh /opt/kide`, or
-`curl … | bash -s /opt/kide`.
+No internet on the box: see [Offline install from the tarball](#offline-install-from-the-tarball).
+Another prefix: `./install.sh /opt/kide`, or `curl … | bash -s /opt/kide`.
 
 Config-only update of an existing install (seconds, no compiling): plugins,
 nvim and yazi config, `kide` launcher and `PREFIX/bashrc` are refreshed;
@@ -45,6 +44,75 @@ servers and formatters (`PREFIX/bin`) first on `PATH`. Its data, state and
 cache live under `NVIM_APPNAME=kreatos-ide` (`~/.local/share/kreatos-ide`, …),
 so it never mixes with another nvim. The repo is only read; intermediate files
 go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
+
+### Offline install from the tarball
+
+For a RHEL9 box without internet. The build itself never needs the network;
+only the repo tarball has to get there, and the RHEL packages have to come
+from somewhere.
+
+1. On any machine with internet, download the tarball (or use a copy someone
+   gave you):
+
+       curl -fLo kreatos-ide-rhel9-main.tar.gz https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz
+
+2. Copy it to the RHEL9 box (USB stick, `scp`, …).
+3. RHEL packages: `install.sh` installs the missing ones with `dnf`, which
+   needs a reachable repo — on an offline box the company mirror/Satellite or
+   a local repo from the RHEL9 DVD ISO. If none is reachable, get them
+   installed beforehand: `install.sh` only calls `dnf` for packages that are
+   missing, and stops if `dnf` fails. The full list:
+
+       sudo dnf install gcc make cmake python3 rust-toolset golang findutils diffutils tar \
+           git-core gcc-c++ clang-tools-extra gdb lldb file
+
+4. Unpack and install (into `~/.local/kreatos-ide`, ~5 min; an argument picks
+   another prefix, e.g. `./install.sh /opt/kide`):
+
+       tar -xzf kreatos-ide-rhel9-main.tar.gz
+       cd kreatos-ide-rhel9-main
+       ./install.sh
+
+   From an unpacked tree `install.sh` skips the download and does the other
+   steps listed above (packages, build, samples, new shell). The tree is only
+   read; it can be deleted afterwards.
+
+Updating offline: bring over a new tarball, unpack it, and run `./install.sh`
+(full rebuild) or `./install.sh --no-build` (config only) in it.
+
+### In a podman container
+
+No install on the host at all, only podman: `podman/Containerfile` builds a
+UBI9 image with kide in `/opt/kide` plus the RHEL packages it uses (details
+and limits: [podman/README.md](podman/README.md)).
+
+Build the image (~5–10 min; the `dnf` steps need the RHEL/UBI repos, see
+below for an offline box):
+
+    podman build -t kide -f podman/Containerfile .        # from a checkout / unpacked tarball
+    podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+
+Run it on the current directory (rootless podman, as your normal user — not
+`sudo podman` — so files kide writes stay yours):
+
+    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide
+    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide src/main.py
+
+- `-v "$PWD:/work:Z"`: the project; `:Z` relabels it for SELinux (needed on RHEL).
+- `-v kide-data:/root/.local`: kide's data and state survive the container;
+  leave it out for a throwaway session.
+- A shell inside instead of kide (lazygit, yazi, cmake, gdb on `PATH`): add
+  `--entrypoint bash` before `kide`.
+
+As an alias in `~/.bashrc`:
+
+    alias kide='podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide'
+
+Offline box: build the image on a machine with internet and carry it over as
+a file:
+
+    podman save -o kide-image.tar kide          # on the connected machine
+    podman load -i kide-image.tar               # on the offline box, then run as above
 
 ### C/C++ development
 

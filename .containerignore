@@ -1,0 +1,3 @@
+# podman/docker build context (podman/Containerfile): only what git tracks
+.git
+vendor.staging

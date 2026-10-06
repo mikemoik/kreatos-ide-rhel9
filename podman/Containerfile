@@ -1,0 +1,33 @@
+# kide in a RHEL9 (UBI9) container — no install on the host, only podman.
+# Build from the repo root (dnf needs the RHEL repos; build.sh itself runs offline):
+#   podman build -t kide -f podman/Containerfile .
+# or without a checkout, straight from GitHub:
+#   podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+# Run (rootless podman: root in the container is you on the host, so files in
+# the mounted project stay yours):
+#   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide [FILE…]
+# See podman/README.md.
+
+# --- build: the RHEL9 toolchain + build.sh (as test/Containerfile) -----------
+FROM registry.access.redhat.com/ubi9/ubi:latest AS build
+RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
+        git-core file gcc-c++ clang-tools-extra gdb lldb \
+    && dnf clean all
+COPY . /src
+RUN /src/build.sh /opt/kide
+
+# --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
+FROM registry.access.redhat.com/ubi9/ubi:latest
+# python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), and the
+# C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap)
+RUN dnf -y install python3 git-core file findutils diffutils \
+        gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
+    && dnf clean all
+COPY --from=build /opt/kide /opt/kide
+# what PREFIX/bashrc does on an install
+ENV PATH=/opt/kide/bin:$PATH \
+    YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
+# a shell inside the container (podman run … --entrypoint bash kide) sets the same
+RUN echo '. /opt/kide/bashrc' >>/root/.bashrc
+WORKDIR /work
+ENTRYPOINT ["kide"]
