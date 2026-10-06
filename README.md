@@ -135,6 +135,148 @@ a file:
     podman save -o kide-image.tar kide          # on the connected machine
     podman load -i kide-image.tar               # on the offline box, then run as above
 
+### Remote: kide over SSH from Windows (PuTTY)
+
+kide runs on the RHEL9 box (in the podman container, or a normal install);
+PuTTY on Windows is only the terminal. Nothing is installed on Windows except
+PuTTY (0.71 or newer, for 24-bit colour) and a font.
+
+**One-time PuTTY setup** (set it, then save the session under *Session →
+Saved Sessions → Save*):
+
+| PuTTY setting | Value | Why |
+|---|---|---|
+| *Session*: Host Name, Port | the RHEL box, `22`, *SSH* | |
+| *Connection → Data*: Terminal-type string | `xterm-256color` | kide's colours (default `xterm` gives a washed-out theme) |
+| *Connection*: Seconds between keepalives | `30` | idle sessions are not dropped by firewalls |
+| *Window → Translation*: Remote character set | `UTF-8` | icons and box drawing |
+| *Window → Appearance*: Font | a **Nerd Font Mono**, e.g. *JetBrainsMono Nerd Font Mono* (install the `.ttf` on Windows first, from <https://www.nerdfonts.com>) | kide's icons (file types, git, diagnostics); without it they show as boxes |
+| *Window*: Columns × Rows | at least `120 × 35` | room for the file tree and pickers |
+
+**Each time:**
+
+1. Open the saved session, log in.
+2. A kide started like in step 3 ends when the SSH connection ends (logout,
+   or a dropped connection). Unsaved changes can be recovered with `:recover`
+   next time (the swap files are in the `kide-data` volume). To keep kide
+   running across logouts and disconnects, use
+   [the persistent setup below](#persistent-kide-survives-ssh-logout) instead
+   of step 3.
+3. `cd` to the project on the RHEL box and start kide:
+
+       podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local kide
+
+   - `-e TERM` hands PuTTY's `xterm-256color` to the container (podman would
+     set plain `xterm`).
+   - `-e SSH_CONNECTION` tells kide it runs over SSH, so yanks stay inside
+     kide instead of trying to reach a clipboard the container does not have
+     (without it every yank shows `clipboard: No provider`).
+
+   As an alias in `~/.bashrc` on the RHEL box:
+
+       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local kide'
+
+   With a normal install (no container) it is just `kide`.
+
+**Using it in PuTTY:**
+
+- Mouse works in kide (click, scroll, resize splits). Hold **Shift** to use
+  PuTTY's own selection instead.
+- **Copy to Windows**: Shift + drag selects text in PuTTY, which copies it to
+  the Windows clipboard right away. kide's own yank (`y`) does not reach
+  Windows: PuTTY does not support OSC 52.
+- **Paste from Windows**: in insert mode, Shift + right-click or
+  Shift + Insert; the text is pasted as is (no auto-indent mess).
+- Alt keys (`<A-j>`/`<A-k>` move lines) work: PuTTY sends Alt as Esc + key.
+- Window resize: drag the PuTTY window; kide redraws.
+- Only the mounted project directory is visible inside the container (see
+  [podman/README.md](podman/README.md) § Limits).
+
+### Persistent kide (survives SSH logout)
+
+If the RHEL box kills a user's processes at logout (systemd-logind
+`KillUserProcesses=yes`, or lingering is off), a container started from the
+SSH shell dies with it, and so does `tmux`. Two things fix that:
+
+- the container runs as a **systemd user service**, not as a child of the
+  SSH session, and
+- inside it kide runs as a **Neovim server** (`--headless --listen`). Each
+  login attaches a UI to it (`--remote-ui`); closing the UI, a logout or a
+  dropped connection leaves the server running, with all open buffers, undo
+  history, LSP servers and `:terminal`s. This is Neovim's own client/server
+  mode, so no tmux is needed (and UBI9 has no tmux package).
+
+Needs podman 4.4 or newer for Quadlet (RHEL 9.2+; check `podman --version`)
+and the `kide` image built as **the same user** that runs it (rootless images
+belong to the user who built them).
+
+**Set it up once** (on the RHEL box, as your normal user):
+
+1. Let your user services run without a login session (linger):
+
+       loginctl enable-linger
+       loginctl show-user "$USER" -p Linger     # must say Linger=yes
+
+   If that is refused, an admin runs `sudo loginctl enable-linger <your user>`.
+
+2. Pick the directory kide may see; it is mounted as `/work` (here
+   `~/projects`; every project under it is reachable from the one kide):
+
+       mkdir -p ~/projects
+
+3. Create the unit file `~/.config/containers/systemd/kide.container`
+   (`mkdir -p ~/.config/containers/systemd` first):
+
+       [Unit]
+       Description=kide (Neovim server in podman)
+
+       [Container]
+       Image=localhost/kide:latest
+       ContainerName=kide
+       # the image's entrypoint is kide; this makes it a server, no UI
+       Exec=--headless --listen /tmp/kide.sock
+       Volume=%h/projects:/work:Z
+       Volume=kide-data:/root/.local
+       Environment=TERM=xterm-256color SSH_CONNECTION=persistent
+
+       [Service]
+       # :qa ends the server; start a fresh one right away
+       Restart=always
+
+       [Install]
+       WantedBy=default.target
+
+4. Start it (and on every boot from now on, thanks to `[Install]` + linger):
+
+       systemctl --user daemon-reload
+       systemctl --user start kide
+       systemctl --user status kide              # active (running)
+
+**Use it** (every SSH/PuTTY login):
+
+    podman exec -it -e TERM kide kide --server /tmp/kide.sock --remote-ui
+
+As an alias in `~/.bashrc` on the RHEL box:
+
+    alias kide-attach='podman exec -it -e TERM kide kide --server /tmp/kide.sock --remote-ui'
+
+| You do | Effect |
+|---|---|
+| `:detach` | UI closes, back at the shell; kide keeps running with everything open |
+| close PuTTY, log out, connection drops | same as `:detach` |
+| `kide-attach` | back where you left off |
+| `:qa` | kide really quits (asks about unsaved files); systemd starts a fresh, empty one, ready for the next `kide-attach` |
+| `:e ~/…` | not visible: only `/work` (= `~/projects`) is mounted; open files as `:e /work/<project>/…` or `:cd /work/<project>` first |
+
+Maintenance:
+
+- Logs: `journalctl --user -u kide`. Stop: `systemctl --user stop kide`
+  (unsaved changes are lost; `:recover` brings them back from the swap files).
+- After rebuilding the image (`podman build -t kide …`):
+  `systemctl --user restart kide`.
+- Another project directory: change the `Volume=%h/projects:…` line, then
+  `systemctl --user daemon-reload && systemctl --user restart kide`.
+
 ### C/C++ development
 
 RHEL9 ships the heavy C/C++ tools itself, so they are **not** bundled; kide
