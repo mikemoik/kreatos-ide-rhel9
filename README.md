@@ -210,6 +210,19 @@ Needs podman 4.4 or newer for Quadlet (RHEL 9.2+; check `podman --version`)
 and the `kide` image built as **the same user** that runs it (rootless images
 belong to the user who built them).
 
+**Root needed?** Only for things an admin may have done already:
+
+- podman installed (`sudo dnf install podman`) and subuid/subgid ranges for
+  your user, which rootless podman needs anyway (normally created by
+  `useradd`; check with `grep "$USER" /etc/subuid /etc/subgid`).
+- possibly linger (step 1), once: depending on the systemd version and site
+  policy, `loginctl enable-linger` for yourself may be refused, especially
+  over SSH; then an admin runs `sudo loginctl enable-linger <your user>`.
+
+Everything else (building the image, the unit file in your home,
+`systemctl --user`, attaching, detaching, restarting) runs as your normal
+user, without sudo.
+
 **Set it up once** (on the RHEL box, as your normal user):
 
 1. Let your user services run without a login session (linger):
@@ -324,6 +337,89 @@ gets one setting, see below):
   syntect, as in upstream yazi).
 - `fd` — fast `find`; the snacks file pickers use it
 - `fzf` — fuzzy finder
+
+## Moving the repo to an on-prem GitLab
+
+The repo is plain git (no LFS, no submodules; ~120 MB packed, largest file
+25 MB), so any GitLab or other git server can host it. In GitLab, first
+create an **empty** project (no README, no license): e.g.
+`gitlab.example.com/tools/kreatos-ide-rhel9`. Below, replace that URL with
+yours.
+
+### Copy the repo over
+
+**A machine that reaches both GitHub and the GitLab** — copy all
+branches and tags:
+
+    git clone --mirror https://github.com/mikemoik/kreatos-ide-rhel9.git
+    cd kreatos-ide-rhel9.git
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --all
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --tags
+
+(`--all` + `--tags` rather than `push --mirror`: the GitHub mirror also holds
+GitHub's pull-request refs, which GitLab rejects.)
+
+**No such machine** (the GitLab is only reachable from the internal
+network): carry a git bundle over, a single file holding the whole repo
+with its history:
+
+    # outside, with internet
+    git clone --mirror https://github.com/mikemoik/kreatos-ide-rhel9.git
+    git -C kreatos-ide-rhel9.git bundle create "$PWD/kreatos-ide-rhel9.bundle" --branches --tags
+
+    # inside, after copying kreatos-ide-rhel9.bundle (~115 MB) over
+    git clone --mirror kreatos-ide-rhel9.bundle kreatos-ide-rhel9.git
+    cd kreatos-ide-rhel9.git
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --all
+    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --tags
+
+If a push over HTTPS fails with `413` / `RPC failed`, the server's upload
+limit is too small for the first push: push over SSH (`git@…` URL as above)
+instead.
+
+**Later updates** go the same way: fetch from GitHub, then push to GitLab
+(`git remote update` + the two `git push` lines in the mirror clone, or a
+new bundle the same way). GitLab's
+automatic pull mirroring needs a paid GitLab tier.
+
+### Install from the GitLab
+
+The one-call install and the download in `install.sh` default to GitHub.
+Point them at the GitLab instead; `KIDE_TARBALL` overrides the tarball URL,
+nothing in the repo has to be edited.
+
+**Project readable without login** (visibility *internal* still needs a
+login, so this means *public*):
+
+    curl -fsSL https://gitlab.example.com/tools/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.example.com/tools/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
+
+**Private or internal project** (the usual case): clone with your GitLab
+login, then install from the checkout. `install.sh` sees the checkout and
+skips the download, so no URL needs changing:
+
+    git clone https://gitlab.example.com/tools/kreatos-ide-rhel9.git
+    cd kreatos-ide-rhel9
+    ./install.sh
+
+Updating later: `git pull` in that checkout, then `./install.sh` or
+`./install.sh --no-build`.
+
+The offline tarball install works the same with a tarball from GitLab
+(project page → *Code* → *Download source code* → *tar.gz*). GitLab's tarball
+unpacks to `kreatos-ide-rhel9-main-<commit>/` instead of
+`kreatos-ide-rhel9-main/`, so `cd kreatos-ide-rhel9-main*/`.
+
+**Podman image** from the GitLab: build from the clone (`podman build -t kide
+-f podman/Containerfile .` in it), as described in
+[In a podman container](#in-a-podman-container). Building straight from the
+URL only works for a project readable without login.
+
+**Internal TLS certificate**: if `curl` or `git` fails with `SSL certificate
+problem`, the GitLab uses a certificate from an internal CA. An admin adds
+the CA to the system trust once (`sudo cp ca.crt
+/etc/pki/ca-trust/source/anchors/ && sudo update-ca-trust`); don't switch
+off TLS checks instead.
 
 ## What is inside
 
