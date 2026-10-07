@@ -57,23 +57,21 @@ with its own dnf repos):
   `/etc/yum.repos.d/` (both stages, before any `dnf install`), and in the
   runtime stage, system-wide as root:
   - `pip.conf` to `/etc/pip.conf`: `index-url` (the pip package repo) and
-    `client-cert = ~/.pip/pip-server.crt` (pip expands `~` per user)
+    `cert = /etc/pki/tls/certs/ca-bundle.crt` (the system trust store)
   - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the repo
     goes here too (`[[index]]` with `default = true`), plus
     `system-certs = true` (server certificate checked against the system
     trust store) and `python-preference = "only-system"`,
     `python-downloads = "never"`
-  - `pip-server.crt`: the user's **client certificate** for the pip server
-    (mTLS: certificate and its private key in one PEM file; the build stops
-    if the key is missing). `KIDE_USER` keeps it as `~/.pip/pip-server.crt`
-    (mode 600). Every pip and uv call uses it, at build time and at runtime,
-    with or without a shell (`podman exec`, kide, quadlet): pip through
-    `client-cert` in `/etc/pip.conf`, uv through the image `ENV`
-    `SSL_CLIENT_CERT=/etc/kide/pip-server.crt` (a symlink to that file; uv
-    has no config setting for it).
+  - `pip-server.crt`: the pip server's certificate, or the company CA that
+    signed it (PEM, `BEGIN CERTIFICATE`; the build stops on anything else or
+    on a private key in it). It goes into the system trust store
+    (`/etc/pki/ca-trust/source/anchors/`, `update-ca-trust`), so every pip
+    and uv call trusts the repo, at build time and at runtime: pip through
+    `cert` in `/etc/pip.conf`, uv through `system-certs = true`.
 
   Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
-  with that config and the client certificate. `podman/conf` holds a
+  with that config. `podman/conf` holds a
   self-signed dummy `pip-server.crt` and an empty `ubi.repo`; replace them
   with the real ones on prod. Point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).

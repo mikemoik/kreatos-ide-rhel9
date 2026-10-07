@@ -67,6 +67,22 @@ RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils sh
         python3.12-pybind11 python3.12-pybind11-devel \
         opencv-devel glew-devel glfw glfw-devel \
     && dnf clean all
+# pip-server.crt is the pip server's certificate (or the company CA that signed
+# it; PEM, no private key; the repo has a dummy). It goes into the system trust
+# store, so every user and tool trusts the pip repo, at build time and runtime:
+# pip through cert = the system bundle (/etc/pip.conf), uv through
+# system-certs = true (/etc/uv/uv.toml).
+COPY $CONF_DIR/pip-server.crt /tmp/pip-server.crt
+RUN set -e; \
+    grep -q -- '-----BEGIN CERTIFICATE-----' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must be a PEM certificate (BEGIN CERTIFICATE)" >&2; exit 1; }; \
+    ! grep -q 'PRIVATE KEY' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must not contain a private key (it goes into the trust store)" >&2; exit 1; }; \
+    sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /tmp/pip-server.crt \
+      >/etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    chmod 644 /etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    rm /tmp/pip-server.crt; \
+    update-ca-trust
 # pip and uv config, system-wide for every user (uv does not read pip.conf).
 # Both are templates: @PIP_INDEX_URL@ becomes PIP_INDEX_URL from
 # podman/base.conf (the pip package repo).
@@ -109,21 +125,10 @@ ENV XDG_DATA_HOME=/var/lib/kide/share \
 # otherwise created with KIDE_UID/KIDE_GID. Gets fish as login shell and the
 # fish and bash config (with ~/.local/bin, where its pip and uv go, on PATH),
 # owns /var/lib/kide and /work.
-# pip-server.crt is the user's client certificate for the pip server (mTLS;
-# certificate + private key in one PEM file; the repo has a dummy). It goes to
-# ~/.pip/pip-server.crt (mode 600) and every pip or uv call uses it, at build
-# time and at runtime, with or without a shell (podman exec, kide, quadlet):
-# - pip: /etc/pip.conf (CONF_DIR/pip.conf) says client-cert =
-#   ~/.pip/pip-server.crt; pip expands ~ per user and reads it on every call
-# - uv: has no config setting for it, only SSL_CLIENT_CERT, set below as an
-#   image ENV to /etc/kide/pip-server.crt, a symlink to that file
 ARG KIDE_USER
 ARG KIDE_UID
 ARG KIDE_GID
-COPY $CONF_DIR/pip-server.crt /tmp/pip-server.crt
 RUN set -e; \
-    grep -q 'BEGIN CERTIFICATE' /tmp/pip-server.crt && grep -q 'PRIVATE KEY-----' /tmp/pip-server.crt \
-      || { echo "pip-server.crt must hold the client certificate and its private key (PEM)" >&2; exit 1; }; \
     if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
       getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
       useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
@@ -131,19 +136,14 @@ RUN set -e; \
     usermod -s /opt/kide/bin/fish "$KIDE_USER"; \
     home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
     group=$(id -g "$KIDE_USER"); \
-    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /work /etc/kide; \
+    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /work; \
     printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' >"$home/.config/fish/config.fish"; \
     printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' '. /opt/kide/bashrc' >>"$home/.bashrc"; \
-    install -d -m 700 -o "$KIDE_USER" -g "$group" "$home/.pip"; \
-    install -m 600 -o "$KIDE_USER" -g "$group" /tmp/pip-server.crt "$home/.pip/pip-server.crt"; \
-    ln -s "$home/.pip/pip-server.crt" /etc/kide/pip-server.crt; \
-    rm /tmp/pip-server.crt; \
     chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
     chown -R "$KIDE_USER:$group" "$home/.config" /var/lib/kide /work
-ENV SSL_CLIENT_CERT=/etc/kide/pip-server.crt
 USER $KIDE_USER
 # as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
-# (pip install --user, with /etc/pip.conf: company repo + client certificate);
+# (pip install --user, with /etc/pip.conf: company repo, trusted via pip-server.crt);
 # root installs nothing with pip.
 RUN python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
 WORKDIR /work

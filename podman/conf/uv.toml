@@ -13,15 +13,10 @@
 python-preference = "only-system"
 python-downloads = "never"
 
-# Check the repo's server certificate against the system trust store (where a
-# company CA lives), not uv's own bundled roots. uv 0.12: `system-certs`
-# (`native-tls` is deprecated).
+# Check the repo's server certificate against the system trust store, where
+# the build adds the pip server's certificate (CONF_DIR/pip-server.crt), not
+# uv's own bundled roots. uv 0.12: `system-certs` (`native-tls` is deprecated).
 system-certs = true
-
-# The client certificate (CONF_DIR/pip-server.crt) has no setting in this
-# file: uv only reads it from SSL_CLIENT_CERT, which the image sets as ENV to
-# /etc/kide/pip-server.crt (a link to KIDE_USER's ~/.pip/pip-server.crt), at
-# build time and runtime.
 
 # The pip package repo (on prod the company's, instead of pypi.org).
 [[index]]
