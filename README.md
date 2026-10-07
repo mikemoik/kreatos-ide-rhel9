@@ -434,8 +434,11 @@ image too): `python3.12` with `numpy` and `pybind11` (+ `-devel`),
 On stock RHEL pybind11 is in CRB and opencv/glew/glfw in EPEL; the target's
 own repos are expected to carry them. The podman image (Rocky 9 + CRB + EPEL)
 stands in for that here. The
-podman image also has the newest `pip` and `uv` for Python 3.12
-(`python3.12 -m pip install --upgrade pip uv`, in `/usr/local/bin`).
+podman image also has the newest `pip` and `uv` for Python 3.12, installed
+by the image's user, not root (`python3.12 -m pip install --user --upgrade pip uv`,
+in its `~/.local/bin`, on `PATH` in fish and bash); root only sets up
+`/etc/pip.conf`, `/etc/uv/uv.toml` and the machine certificate (see
+[podman/README.md](podman/README.md) § Another base image).
 
 ### Terminal tools
 

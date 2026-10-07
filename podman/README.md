@@ -7,7 +7,9 @@ clangd/clang-format/clang-tidy, gdb, lldb), plus what C/C++ projects build
 against: CMake 4, onnxruntime, ACE+TAO and OpenDDS in `/opt/kide` (from
 `dist/`), and from CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with numpy and
 pybind11, opencv, glew, glfw. pip (newest) and uv for Python 3.12 are
-pip-installed into `/usr/local`. Not UBI9: UBI lacks packages the EPEL ones
+pip-installed by the image's user (`KIDE_USER`) into its `~/.local`; root
+installs nothing with pip, it only sets up their config and certificate
+system-wide. Not UBI9: UBI lacks packages the EPEL ones
 depend on (Qt5, gdal, protobuf for opencv; GL libraries for glew/glfw).
 The build stage is `build.sh`, as on a normal install; the Rust and Go
 toolchains stay in the build stage and are not in the final image.
@@ -52,11 +54,23 @@ with its own dnf repos):
   (no default).
 - `CONF_DIR` in `podman/base.conf` (default `podman/conf`, relative to the
   repo root): files copied into the image — `repos.sh` (below), `ubi.repo` to
-  `/etc/yum.repos.d/` (both stages, before any `dnf install`), `pip.conf`
-  and `machine.crt` to `/root/.pip/` (before the `pip install`) and to
-  `KIDE_USER`'s `~/.pip/` (e.g. an index URL and
-  `cert = ~/.pip/machine.crt`; pip expands `~`, so the same line works for
-  both). `podman/conf` holds empty
+  `/etc/yum.repos.d/` (both stages, before any `dnf install`), and in the
+  runtime stage, system-wide as root:
+  - `pip.conf` to `/etc/pip.conf` (e.g. `[global]` `index-url = …`)
+  - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the index
+    goes here too, e.g. `[[index]]` `url = "https://<mirror>/simple"`
+    `default = true`
+  - every `*.crt` (PEM, also a chain with several certificates, or DER)
+    into the system trust store (`/etc/pki/ca-trust/source/anchors/kide-<name>.pem`,
+    `update-ca-trust`). The build checks that each certificate is in
+    `/etc/pki/tls/certs/ca-bundle.crt` and stops if one is not, or if a
+    non-empty `*.crt` holds no certificate. `PIP_CERT` and `SSL_CERT_FILE`
+    point pip and uv (and Python's `ssl`) at that bundle, so no `cert =`
+    line is needed; git and curl use it anyway. Empty files (the placeholder
+    `machine.crt`) and no `*.crt` at all add nothing.
+
+  Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
+  with that config. `podman/conf` holds empty
   placeholders; point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).
 - `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
