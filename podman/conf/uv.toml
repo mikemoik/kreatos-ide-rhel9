@@ -1,0 +1,40 @@
+# uv's system-wide config, copied to /etc/uv/uv.toml (podman/Containerfile).
+# uv does not read pip.conf: a company index has to be set here too.
+# Everything below is a commented sample; uncomment and adjust for your site.
+# Reference: https://docs.astral.sh/uv/reference/settings/
+
+# --- package index -------------------------------------------------------------
+# The company mirror/proxy of PyPI, used instead of pypi.org. Same URL as
+# `index-url` in pip.conf.
+#
+# [[index]]
+# name = "company"
+# url = "https://pypi.example.com/simple"
+# default = true
+
+# An extra internal index next to the default one (e.g. in-house packages).
+# Pin a package to it in a project's pyproject.toml with
+# [tool.uv.sources] mypkg = { index = "internal" }.
+#
+# [[index]]
+# name = "internal"
+# url = "https://gitlab.example.com/api/v4/projects/123/packages/pypi/simple"
+# explicit = true
+
+# --- TLS -----------------------------------------------------------------------
+# Not needed in the image: SSL_CERT_FILE points uv at the system CA bundle,
+# which holds the *.crt from CONF_DIR. Use this on hosts without that variable.
+#
+# native-tls = true
+
+# Only if the index has no valid certificate at all (better: add its CA as a
+# *.crt next to this file).
+#
+# allow-insecure-host = ["pypi.example.com"]
+
+# --- Python interpreters -------------------------------------------------------
+# Use the RHEL Pythons (python3.12 from dnf) and never download one from the
+# internet (no access to GitHub on the target).
+#
+# python-preference = "only-system"
+# python-downloads = "never"
