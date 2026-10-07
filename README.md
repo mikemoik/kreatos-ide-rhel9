@@ -192,6 +192,42 @@ Saved Sessions → Save*):
 | *Window → Appearance*: Font | a **Nerd Font Mono**, e.g. *JetBrainsMono Nerd Font Mono* (install the `.ttf` on Windows first, from <https://www.nerdfonts.com>) | kide's icons (file types, git, diagnostics); without it they show as boxes |
 | *Window*: Columns × Rows | at least `120 × 35` | room for the file tree and pickers |
 
+#### Ready-made session with the kreatos colours (`putty/kide.reg`)
+
+`putty/kide.reg` creates the PuTTY session **kide** with the kreatos ethereal
+colours (22 colours from the kreatos theme's `ghostty.conf`), so the terminal
+background and colours match kreatos. It also sets JetBrainsMono Nerd Font Mono
+10 pt, terminal type `xterm-256color`, 24-bit colour, and as *Connection → SSH →
+Remote command* it starts the kide container with fish as its shell:
+
+    podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint fish kide
+
+The remote command runs in your home directory on the RHEL box, so `/work` in
+the container is your home; `cd` to the project there, `kide` opens it. Leaving
+fish (`exit`) ends the container and the PuTTY session. Needs the `kide` image
+on the RHEL box ([In a podman container](#in-a-podman-container)). For a plain
+login shell instead (e.g. a normal install), clear the remote command in PuTTY
+and save.
+
+Install (no admin rights needed: it writes only to
+`HKCU\Software\SimonTatham\PuTTY\Sessions\kide`):
+
+1. Install the font **JetBrainsMono Nerd Font**: download
+   <https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip>
+   (project page: <https://www.nerdfonts.com/font-downloads>), unzip, select the
+   `JetBrainsMonoNerdFontMono-*.ttf` files, right-click → **Install** (not
+   "Install for all users" — the per-user install needs no admin rights).
+2. Copy `putty/kide.reg` to the Windows machine.
+3. Import it: double-click the file, or run `reg import kide.reg`.
+   If `regedit`/`reg.exe` are blocked by policy, set the 22 colours by hand in
+   PuTTY → Window → Colours instead (values are in the file, `Colour0`…`Colour21`).
+4. In PuTTY, load **kide**, enter the host and port, set the keepalive and
+   window size from the table above, and click **Save**.
+
+If the font is not installed, PuTTY falls back to a default font. Importing
+again overwrites only the colours, font, terminal type and remote command of
+that session; host, port and other settings stay. Not tested on Windows yet.
+
 **Each time:**
 
 1. Open the saved session, log in.
@@ -551,6 +587,7 @@ off TLS checks instead.
 | `dist` | upstream release tarballs kept as shipped (`manifest/dist.tsv`): CMake 4 and onnxruntime (prebuilt), ACE+TAO, OpenDDS, RapidJSON (source) |
 | `config` | the nvim config (kreatos `home/nvim`, adapted, see below) |
 | `yazi` | the yazi config bundled with kide (text files open in kide) |
+| `putty` | `kide.reg`: Windows PuTTY session with the kreatos colours ([PuTTY](#remote-kide-over-ssh-from-windows-putty)) |
 | `manifest/` | the pins; `parsers.lock.tsv` is generated from `parsers.txt`; `licenses.tsv` holds license facts the inventory cannot detect |
 | `VERSIONS` | every vendored component with upstream URL and commit/tag/sha256 |
 

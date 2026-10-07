@@ -1,0 +1,38 @@
+Windows Registry Editor Version 5.00
+
+; PuTTY session "kide": the kreatos ethereal theme (~/.local/share/kreatos/theme/ghostty.conf),
+; and on login it starts the kide container with fish (RemoteCommand).
+; Import without admin rights: double-click, or `reg import kide.reg`. Writes HKCU only.
+
+[HKEY_CURRENT_USER\Software\SimonTatham\PuTTY\Sessions\kide]
+"UseSystemColours"=dword:00000000
+"TerminalType"="xterm-256color"
+"RemoteCommand"="podman run --rm -it -e TERM -e SSH_CONNECTION -v \"$PWD:/work:Z\" -v kide-data:/root/.local --entrypoint fish kide"
+"Xterm256Colour"=dword:00000001
+"TrueColour"=dword:00000001
+"Font"="JetBrainsMono Nerd Font Mono"
+"FontHeight"=dword:0000000a
+"FontIsBold"=dword:00000000
+"FontCharSet"=dword:00000000
+"Colour0"="255,206,173"
+"Colour1"="255,206,173"
+"Colour2"="6,11,30"
+"Colour3"="6,11,30"
+"Colour4"="6,11,30"
+"Colour5"="255,206,173"
+"Colour6"="6,11,30"
+"Colour7"="109,125,182"
+"Colour8"="237,91,90"
+"Colour9"="250,170,169"
+"Colour10"="146,165,147"
+"Colour11"="196,207,196"
+"Colour12"="233,187,79"
+"Colour13"="247,220,156"
+"Colour14"="125,130,217"
+"Colour15"="194,196,240"
+"Colour16"="200,157,193"
+"Colour17"="234,215,231"
+"Colour18"="163,191,209"
+"Colour19"="223,234,240"
+"Colour20"="249,153,87"
+"Colour21"="255,206,173"

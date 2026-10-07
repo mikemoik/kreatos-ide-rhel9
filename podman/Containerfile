@@ -1,9 +1,9 @@
 # kide in a RHEL9-compatible container — no install on the host, only podman.
 # The base image and its repo setup are not in this file: podman/base.conf
 # (BASE=…, default Rocky Linux 9; CONF_DIR=…, default podman/conf with
-# ubi.repo, pip.conf, machine.crt) and podman/repos.sh (default: CRB + EPEL,
-# standing in for the RHEL9 target's own dnf repos). Replace those for
-# another base; this file stays as it is.
+# repos.sh (default: CRB + EPEL, standing in for the RHEL9 target's own dnf
+# repos), ubi.repo, pip.conf, machine.crt). Replace those for another base;
+# this file stays as it is.
 # Build from the repo root (dnf needs the repos; build.sh itself runs offline):
 #   podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub (the default base, no arg file):
@@ -23,7 +23,7 @@ ARG CONF_DIR
 FROM $BASE AS build
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
-COPY podman/repos.sh /tmp/repos.sh
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
 RUN /tmp/repos.sh && dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
         git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
         perl perl-Dumpvalue bzip2 \
@@ -53,7 +53,7 @@ FROM $BASE
 # Python 3.12 with numpy and pybind11, opencv, glew, glfw.
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
-COPY podman/repos.sh /tmp/repos.sh
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
 RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
         perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \

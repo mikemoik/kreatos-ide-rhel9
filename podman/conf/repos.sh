@@ -1,6 +1,7 @@
 #!/bin/sh
 # Repo setup for podman/Containerfile, run as root in both stages before any
-# dnf install. Replace this file together with podman/base.conf: whatever the
+# dnf install (copied from $CONF_DIR, see podman/base.conf). Replace it for
+# another base: whatever the
 # base image needs so that dnf finds every package the Containerfile installs
 # (e.g. copy in .repo files), or nothing if its repos are already set up.
 #

@@ -42,8 +42,8 @@ them, also binaries built without an RPATH (plain `g++ -L… -l…`, or
 
 ### Another base image
 
-The Containerfile names no base image and sets up no repos itself; two small
-files do, and only they change for another base (e.g. a company RHEL9 image
+The Containerfile names no base image and sets up no repos itself;
+`podman/base.conf` and the files in its `CONF_DIR` do, and only they change for another base (e.g. a company RHEL9 image
 with its own dnf repos):
 
 - `podman/base.conf`: `BASE=<image>`, used by both stages and read with
@@ -51,13 +51,13 @@ with its own dnf repos):
   Without the file, `--build-arg BASE=<image>`; with neither, the build stops
   (no default).
 - `CONF_DIR` in `podman/base.conf` (default `podman/conf`, relative to the
-  repo root): files copied into the image — `ubi.repo` to
+  repo root): files copied into the image — `repos.sh` (below), `ubi.repo` to
   `/etc/yum.repos.d/` (both stages, before any `dnf install`), `pip.conf`
   and `machine.crt` to `/root/.pip/` (before the `pip install`; e.g. an
   index URL and `cert = /root/.pip/machine.crt`). `podman/conf` holds empty
   placeholders; point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).
-- `podman/repos.sh`: runs as root in both stages before any `dnf install`.
+- `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
   Default: enables CRB and EPEL (Rocky's stand-in for the target repos).
   Replace it with whatever the base needs so dnf finds every package the
   Containerfile installs (e.g. copying `.repo` files into
