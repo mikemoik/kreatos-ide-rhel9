@@ -29,6 +29,7 @@ One call does everything:
 5. Opens a new shell in which `kide` works. Every later shell finds it too.
 
 No internet on the box: see [Offline install from the tarball](#offline-install-from-the-tarball).
+Repo on GitLab: see [Install from GitLab](#install-from-gitlab).
 Another prefix: `./install.sh /opt/kide`, or `curl … | bash -s /opt/kide`.
 
 Config-only update of an existing install (seconds, no compiling): plugins,
@@ -51,6 +52,23 @@ servers and formatters (`PREFIX/bin`) first on `PATH`. Its data, state and
 cache live under `NVIM_APPNAME=kreatos-ide` (`~/.local/share/kreatos-ide`, …),
 so it never mixes with another nvim. The repo is only read; intermediate files
 go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
+
+### Install from GitLab
+
+Same install when the repo is hosted on GitLab as `user/kreatos-ide-rhel9`.
+`install.sh` fetches the repo tarball from `$KIDE_TARBALL` (default: GitHub),
+so point it at GitLab's archive:
+
+    curl -fsSL https://gitlab.com/user/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.com/user/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
+
+Arguments go after `bash -s --` as above, e.g. config-only update:
+
+    curl -fsSL https://gitlab.com/user/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.com/user/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash -s -- --no-build
+
+Self-hosted GitLab: replace `gitlab.com` with its host. The repo has to be
+public: `install.sh` downloads the tarball with plain `curl`, without a token.
 
 ### Offline install from the tarball
 
