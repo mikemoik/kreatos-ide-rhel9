@@ -7,7 +7,7 @@
 # Build from the repo root (dnf needs the repos; build.sh itself runs offline):
 #   podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub (the default base, no arg file):
-#   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+#   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 # Run (rootless podman: root in the container is you on the host, so files in
 # the mounted project stay yours):
 #   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide [FILE…]

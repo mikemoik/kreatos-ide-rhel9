@@ -1,7 +1,7 @@
 # Plain RHEL9 with a sudo user, to try install.sh by hand like on the real box:
 #   docker build -t kreatos-ide-rhel9-plain -f test/Containerfile.plain test
 #   docker run --rm -it kreatos-ide-rhel9-plain
-# then: curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
+# then: curl -fsSL https://raw.githubusercontent.com/kreatos/kreatos-ide-rhel9/main/install.sh | bash
 # (sudo password: misw). Sample projects to try kide on: ~/proj (test/proj).
 FROM registry.access.redhat.com/ubi9/ubi:latest
 RUN dnf -y install sudo && dnf clean all \

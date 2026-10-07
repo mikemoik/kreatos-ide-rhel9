@@ -8,9 +8,11 @@ them prebuilt (CMake 4, onnxruntime), see [C/C++ libraries](#cc-libraries).
 
 ## Install (on the RHEL9 box)
 
-One call does everything:
+The repo is hosted on GitLab as `kreatos/kreatos-ide-rhel9`. One call does
+everything:
 
-    curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
+    curl -fsSL https://gitlab.com/kreatos/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.com/kreatos/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
 
 1. Installs the RHEL packages that are missing (asks for your sudo
    password): the build toolchain (gcc, make, cmake, python3, rust-toolset,
@@ -28,15 +30,20 @@ One call does everything:
    database in Python and C++/CMake to try kide on (see their READMEs).
 5. Opens a new shell in which `kide` works. Every later shell finds it too.
 
+`install.sh` downloads the repo tarball from `$KIDE_TARBALL`, which is why the
+call sets it to GitLab's archive. Self-hosted GitLab: replace `gitlab.com`
+with its host. The repo has to be public: `install.sh` downloads with plain
+`curl`, without a token. Mirror on GitHub: see [Install from GitHub](#install-from-github).
+
 No internet on the box: see [Offline install from the tarball](#offline-install-from-the-tarball).
-Repo on GitLab: see [Install from GitLab](#install-from-gitlab).
-Another prefix: `./install.sh /opt/kide`, or `curl … | bash -s /opt/kide`.
+Another prefix: `./install.sh /opt/kide`, or `curl … | KIDE_TARBALL=… bash -s /opt/kide`.
 
 Config-only update of an existing install (seconds, no compiling): plugins,
 nvim and yazi config, `kide` launcher and `PREFIX/bashrc` are refreshed;
 nvim, the treesitter parsers and the tools stay as they are:
 
-    curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash -s -- --no-build
+    curl -fsSL https://gitlab.com/kreatos/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.com/kreatos/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash -s -- --no-build
 
 (`./install.sh --no-build [PREFIX]` from a checkout.) A change to Neovim, the
 parser list or a tool still needs the full install.
@@ -53,22 +60,17 @@ cache live under `NVIM_APPNAME=kreatos-ide` (`~/.local/share/kreatos-ide`, …),
 so it never mixes with another nvim. The repo is only read; intermediate files
 go to `$KIDE_BUILD_DIR` (default `/tmp/kide-build`, safe to delete afterwards).
 
-### Install from GitLab
+### Install from GitHub
 
-Same install when the repo is hosted on GitLab as `user/kreatos-ide-rhel9`.
-`install.sh` fetches the repo tarball from `$KIDE_TARBALL` (default: GitHub),
-so point it at GitLab's archive:
+Same install from the GitHub copy `kreatos/kreatos-ide-rhel9`:
 
-    curl -fsSL https://gitlab.com/user/kreatos-ide-rhel9/-/raw/main/install.sh \
-      | KIDE_TARBALL=https://gitlab.com/user/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
+    curl -fsSL https://raw.githubusercontent.com/kreatos/kreatos-ide-rhel9/main/install.sh \
+      | KIDE_TARBALL=https://github.com/kreatos/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz bash
 
-Arguments go after `bash -s --` as above, e.g. config-only update:
+Arguments the same way, e.g. config-only update:
 
-    curl -fsSL https://gitlab.com/user/kreatos-ide-rhel9/-/raw/main/install.sh \
-      | KIDE_TARBALL=https://gitlab.com/user/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash -s -- --no-build
-
-Self-hosted GitLab: replace `gitlab.com` with its host. The repo has to be
-public: `install.sh` downloads the tarball with plain `curl`, without a token.
+    curl -fsSL https://raw.githubusercontent.com/kreatos/kreatos-ide-rhel9/main/install.sh \
+      | KIDE_TARBALL=https://github.com/kreatos/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz bash -s -- --no-build
 
 ### Offline install from the tarball
 
@@ -79,7 +81,7 @@ from somewhere.
 1. On any machine with internet, download the tarball (or use a copy someone
    gave you):
 
-       curl -fLo kreatos-ide-rhel9-main.tar.gz https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz
+       curl -fLo kreatos-ide-rhel9-main.tar.gz https://gitlab.com/kreatos/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz
 
 2. Copy it to the RHEL9 box (USB stick, `scp`, …).
 3. RHEL packages: `install.sh` installs the missing ones with `dnf`, which
@@ -100,7 +102,7 @@ from somewhere.
    another prefix, e.g. `./install.sh /opt/kide`):
 
        tar -xzf kreatos-ide-rhel9-main.tar.gz
-       cd kreatos-ide-rhel9-main
+       cd kreatos-ide-rhel9-main*/
        ./install.sh
 
    From an unpacked tree `install.sh` skips the download and does the other
@@ -129,17 +131,17 @@ Two ways to give it the repo:
   `podman/` are; the `.` at the end means "this directory":
 
       tar -xzf kreatos-ide-rhel9-main.tar.gz
-      cd kreatos-ide-rhel9-main
+      cd kreatos-ide-rhel9-main*/
       podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 
   Run from anywhere else, give the path instead of `.`:
-  `podman build --build-arg-file ~/kreatos-ide-rhel9-main/podman/base.conf -t kide -f ~/kreatos-ide-rhel9-main/podman/Containerfile ~/kreatos-ide-rhel9-main`.
+  `podman build --build-arg-file ~/kreatos-ide-rhel9/podman/base.conf -t kide -f ~/kreatos-ide-rhel9/podman/Containerfile ~/kreatos-ide-rhel9` (with the tree unpacked to `~/kreatos-ide-rhel9`).
   The directory is only read and can be deleted once the image is built.
 
-- **Straight from GitHub** (no tarball, no checkout; podman clones the repo
-  itself):
+- **Straight from GitLab** (no tarball, no checkout; podman clones the repo
+  itself; public project only):
 
-      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
 
   (the arg file is local, so the base image is given directly)
 
@@ -423,7 +425,7 @@ gets one setting, see below):
 The repo is plain git (no LFS, no submodules; ~120 MB packed, largest file
 25 MB), so any GitLab or other git server can host it. In GitLab, first
 create an **empty** project (no README, no license): e.g.
-`gitlab.example.com/tools/kreatos-ide-rhel9`. Below, replace that URL with
+`gitlab.example.com/kreatos/kreatos-ide-rhel9`. Below, replace that URL with
 yours.
 
 ### Copy the repo over
@@ -431,10 +433,10 @@ yours.
 **A machine that reaches both GitHub and the GitLab** — copy all
 branches and tags:
 
-    git clone --mirror https://github.com/mikemoik/kreatos-ide-rhel9.git
+    git clone --mirror https://github.com/kreatos/kreatos-ide-rhel9.git
     cd kreatos-ide-rhel9.git
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --all
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --tags
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git --all
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git --tags
 
 (`--all` + `--tags` rather than `push --mirror`: the GitHub mirror also holds
 GitHub's pull-request refs, which GitLab rejects.)
@@ -444,22 +446,22 @@ network): carry a git bundle over, a single file holding the whole repo
 with its history:
 
     # outside, with internet
-    git clone --mirror https://github.com/mikemoik/kreatos-ide-rhel9.git
+    git clone --mirror https://github.com/kreatos/kreatos-ide-rhel9.git
     git -C kreatos-ide-rhel9.git bundle create "$PWD/kreatos-ide-rhel9.bundle" --branches --tags
 
     # inside, after copying kreatos-ide-rhel9.bundle (~115 MB) over
     git clone --mirror kreatos-ide-rhel9.bundle kreatos-ide-rhel9.git
     cd kreatos-ide-rhel9.git
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --all
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git --tags
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git --all
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git --tags
 
 **Only the default branch** (`main` as on GitHub, with its history; no
 other branches, no tags). Use a normal single-branch clone instead of the
 mirror:
 
-    git clone --single-branch https://github.com/mikemoik/kreatos-ide-rhel9.git
+    git clone --single-branch https://github.com/kreatos/kreatos-ide-rhel9.git
     cd kreatos-ide-rhel9
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git HEAD:refs/heads/main
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git HEAD:refs/heads/main
 
 As a bundle for the offline case (`HEAD` included, so a clone of it checks
 out `main`):
@@ -468,17 +470,17 @@ out `main`):
     # inside:
     git clone kreatos-ide-rhel9-main.bundle kreatos-ide-rhel9
     cd kreatos-ide-rhel9
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git HEAD:refs/heads/main
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git HEAD:refs/heads/main
 
 **Only the latest state, no history** (one fresh commit holding today's
 files; it saves little, ~100 MB instead of ~115 MB, since the vendored
 sources are most of the size, but the GitLab then holds no GitHub history):
 
-    git clone --depth 1 https://github.com/mikemoik/kreatos-ide-rhel9.git
+    git clone --depth 1 https://github.com/kreatos/kreatos-ide-rhel9.git
     cd kreatos-ide-rhel9
     git checkout --orphan snapshot
     git commit -m "kreatos-ide-rhel9 snapshot of $(git rev-parse --short origin/main)"
-    git push git@gitlab.example.com:tools/kreatos-ide-rhel9.git snapshot:refs/heads/main
+    git push git@gitlab.example.com:kreatos/kreatos-ide-rhel9.git snapshot:refs/heads/main
     # or for the offline case: git bundle create "$PWD/../kreatos-ide-rhel9-snapshot.bundle" snapshot
     # inside: git clone -b snapshot …-snapshot.bundle kreatos-ide-rhel9, then push as above
 
@@ -506,14 +508,14 @@ nothing in the repo has to be edited.
 **Project readable without login** (visibility *internal* still needs a
 login, so this means *public*):
 
-    curl -fsSL https://gitlab.example.com/tools/kreatos-ide-rhel9/-/raw/main/install.sh \
-      | KIDE_TARBALL=https://gitlab.example.com/tools/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
+    curl -fsSL https://gitlab.example.com/kreatos/kreatos-ide-rhel9/-/raw/main/install.sh \
+      | KIDE_TARBALL=https://gitlab.example.com/kreatos/kreatos-ide-rhel9/-/archive/main/kreatos-ide-rhel9-main.tar.gz bash
 
 **Private or internal project** (the usual case): clone with your GitLab
 login, then install from the checkout. `install.sh` sees the checkout and
 skips the download, so no URL needs changing:
 
-    git clone https://gitlab.example.com/tools/kreatos-ide-rhel9.git
+    git clone https://gitlab.example.com/kreatos/kreatos-ide-rhel9.git
     cd kreatos-ide-rhel9
     ./install.sh
 

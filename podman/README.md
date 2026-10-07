@@ -25,7 +25,7 @@ top directory (where `install.sh` and `podman/` are; ~5–10 min):
 
 Without a checkout, straight from GitHub (no curl needed):
 
-    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 
 The build stage has two layers: the compile step (`vendor/`, `dist/`, `manifest/`,
 `scripts/`, `build.sh`) and the config step (`config/`, `yazi/`, `fish/`, run

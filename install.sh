@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install.sh [--no-build] [PREFIX] — the whole install in one call:
 #
-#   curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/kreatos/kreatos-ide-rhel9/main/install.sh | bash
 #   curl -fsSL …/install.sh | bash -s -- --no-build   # config only, see build.sh
 #   ./install.sh [--no-build] [PREFIX]                 # from a checkout (no download)
 #
@@ -13,7 +13,7 @@
 #   5. starts a new shell in which `kide` is on PATH
 set -euo pipefail
 
-KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
+KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/kreatos/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
 
 # build toolchain, tar (download), git (gitsigns, lazygit), file (yazi), the
 # C/C++ tools kide uses from RHEL, libevent/ncurses headers (tmux build), and
