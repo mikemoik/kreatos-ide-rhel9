@@ -112,16 +112,18 @@ Two ways to give it the repo:
 
       tar -xzf kreatos-ide-rhel9-main.tar.gz
       cd kreatos-ide-rhel9-main
-      podman build -t kide -f podman/Containerfile .
+      podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 
   Run from anywhere else, give the path instead of `.`:
-  `podman build -t kide -f ~/kreatos-ide-rhel9-main/podman/Containerfile ~/kreatos-ide-rhel9-main`.
+  `podman build --build-arg-file ~/kreatos-ide-rhel9-main/podman/base.conf -t kide -f ~/kreatos-ide-rhel9-main/podman/Containerfile ~/kreatos-ide-rhel9-main`.
   The directory is only read and can be deleted once the image is built.
 
 - **Straight from GitHub** (no tarball, no checkout; podman clones the repo
   itself):
 
-      podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+
+  (the arg file is local, so the base image is given directly)
 
 Either way the `dnf install` steps in the Containerfile download packages
 (Rocky + EPEL repos) and the `pip install` step pip and uv (PyPI), so the
@@ -505,7 +507,7 @@ The offline tarball install works the same with a tarball from GitLab
 unpacks to `kreatos-ide-rhel9-main-<commit>/` instead of
 `kreatos-ide-rhel9-main/`, so `cd kreatos-ide-rhel9-main*/`.
 
-**Podman image** from the GitLab: build from the clone (`podman build -t kide
+**Podman image** from the GitLab: build from the clone (`podman build --build-arg-file podman/base.conf -t kide
 -f podman/Containerfile .` in it), as described in
 [In a podman container](#in-a-podman-container). Building straight from the
 URL only works for a project readable without login.

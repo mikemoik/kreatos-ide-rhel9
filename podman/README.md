@@ -21,11 +21,11 @@ top directory (where `install.sh` and `podman/` are; ~5–10 min):
 
     tar -xzf kreatos-ide-rhel9-main.tar.gz
     cd kreatos-ide-rhel9-main
-    podman build -t kide -f podman/Containerfile .
+    podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 
 Without a checkout, straight from GitHub (no curl needed):
 
-    podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
+    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
 
 The build stage has two layers: the compile step (`vendor/`, `dist/`, `manifest/`,
 `scripts/`, `build.sh`) and the config step (`config/`, `yazi/`, `fish/`, run
@@ -33,8 +33,37 @@ with `build.sh --no-build`). After a change to the config only, podman reuses
 the compiled layer and the rebuild takes seconds; a change to the compile
 inputs rebuilds everything (~10–15 min).
 
-The `dnf install` steps need the Rocky and EPEL repos and the `pip install`
-step PyPI; `build.sh` itself never touches the network. The build context is what git tracks (`.containerignore`
+### Libraries: no LD_LIBRARY_PATH
+
+`/etc/ld.so.conf.d/kide.conf` lists `/opt/kide/lib` (ACE, TAO, OpenDDS) and
+`/opt/kide/lib64` (onnxruntime), so every program in the container finds
+them, also binaries built without an RPATH (plain `g++ -L… -l…`, or
+`cmake --install`ed elsewhere). No `LD_LIBRARY_PATH` is set.
+
+### Another base image
+
+The Containerfile names no base image and sets up no repos itself; two small
+files do, and only they change for another base (e.g. a company RHEL9 image
+with its own dnf repos):
+
+- `podman/base.conf`: `BASE=<image>`, used by both stages and read with
+  `--build-arg-file` (podman ≥ 4.7). Default: `docker.io/rockylinux/rockylinux:9`.
+  Without the file, `--build-arg BASE=<image>`; with neither, the build stops
+  (no default).
+- `CONF_DIR` in `podman/base.conf` (default `podman/conf`, relative to the
+  repo root): files copied into the image — `ubi.repo` to
+  `/etc/yum.repos.d/` (both stages, before any `dnf install`), `pip.conf`
+  and `machine.crt` to `/root/.pip/` (before the `pip install`; e.g. an
+  index URL and `cert = /root/.pip/machine.crt`). `podman/conf` holds empty
+  placeholders; point `CONF_DIR` at a directory with the real ones (it has
+  to be inside the build context).
+- `podman/repos.sh`: runs as root in both stages before any `dnf install`.
+  Default: enables CRB and EPEL (Rocky's stand-in for the target repos).
+  Replace it with whatever the base needs so dnf finds every package the
+  Containerfile installs (e.g. copying `.repo` files into
+  `/etc/yum.repos.d/`), or with an empty script if the base is ready as is.
+
+The `dnf install` steps need those repos and the `pip install` step PyPI; `build.sh` itself never touches the network. The build context is what git tracks (`.containerignore`
 leaves out `.git` and `vendor.staging`).
 
 ## Run
