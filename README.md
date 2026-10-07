@@ -152,7 +152,17 @@ build needs internet or a mirror. For a box without either, see the end of
 this section.
 
 Run it on your `~/workspace` (rootless podman, as your normal user — not
-`sudo podman` — so files kide writes stay yours):
+`sudo podman` — so files kide writes stay yours).
+
+`podman/start.sh` does exactly this (it creates `~/workspace` if missing,
+takes the uid/gid from `podman/base.conf` and passes on `TERM` and
+`SSH_CONNECTION`); `--shell` starts fish instead of kide:
+
+    podman/start.sh                       # kide in ~/workspace
+    podman/start.sh myproject/src/main.py # a file, relative to ~/workspace
+    podman/start.sh --shell               # fish
+
+By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
 
     podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
     podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py

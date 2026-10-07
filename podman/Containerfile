@@ -11,8 +11,9 @@
 #   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 # Every step that installs or writes system files runs as root (USER root, also
 # when the base image defaults to another user); the image runs as KIDE_USER.
-# Run with rootless podman, mapping you on the host to that user, so files in
-# the mounted ~/workspace stay yours (create it on the host first):
+# Start it with podman/start.sh [--shell] [FILE…], which runs rootless podman,
+# mapping you on the host to that user, so files in the mounted ~/workspace
+# stay yours:
 #   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide [FILE…]
 # A shell (fish, with the IDE's aliases from fish/):
 #   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
