@@ -142,7 +142,7 @@ Two ways to give it the repo:
 - **Straight from GitLab** (no tarball, no checkout; podman clones the repo
   itself; public project only):
 
-      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
 
   (the arg file is local, so the base image is given directly)
 

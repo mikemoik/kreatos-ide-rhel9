@@ -1,7 +1,8 @@
 # uv's system-wide config, copied to /etc/uv/uv.toml (podman/Containerfile).
-# uv does not read pip.conf: the company repo is set here too.
-# DUMMY values: replace the URL with the company's pip package repo on prod
-# (the same as index-url in pip.conf).
+# uv does not read pip.conf: the pip package repo is set here too.
+# The index URL below is a placeholder (PIP_INDEX_URL between @ signs); the
+# build replaces it with PIP_INDEX_URL from
+# podman/base.conf (the same URL as index-url in pip.conf; default PyPI).
 # Reference: https://docs.astral.sh/uv/reference/settings/
 #
 # Order matters (TOML): the plain settings must stay above the first [[index]]
@@ -22,8 +23,8 @@ system-certs = true
 # /etc/kide/pip-server.crt (a link to KIDE_USER's ~/.pip/pip-server.crt), at
 # build time and runtime.
 
-# The company pip package repo, used instead of pypi.org.
+# The pip package repo (on prod the company's, instead of pypi.org).
 [[index]]
-name = "company"
-url = "https://pypi.example.com/simple"
+name = "pip-repo"
+url = "@PIP_INDEX_URL@"
 default = true

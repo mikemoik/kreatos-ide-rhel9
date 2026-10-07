@@ -27,7 +27,7 @@ top directory (where `install.sh` and `podman/` are; ~5–10 min):
 
 Without a checkout, straight from GitHub (no curl needed):
 
-    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
+    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 
 The build stage has two layers: the compile step (`vendor/`, `dist/`, `manifest/`,
 `scripts/`, `build.sh`) and the config step (`config/`, `yazi/`, `fish/`, run
@@ -56,9 +56,8 @@ with its own dnf repos):
   repo root): files copied into the image — `repos.sh` (below), `ubi.repo` to
   `/etc/yum.repos.d/` (both stages, before any `dnf install`), and in the
   runtime stage, system-wide as root:
-  - `pip.conf` to `/etc/pip.conf`: `index-url` (the company pip package
-    repo) and `client-cert = ~/.pip/pip-server.crt` (pip expands `~` per
-    user)
+  - `pip.conf` to `/etc/pip.conf`: `index-url` (the pip package repo) and
+    `client-cert = ~/.pip/pip-server.crt` (pip expands `~` per user)
   - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the repo
     goes here too (`[[index]]` with `default = true`), plus
     `system-certs = true` (server certificate checked against the system
@@ -74,12 +73,14 @@ with its own dnf repos):
     has no config setting for it).
 
   Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
-  with that config and the client certificate. `podman/conf` holds
-  **dummies**: `pip.conf` and `uv.toml` with the repo URL
-  `https://pypi.example.com/simple`, a self-signed `pip-server.crt`, an
-  empty `ubi.repo`. Replace them with the real ones on prod. With the dummy
-  URL the build stops at that pip install (the repo does not exist). Point `CONF_DIR` at a directory with the real ones (it has
+  with that config and the client certificate. `podman/conf` holds a
+  self-signed dummy `pip-server.crt` and an empty `ubi.repo`; replace them
+  with the real ones on prod. Point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).
+- `PIP_INDEX_URL` in `podman/base.conf` (default `https://pypi.org/simple`):
+  the pip package repo. `pip.conf` and `uv.toml` are templates; the build
+  replaces `@PIP_INDEX_URL@` in both with it (and stops if it is empty). On
+  prod set the company repo here, nothing else changes.
 - `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
   Default: enables CRB and EPEL (Rocky's stand-in for the target repos).
   Replace it with whatever the base needs so dnf finds every package the
