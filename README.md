@@ -356,6 +356,14 @@ libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 `LD_LIBRARY_PATH`. The bundled cmake finds both packages without hints (it
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
+The fish config sets `ACE_ROOT`, `TAO_ROOT` and `DDS_ROOT` (`PREFIX/share/{ace,tao,dds}`)
+for running `opendds_idl` or MPC by hand. `build.sh` removes the build-tree
+paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
+the package resolves to `PREFIX`.
+
+Gotcha: `onnxruntime_c_api.h` defines a macro `NO_EXCEPTION`, which breaks
+TAO's `CORBA::exception_type` enum (`tao/Exception.h`). Keep onnxruntime and
+TAO/OpenDDS headers in separate `.cpp` files (as `test/devlibs` does).
 
 From the box's dnf repos instead (installed by `install.sh`, in the podman
 image too): `python3.12` with `numpy` and `pybind11` (+ `-devel`),

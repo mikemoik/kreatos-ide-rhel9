@@ -6,6 +6,6 @@ project(devlibs LANGUAGES CXX)
 find_package(onnxruntime REQUIRED)
 find_package(OpenDDS REQUIRED)
 
-add_executable(devlibs main.cpp)
+add_executable(devlibs main.cpp ort.cpp)
 opendds_target_sources(devlibs Msg.idl)
 target_link_libraries(devlibs onnxruntime::onnxruntime OpenDDS::Dcps)

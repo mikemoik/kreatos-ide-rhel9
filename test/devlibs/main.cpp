@@ -1,16 +1,16 @@
 // test/run.sh: links onnxruntime and OpenDDS, uses an IDL-generated type
-#include <onnxruntime_cxx_api.h>
-
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/Version.h>
 
 #include "MsgTypeSupportImpl.h"
 
 #include <iostream>
+#include <string>
+
+std::string ort_version(); // ort.cpp
 
 int main(int argc, char* argv[]) {
-  std::cout << "onnxruntime " << Ort::GetVersionString() << "\n";
-  Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "kide");
+  std::cout << "onnxruntime " << ort_version() << "\n";
 
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   Kide::Msg msg;

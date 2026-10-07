@@ -10,6 +10,12 @@ set -l kide_prefix (path resolve (status dirname)/../../..)
 contains -- $kide_prefix/bin $PATH; or set -gx PATH $kide_prefix/bin $PATH
 set -gx YAZI_CONFIG_HOME $kide_prefix/share/kreatos-ide/yazi
 
+# ACE+TAO and OpenDDS in PREFIX (as their share/*/*-devel.sh): opendds_idl and
+# MPC need them when run by hand; find_package(OpenDDS) does not
+set -gx ACE_ROOT $kide_prefix/share/ace
+set -gx TAO_ROOT $kide_prefix/share/tao
+set -gx DDS_ROOT $kide_prefix/share/dds
+
 # functions/: the IDE's fish functions (autoloaded, e.g. tm)
 set -l kide_functions (status dirname)/functions
 contains -- $kide_functions $fish_function_path

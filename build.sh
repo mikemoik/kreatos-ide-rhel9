@@ -346,6 +346,14 @@ tar -xzf "$(dist rapidjson)" -C "$dds/rapidjson" --strip-components=1
     --no-debug --optimize --install-origin-relative >"$dds/configure.log" &&
   make -j "$JOBS" >"$dds/make.log" 2>&1 && make install >"$dds/install.log" 2>&1) ||
   { tail -30 "$dds/configure.log" "$dds/make.log" "$dds/install.log" 2>/dev/null; exit 1; }
+# the installed config.cmake still names the build tree's ACE/TAO/MPC/RapidJSON,
+# which would win over PREFIX (its OPENDDS_USE_PREFIX_PATH) and break once
+# $BUILD is gone: drop them
+sed -i -E '/^set\(OPENDDS_(SOURCE_DIR|MPC|ACE|TAO|RAPIDJSON) /d' "$PREFIX/share/cmake/OpenDDS/config.cmake"
+if grep -v '^#' "$PREFIX/share/cmake/OpenDDS/config.cmake" | grep -qF "$dds"; then
+  echo "OpenDDS config.cmake still refers to $dds" >&2
+  exit 1
+fi
 
 fi # binaries
 

@@ -24,6 +24,8 @@ docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash 
     source /opt/kide/share/kreatos-ide/fish/config.fish
     test \$PATH[1] = /opt/kide/bin; or exit 1
     test \$YAZI_CONFIG_HOME = /opt/kide/share/kreatos-ide/yazi; or exit 1
+    test \$DDS_ROOT = /opt/kide/share/dds; or exit 1
+    opendds_idl --version 2>&1 | string match -q \"*3.34*\"; or exit 1
     functions -q vi lg y ll ff ffex tm; or exit 1
     command -q lazygit; or exit 1
     command -q tmux; or exit 1
@@ -39,5 +41,5 @@ docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash 
   # the installed tools run from PREFIX alone ($ORIGIN-relative RPATH)
   rm -rf "${KIDE_BUILD_DIR:-/tmp/kide-build}/dds"
   tao_idl -V 2>&1 | grep -m1 "TAO_IDL_FE"
-  opendds_idl --version 2>&1 | head -1
+  DDS_ROOT=/opt/kide/share/dds opendds_idl --version
 '
