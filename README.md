@@ -1,6 +1,6 @@
 # kreatos-ide-rhel9
 
-misw's kreatos Neovim setup, packaged to build **offline from source** on
+kreatos Neovim setup, packaged to build **offline from source** on
 RHEL9. Everything the build needs is in this repo; the build never touches the
 network, and `vendor/` holds no binaries (checked by `scripts/check-sources.py`).
 The one exception is `dist/`: upstream release tarballs kept as shipped, two of
