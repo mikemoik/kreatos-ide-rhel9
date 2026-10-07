@@ -61,8 +61,10 @@ with its own dnf repos):
   - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the repo
     goes here too (`[[index]]` with `default = true`), plus
     `system-certs = true` (server certificate checked against the system
-    trust store) and `python-preference = "only-system"`,
-    `python-downloads = "never"`
+    trust store), `python-preference = "only-system"`,
+    `python-downloads = "never"` and `link-mode = "copy"` (uv's cache and the
+    install target are on different filesystems in the container, so
+    hardlinks fail with "Failed to hardlink files")
   - `pip-server.crt`: the pip server's certificate, or the company CA that
     signed it (PEM, `BEGIN CERTIFICATE`; the build stops on anything else or
     on a private key in it). It goes into the system trust store

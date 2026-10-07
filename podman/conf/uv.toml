@@ -18,6 +18,13 @@ python-downloads = "never"
 # uv's own bundled roots. uv 0.12: `system-certs` (`native-tls` is deprecated).
 system-certs = true
 
+# Copy packages from uv's cache instead of hardlinking them. In the container
+# the cache (~/.cache/uv, in the image's filesystem) and the target (a venv in
+# the /workspace mount, the base image's venv, ~/.local) are on different
+# filesystems, so hardlinks fail and uv warns "Failed to hardlink files" on
+# every install before falling back to a copy anyway.
+link-mode = "copy"
+
 # The pip package repo (on prod the company's, instead of pypi.org).
 [[index]]
 name = "pip-repo"
