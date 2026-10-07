@@ -2,8 +2,30 @@
 # uv does not read pip.conf: a company index has to be set here too.
 # Everything below is a commented sample; uncomment and adjust for your site.
 # Reference: https://docs.astral.sh/uv/reference/settings/
+#
+# Order matters (TOML): the plain settings must stay above the first [[index]]
+# block, otherwise they belong to that index and uv ignores them.
 
-# --- package index -------------------------------------------------------------
+# --- Python interpreters -------------------------------------------------------
+# Use the RHEL Pythons (python3.12 from dnf) and never download one from the
+# internet (no access to GitHub on the target).
+#
+# python-preference = "only-system"
+# python-downloads = "never"
+
+# --- TLS -----------------------------------------------------------------------
+# Not needed in the image: SSL_CERT_FILE points uv at the system CA bundle,
+# which holds the *.crt from CONF_DIR. Use the system trust store on hosts
+# without that variable (uv 0.12: `system-certs`; `native-tls` is deprecated).
+#
+# system-certs = true
+
+# Only if the index has no valid certificate at all (better: add its CA as a
+# *.crt next to this file).
+#
+# allow-insecure-host = ["pypi.example.com"]
+
+# --- package indexes (keep these last) -----------------------------------------
 # The company mirror/proxy of PyPI, used instead of pypi.org. Same URL as
 # `index-url` in pip.conf.
 #
@@ -20,21 +42,3 @@
 # name = "internal"
 # url = "https://gitlab.example.com/api/v4/projects/123/packages/pypi/simple"
 # explicit = true
-
-# --- TLS -----------------------------------------------------------------------
-# Not needed in the image: SSL_CERT_FILE points uv at the system CA bundle,
-# which holds the *.crt from CONF_DIR. Use this on hosts without that variable.
-#
-# native-tls = true
-
-# Only if the index has no valid certificate at all (better: add its CA as a
-# *.crt next to this file).
-#
-# allow-insecure-host = ["pypi.example.com"]
-
-# --- Python interpreters -------------------------------------------------------
-# Use the RHEL Pythons (python3.12 from dnf) and never download one from the
-# internet (no access to GitHub on the target).
-#
-# python-preference = "only-system"
-# python-downloads = "never"
