@@ -1,6 +1,7 @@
 # kide in a RHEL9-compatible (Rocky Linux 9) container — no install on the
-# host, only podman. Rocky, not UBI: the EPEL packages (opencv, glew, glfw)
-# need packages UBI does not carry.
+# host, only podman. Rocky + CRB + EPEL stand in for the RHEL9 target's own
+# dnf repos, which carry every package installed below; UBI cannot (opencv,
+# glew, glfw need packages UBI does not carry).
 # Build from the repo root (dnf needs the Rocky + EPEL repos; build.sh itself runs offline):
 #   podman build -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub:

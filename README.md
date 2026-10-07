@@ -16,9 +16,10 @@ One call does everything:
    password): the build toolchain (gcc, make, cmake, python3, rust-toolset,
    golang, libevent-devel and ncurses-devel for tmux, perl, perl-Dumpvalue
    and bzip2 for ACE+TAO/OpenDDS), tar, git-core, the C/C++ tools below, and
-   the [C/C++ libraries](#cc-libraries) RHEL ships. Those come partly from
-   CRB and EPEL, which it enables first (CRB via `subscription-manager` on
-   RHEL; EPEL by installing `epel-release`).
+   the [C/C++ libraries](#cc-libraries) that come as RHEL packages. All
+   from the box's configured dnf repos (install.sh adds no repos); stock RHEL
+   has pybind11 only in CRB and opencv/glew/glfw only in EPEL, so the repos
+   have to carry them.
 2. Downloads this repo as a tarball into a temp dir (removed afterwards).
 3. Builds and installs kreatos-ide offline into `~/.local/kreatos-ide`
    (`build.sh`, ~5 min).
@@ -69,15 +70,13 @@ from somewhere.
    installed beforehand: `install.sh` only calls `dnf` for packages that are
    missing, and stops if `dnf` fails. The full list:
 
-       sudo subscription-manager repos --enable codeready-builder-for-rhel-9-$(uname -m)-rpms
-       sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
        sudo dnf install gcc make cmake python3 rust-toolset golang findutils diffutils tar \
            git-core gcc-c++ clang-tools-extra gdb lldb file libevent-devel ncurses-devel \
            perl perl-Dumpvalue bzip2 python3.12 python3.12-pip python3.12-numpy \
            python3.12-pybind11 python3.12-pybind11-devel opencv-devel glew-devel glfw glfw-devel
 
-   (The first two lines enable CRB and EPEL; on an offline box the mirror has
-   to carry them too.)
+   (python3.12-pybind11*, opencv-devel, glew-devel and glfw* are CRB/EPEL
+   packages on stock RHEL; the box's repos have to provide them.)
 
 4. Unpack and install (into `~/.local/kreatos-ide`, ~5 min; an argument picks
    another prefix, e.g. `./install.sh /opt/kide`):
@@ -358,9 +357,12 @@ libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
 
-From RHEL instead (installed by `install.sh`, in the podman image too):
-`python3.12` with `numpy` and `pybind11` (+ `-devel`, CRB), `opencv-devel`,
-`glew-devel`, `glfw`/`glfw-devel` (EPEL), `perl` + `perl-Dumpvalue`. The
+From the box's dnf repos instead (installed by `install.sh`, in the podman
+image too): `python3.12` with `numpy` and `pybind11` (+ `-devel`),
+`opencv-devel`, `glew-devel`, `glfw`/`glfw-devel`, `perl` + `perl-Dumpvalue`.
+On stock RHEL pybind11 is in CRB and opencv/glew/glfw in EPEL; the target's
+own repos are expected to carry them. The podman image (Rocky 9 + CRB + EPEL)
+stands in for that here. The
 podman image also has the newest `pip` and `uv` for Python 3.12
 (`python3.12 -m pip install --upgrade pip uv`, in `/usr/local/bin`).
 
@@ -616,8 +618,8 @@ EPEL ones); building `podman/Containerfile` covers them.
 
 To try the install by hand in the same container (the container and its
 install are gone on exit; without network, `install.sh` stops at the CRB/EPEL
-packages the UBI image lacks — use `build.sh /opt/kide` there to skip the
-package step):
+packages the UBI image lacks (opencv etc.) — use `build.sh /opt/kide`
+there to skip the package step):
 
     docker run --rm -it --network=none -v "$PWD:/src:ro" kreatos-ide-rhel9-test /src/install.sh
 
