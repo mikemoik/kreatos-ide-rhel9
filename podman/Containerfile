@@ -15,8 +15,20 @@ FROM registry.access.redhat.com/ubi9/ubi:latest AS build
 RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
         git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
     && dnf clean all
-COPY . /src
-RUN /src/build.sh /opt/kide
+# Two layers, so that a config-only change rebuilds in seconds:
+# 1. compile: only what the binaries are built from (vendor/, manifest/,
+#    scripts/, build.sh). podman reuses this layer until one of them changes.
+#    The config dirs are empty here; build.sh still copies them.
+COPY build.sh /src/
+COPY manifest /src/manifest
+COPY scripts /src/scripts
+COPY vendor /src/vendor
+RUN mkdir -p /src/config /src/yazi /src/fish && /src/build.sh /opt/kide
+# 2. config: nvim, yazi and fish config, plugins, launcher (build.sh --no-build)
+COPY config /src/config
+COPY yazi /src/yazi
+COPY fish /src/fish
+RUN /src/build.sh --no-build /opt/kide
 
 # --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
 FROM registry.access.redhat.com/ubi9/ubi:latest
