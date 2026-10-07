@@ -70,7 +70,7 @@ with its own dnf repos):
     and uv call trusts the repo, at build time and at runtime: pip through
     `cert` in `/etc/pip.conf`, uv through `system-certs = true`.
 
-  Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
+  Then `KIDE_USER` runs `/usr/bin/python3.12 -m pip install --user --upgrade pip uv` (the dnf Python by full path: pip refuses `--user` in a venv, which some base images put first on `PATH`)
   with that config. `podman/conf` holds a
   self-signed dummy `pip-server.crt` and an empty `ubi.repo`; replace them
   with the real ones on prod. Point `CONF_DIR` at a directory with the real ones (it has

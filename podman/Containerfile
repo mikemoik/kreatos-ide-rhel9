@@ -144,7 +144,9 @@ RUN set -e; \
 USER $KIDE_USER
 # as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
 # (pip install --user, with /etc/pip.conf: company repo, trusted via pip-server.crt);
-# root installs nothing with pip.
-RUN python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
+# root installs nothing with pip. /usr/bin/python3.12, the dnf one: a base
+# image may put a venv's python first on PATH (e.g. /opt/app-root in Red Hat's
+# Python images), and pip refuses --user inside a venv.
+RUN /usr/bin/python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
 WORKDIR /work
 ENTRYPOINT ["kide"]
