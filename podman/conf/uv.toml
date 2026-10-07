@@ -15,10 +15,13 @@
 
 # --- TLS -----------------------------------------------------------------------
 # Not needed in the image: SSL_CERT_FILE points uv at the system CA bundle,
-# which holds the *.crt from CONF_DIR. Use the system trust store on hosts
+# which holds the CA *.crt from CONF_DIR. Use the system trust store on hosts
 # without that variable (uv 0.12: `system-certs`; `native-tls` is deprecated).
 #
 # system-certs = true
+
+# The client certificate (mTLS, CONF_DIR/machine.crt) has no setting here: uv
+# reads it from SSL_CLIENT_CERT, which the image sets for KIDE_USER.
 
 # Only if the index has no valid certificate at all (better: add its CA as a
 # *.crt next to this file).

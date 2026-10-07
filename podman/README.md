@@ -60,17 +60,25 @@ with its own dnf repos):
   - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the index
     goes here too, e.g. `[[index]]` `url = "https://<mirror>/simple"`
     `default = true`
-  - every `*.crt` (PEM, also a chain with several certificates, or DER)
-    into the system trust store (`/etc/pki/ca-trust/source/anchors/kide-<name>.pem`,
-    `update-ca-trust`). The build checks that each certificate is in
-    `/etc/pki/tls/certs/ca-bundle.crt` and stops if one is not, or if a
-    non-empty `*.crt` holds no certificate. `PIP_CERT` and `SSL_CERT_FILE`
-    point pip and uv (and Python's `ssl`) at that bundle, so no `cert =`
-    line is needed; git and curl use it anyway. Empty files (the placeholder
-    `machine.crt`) and no `*.crt` at all add nothing.
+  - `machine.crt` is the **client certificate** (mTLS: certificate and its
+    private key in one PEM file; the build stops if the key is missing). It
+    does not go into the trust store: `KIDE_USER` keeps it as
+    `~/.pip/machine.crt` (mode 600), and its fish and bash config set
+    `PIP_CLIENT_CERT` (pip) and `SSL_CLIENT_CERT` (uv, which has no
+    `uv.toml` setting for it) to it, so `pip.conf` needs no `client-cert`
+    line. Empty: no client certificate.
+  - every other `*.crt` is a **CA** (PEM, also a chain with several
+    certificates, or DER) and goes into the system trust store
+    (`/etc/pki/ca-trust/source/anchors/kide-<name>.pem`, `update-ca-trust`).
+    The build checks that each certificate is in
+    `/etc/pki/tls/certs/ca-bundle.crt` and stops if one is not, or if such a
+    file holds a private key (a client certificate under another name) or no
+    certificate. `PIP_CERT` and `SSL_CERT_FILE` point pip and uv (and
+    Python's `ssl`) at that bundle, so no `cert =` line is needed; git and
+    curl use it anyway. Empty files and no `*.crt` at all add nothing.
 
   Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
-  with that config. `podman/conf` holds empty
+  with that config and the client certificate. `podman/conf` holds empty
   placeholders; point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).
 - `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
