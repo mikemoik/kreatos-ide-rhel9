@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 # install.sh [--no-build] [PREFIX] — the whole install in one call:
 #
-#   curl -fsSL https://raw.githubusercontent.com/kreatos/kreatos-ide-rhel9/main/install.sh | bash
-#   curl -fsSL …/install.sh | bash -s -- --no-build   # config only, see build.sh
-#   ./install.sh [--no-build] [PREFIX]                 # from a checkout (no download)
+#   curl -fsSL <REPO>/install.sh | KIDE_TARBALL=<REPO tarball URL> bash
+#   curl -fsSL …/install.sh | KIDE_TARBALL=… bash -s -- --no-build   # config only, see build.sh
+#   ./install.sh [--no-build] [PREFIX]          # from a checkout (no download, no KIDE_TARBALL)
+#
+# The script holds no repo URL: piped from curl it needs KIDE_TARBALL (the
+# tarball of the branch to install, from wherever the repo is hosted).
 #
 #   1. installs the missing RHEL packages (dnf; asks for the sudo password)
-#   2. piped from curl: downloads the repo tarball ($KIDE_TARBALL) to a temp dir
+#   2. piped from curl: downloads the repo tarball $KIDE_TARBALL to a temp dir
 #   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide);
 #      with --no-build only refreshes plugins, config, launcher and bashrc
 #   4. copies the sample projects (test/proj) to ~/kide-samples, if not there yet
 #   5. starts a new shell in which `kide` is on PATH
 set -euo pipefail
-
-KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/kreatos/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
 
 # build toolchain, tar (download), git (gitsigns, lazygit), file (yazi), the
 # C/C++ tools kide uses from RHEL, libevent/ncurses headers (tmux build), and
@@ -31,6 +32,16 @@ log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 # command (sudo, dnf) can read from stdin when it is piped from curl
 main() {
   local missing=() p src tmp=
+
+  # piped from curl (no checkout next to the script): the tarball URL must be
+  # given; checked before dnf so nothing is installed for nothing
+  src=$(dirname "${BASH_SOURCE[0]:-}")
+  if [ ! -f "$src/build.sh" ] && [ -z "${KIDE_TARBALL:-}" ]; then
+    echo "install.sh: set KIDE_TARBALL to the repo tarball URL, e.g." >&2
+    echo "  curl -fsSL <REPO>/install.sh | KIDE_TARBALL=<REPO>/…/main.tar.gz bash" >&2
+    exit 1
+  fi
+
   for p in "${PKGS[@]}"; do rpm -q "$p" >/dev/null 2>&1 || missing+=("$p"); done
   if ((${#missing[@]})); then
     log "installing RHEL packages: ${missing[*]}"
@@ -39,7 +50,6 @@ main() {
     fi
   fi
 
-  src=$(dirname "${BASH_SOURCE[0]:-}")
   if [ ! -f "$src/build.sh" ]; then
     tmp=$(mktemp -d)
     trap "rm -rf '$tmp'" EXIT

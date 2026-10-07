@@ -30,8 +30,9 @@ everything:
    database in Python and C++/CMake to try kide on (see their READMEs).
 5. Opens a new shell in which `kide` works. Every later shell finds it too.
 
-`install.sh` downloads the repo tarball from `$KIDE_TARBALL`, which is why the
-call sets it to GitLab's archive. Self-hosted GitLab: replace `gitlab.com`
+`install.sh` holds no repo URL: piped from `curl` it downloads the tarball
+given in `KIDE_TARBALL` and stops with an error if it is not set (a checkout
+or unpacked tarball needs no `KIDE_TARBALL`). Self-hosted GitLab: replace `gitlab.com`
 with its host. The repo has to be public: `install.sh` downloads with plain
 `curl`, without a token. Mirror on GitHub: see [Install from GitHub](#install-from-github).
 
@@ -501,9 +502,8 @@ automatic pull mirroring needs a paid GitLab tier.
 
 ### Install from the GitLab
 
-The one-call install and the download in `install.sh` default to GitHub.
-Point them at the GitLab instead; `KIDE_TARBALL` overrides the tarball URL,
-nothing in the repo has to be edited.
+`install.sh` holds no repo URL; the one-call install takes the tarball URL
+from `KIDE_TARBALL`, so pointing it at the GitLab needs no edit in the repo.
 
 **Project readable without login** (visibility *internal* still needs a
 login, so this means *public*):
