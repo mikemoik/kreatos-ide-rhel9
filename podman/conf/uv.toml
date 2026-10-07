@@ -13,8 +13,8 @@
 # default = true
 
 # An extra internal index next to the default one (e.g. in-house packages).
-# Pin a package to it in a project's pyproject.toml with
-# [tool.uv.sources] mypkg = { index = "internal" }.
+# Pin a package to it in a project's pyproject.toml, in the table
+# tool.uv.sources: mypkg = { index = "internal" }
 #
 # [[index]]
 # name = "internal"
