@@ -142,7 +142,7 @@ Two ways to give it the repo:
 - **Straight from GitLab** (no tarball, no checkout; podman clones the repo
   itself; public project only):
 
-      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
 
   (the arg file is local, so the base image is given directly)
 
@@ -154,19 +154,22 @@ this section.
 Run it on the current directory (rootless podman, as your normal user — not
 `sudo podman` — so files kide writes stay yours):
 
-    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide
-    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide src/main.py
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide src/main.py
 
 - `-v "$PWD:/work:Z"`: the project; `:Z` relabels it for SELinux (needed on RHEL).
-- `-v kide-data:/root/.local`: kide's data and state survive the container;
+- `-v kide-data:/var/lib/kide`: kide's data and state survive the container;
   leave it out for a throwaway session.
+- `--userns=keep-id:uid=1001,gid=1001`: the image runs as the user `default`
+  (uid/gid 1001, `podman/base.conf`), not root; this maps you on the host to
+  it, so it can write the project and the files stay yours (podman 4.3+).
 - A shell inside instead of kide (lazygit, yazi, cmake, gdb on `PATH`): add
   `--entrypoint fish` before `kide` (fish is the container's shell, with the
   IDE's aliases, e.g. `lg` = lazygit; see `podman/README.md`).
 
 As an alias in `~/.bashrc`:
 
-    alias kide='podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide'
+    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide'
 
 Offline box: build the image on a machine with internet and carry it over as
 a file:
@@ -200,7 +203,7 @@ background and colours match kreatos. It also sets JetBrainsMono Nerd Font Mono
 10 pt, terminal type `xterm-256color`, 24-bit colour, and as *Connection → SSH →
 Remote command* it starts the kide container with fish as its shell:
 
-    podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint fish kide
+    podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 
 The remote command runs in your home directory on the RHEL box, so `/work` in
 the container is your home; `cd` to the project there, `kide` opens it. Leaving
@@ -239,7 +242,7 @@ that session; host, port and other settings stay. Not tested on Windows yet.
    of step 3.
 3. `cd` to the project on the RHEL box and start kide:
 
-       podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local kide
+       podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide
 
    - `-e TERM` hands PuTTY's `xterm-256color` to the container (podman would
      set plain `xterm`).
@@ -249,7 +252,7 @@ that session; host, port and other settings stay. Not tested on Windows yet.
 
    As an alias in `~/.bashrc` on the RHEL box:
 
-       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION -v "$PWD:/work:Z" -v kide-data:/root/.local kide'
+       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide'
 
    With a normal install (no container) it is just `kide`.
 
@@ -325,7 +328,8 @@ user, without sudo.
        # the image's entrypoint is kide; this makes it a server, no UI
        Exec=--headless --listen /tmp/kide.sock
        Volume=%h/projects:/work:Z
-       Volume=kide-data:/root/.local
+       Volume=kide-data:/var/lib/kide
+       UserNS=keep-id:uid=1001,gid=1001
        Environment=TERM=xterm-256color SSH_CONNECTION=persistent
 
        [Service]

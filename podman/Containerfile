@@ -2,25 +2,29 @@
 # The base image and its repo setup are not in this file: podman/base.conf
 # (BASE=…, default Rocky Linux 9; CONF_DIR=…, default podman/conf with
 # repos.sh (default: CRB + EPEL, standing in for the RHEL9 target's own dnf
-# repos), ubi.repo, pip.conf, machine.crt). Replace those for another base;
-# this file stays as it is.
+# repos), ubi.repo, pip.conf, machine.crt; KIDE_USER/KIDE_UID/KIDE_GID, the
+# user the image runs as). Replace those for another base; this file stays as
+# it is.
 # Build from the repo root (dnf needs the repos; build.sh itself runs offline):
 #   podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub (the default base, no arg file):
-#   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
-# Run (rootless podman: root in the container is you on the host, so files in
-# the mounted project stay yours):
-#   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide [FILE…]
+#   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
+# Every step that installs or writes system files runs as root (USER root, also
+# when the base image defaults to another user); the image runs as KIDE_USER.
+# Run with rootless podman, mapping you on the host to that user, so files in
+# the mounted project stay yours:
+#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide [FILE…]
 # A shell (fish, with the IDE's aliases from fish/):
-#   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint fish kide
+#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 # See podman/README.md.
 
 ARG BASE
-# CONF_DIR (podman/base.conf): ubi.repo, pip.conf, machine.crt for the image
+# CONF_DIR (podman/base.conf): repos.sh, ubi.repo, pip.conf, machine.crt
 ARG CONF_DIR
 
 # --- build: the RHEL9 toolchain + build.sh (as test/Containerfile) -----------
 FROM $BASE AS build
+USER root
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
 COPY $CONF_DIR/repos.sh /tmp/repos.sh
@@ -46,22 +50,25 @@ RUN /src/build.sh --no-build /opt/kide
 
 # --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
 FROM $BASE
+# Everything up to the USER line at the end runs as root.
+USER root
 # python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), and the
 # C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap).
 # tmux is built by build.sh; its libevent and ncurses-libs are in the base image.
 # For C/C++ projects: perl + perl-Dumpvalue (MPC, ACE+TAO/OpenDDS tooling),
-# Python 3.12 with numpy and pybind11, opencv, glew, glfw.
+# Python 3.12 with numpy and pybind11, opencv, glew, glfw. shadow-utils
+# (useradd/usermod) for KIDE_USER below.
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
 COPY $CONF_DIR/repos.sh /tmp/repos.sh
-RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils \
+RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
         perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
         python3.12-pybind11 python3.12-pybind11-devel \
         opencv-devel glew-devel glfw glfw-devel \
     && dnf clean all
-# newest pip, and uv, for Python 3.12 (into /usr/local); pip reads
-# $HOME/.pip/pip.conf
+# newest pip, and uv, for Python 3.12 (into /usr/local, as root); pip reads
+# $HOME/.pip/pip.conf (root's here; KIDE_USER gets a copy below)
 COPY $CONF_DIR/pip.conf $CONF_DIR/machine.crt /root/.pip/
 RUN python3.12 -m pip install --no-cache-dir --root-user-action=ignore --upgrade pip uv
 COPY --from=build /opt/kide /opt/kide
@@ -72,15 +79,43 @@ RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ld
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
 # fish is the default shell: $SHELL (nvim's :terminal and terminal windows,
-# lazygit, yazi) and root's login shell. Its config is the bundled one
-# (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME, aliases).
+# lazygit, yazi) and the login shell of KIDE_USER and root. Its config is the
+# bundled one (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME,
+# aliases); bash stays as a fallback (--entrypoint bash) and sets the same.
 ENV SHELL=/opt/kide/bin/fish
 RUN echo /opt/kide/bin/fish >>/etc/shells \
     && sed -i 's|^\(root:.*:\)/bin/bash$|\1/opt/kide/bin/fish|' /etc/passwd \
     && grep -q '^root:.*:/opt/kide/bin/fish$' /etc/passwd \
     && mkdir -p /root/.config/fish \
-    && echo 'source /opt/kide/share/kreatos-ide/fish/config.fish' >/root/.config/fish/config.fish
-# bash stays as a fallback (--entrypoint bash) and sets the same
-RUN echo '. /opt/kide/bashrc' >>/root/.bashrc
+    && echo 'source /opt/kide/share/kreatos-ide/fish/config.fish' >/root/.config/fish/config.fish \
+    && echo '. /opt/kide/bashrc' >>/root/.bashrc
+# kide's data and state (nvim undo/shada/swap, fish history, lazygit and yazi
+# state) live under /var/lib/kide instead of ~/.local, so the kide-data volume
+# has the same mount point whatever KIDE_USER's home is.
+ENV XDG_DATA_HOME=/var/lib/kide/share \
+    XDG_STATE_HOME=/var/lib/kide/state
+# KIDE_USER (podman/base.conf): the user the image runs as. Taken from the base
+# image if it has it (e.g. "default" in Red Hat's application images),
+# otherwise created with KIDE_UID/KIDE_GID. Gets fish as login shell, the fish
+# and bash config and a copy of pip.conf/machine.crt, and owns /var/lib/kide
+# and /work.
+ARG KIDE_USER
+ARG KIDE_UID
+ARG KIDE_GID
+RUN set -e; \
+    if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
+      getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
+      useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
+    fi; \
+    usermod -s /opt/kide/bin/fish "$KIDE_USER"; \
+    home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
+    group=$(id -g "$KIDE_USER"); \
+    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /work; \
+    echo 'source /opt/kide/share/kreatos-ide/fish/config.fish' >"$home/.config/fish/config.fish"; \
+    echo '. /opt/kide/bashrc' >>"$home/.bashrc"; \
+    cp -a /root/.pip "$home/.pip"; \
+    chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
+    chown -R "$KIDE_USER:$group" "$home/.config" "$home/.pip" /var/lib/kide /work
+USER $KIDE_USER
 WORKDIR /work
 ENTRYPOINT ["kide"]

@@ -7,7 +7,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CURRENT_USER\Software\SimonTatham\PuTTY\Sessions\kide]
 "UseSystemColours"=dword:00000000
 "TerminalType"="xterm-256color"
-"RemoteCommand"="podman run --rm -it -e TERM -e SSH_CONNECTION -v \"$PWD:/work:Z\" -v kide-data:/root/.local --entrypoint fish kide"
+"RemoteCommand"="podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v \"$PWD:/work:Z\" -v kide-data:/var/lib/kide --entrypoint fish kide"
 "Xterm256Colour"=dword:00000001
 "TrueColour"=dword:00000001
 "Font"="JetBrainsMono Nerd Font Mono"
