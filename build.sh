@@ -6,7 +6,7 @@
 # launcher and bashrc only; nvim, the parsers and the tools are not rebuilt.
 #
 # Needs only the RHEL9 toolchain: gcc, make, cmake, python3, rust-toolset
-# (cargo), golang. The repo itself is never written to (it can be mounted
+# (cargo), golang, and libevent-devel + ncurses-devel (tmux). The repo itself is never written to (it can be mounted
 # read-only); intermediate files go to $KIDE_BUILD_DIR (default:
 # $TMPDIR/kide-build).
 #
@@ -18,10 +18,16 @@
 #   PREFIX/bin/shfmt                  shell formatter
 #   PREFIX/bin/{fd,fzf,lazygit}       file finder, fuzzy finder, git TUI
 #   PREFIX/bin/{yazi,ya}              file manager + its CLI
+#   PREFIX/bin/fish                   fish shell (the container's shell; its
+#                                     functions and completions are built in),
+#                                     + fish_indent, fish_key_reader links
+#   PREFIX/bin/tmux                   terminal multiplexer (fish's `tm`)
 #   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/yazi     yazi/ (yazi.toml: text opens in kide)
+#   PREFIX/share/kreatos-ide/fish     fish/ (config.fish + aliases: the IDE's
+#                                     shell helpers)
 #   PREFIX/share/kreatos-ide/site     pack/vendor/opt plugins, parser/, queries/
 #   PREFIX/bashrc                     puts PREFIX/bin first on PATH, points
 #                                     YAZI_CONFIG_HOME at the yazi config; sourced by
@@ -44,7 +50,7 @@ SITE=$SHARE/site
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 
 log "checking sources (no binaries)"
-python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config" "$ROOT/yazi"
+python3 "$ROOT/scripts/check-sources.py" "$ROOT/vendor" "$ROOT/config" "$ROOT/yazi" "$ROOT/fish"
 
 if ((NO_BUILD)) && [[ ! -x $PREFIX/bin/nvim ]]; then
   echo "--no-build: no kide install in $PREFIX (run without --no-build first)" >&2
@@ -197,6 +203,24 @@ go_build fzf "$PREFIX/bin/fzf" . -ldflags "-X main.version=$(awk '$1 == "fzf" { 
 log "lazygit"
 go_build lazygit "$PREFIX/bin/lazygit" . -ldflags "-X main.version=$(awk '$1 == "lazygit" { print substr($4, 2) }' "$ROOT/manifest/tools.tsv") -X main.buildSource=kide"
 
+log "fish"
+# without the default features: embed-manpages needs Sphinx, localize-messages
+# needs msgfmt (gettext). Functions and completions (share/) are embedded in
+# the binary either way; builtins' --help has no man page to show. One
+# multicall binary: fish_indent and fish_key_reader are links to it.
+cargo_build fish -p fish --no-default-features --bin fish
+install -m755 "$TOOLS/fish/target/release/fish" "$PREFIX/bin/"
+ln -sf fish "$PREFIX/bin/fish_indent"
+ln -sf fish "$PREFIX/bin/fish_key_reader"
+
+log "tmux"
+# the release tarball (manifest kind release) has a generated configure and
+# cmd-parse.c: no autotools or yacc. Links RHEL's libevent and ncurses.
+cp -a "$ROOT/vendor/tools/tmux" "$TOOLS/tmux"
+(cd "$TOOLS/tmux" && ./configure --prefix="$PREFIX" >configure.log && make -j "$JOBS" >make.log) ||
+  { tail -30 "$TOOLS/tmux/configure.log" "$TOOLS/tmux/make.log" 2>/dev/null; exit 1; }
+install -m755 "$TOOLS/tmux/tmux" "$PREFIX/bin/"
+
 # yazi needs two binary inputs that the source-only rule strips:
 # - yazi-prebuilt's built/syntaxes, the compiled syntax set for code previews:
 #   rebuilt here with yazi-prebuilt's own generator from the .sublime-syntax
@@ -271,9 +295,10 @@ mkdir -p "$SITE/pack/vendor/opt"
 cp -a "$ROOT/vendor/plugins/." "$SITE/pack/vendor/opt/"
 
 log "config"
-rm -rf "$SHARE/config" "$SHARE/yazi"
+rm -rf "$SHARE/config" "$SHARE/yazi" "$SHARE/fish"
 cp -a "$ROOT/config" "$SHARE/config"
 cp -a "$ROOT/yazi" "$SHARE/yazi"
+cp -a "$ROOT/fish" "$SHARE/fish"
 
 # --- launcher ----------------------------------------------------------------
 log "launcher"

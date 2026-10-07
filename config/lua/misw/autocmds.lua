@@ -81,13 +81,12 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- wrap and spell in text filetypes
+-- wrap in text filetypes (no spell checking in kide)
 vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("wrap_spell"),
+  group = augroup("wrap"),
   pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
   callback = function()
     vim.opt_local.wrap = true
-    vim.opt_local.spell = true
   end,
 })
 

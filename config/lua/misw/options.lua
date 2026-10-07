@@ -11,6 +11,13 @@ vim.g.markdown_recommended_style = 0
 for _, p in ipairs({ "gzip", "tarPlugin", "tar", "zipPlugin", "zip", "tohtml", "tutor" }) do
   vim.g["loaded_" .. p] = 1
 end
+-- no spell checking in kide; no spell file downloads either (their
+-- "Download? [y/N]" prompt ate the next keys)
+vim.g.loaded_spellfile_plugin = 1
+
+-- snacks writes lazygit's theme into the cache dir without creating it (a new
+-- container has no ~/.cache: <leader>gg failed with E482)
+vim.fn.mkdir(vim.fn.stdpath("cache"), "p")
 
 local opt = vim.opt
 opt.autowrite = true
@@ -59,7 +66,6 @@ opt.signcolumn = "yes"
 opt.smartcase = true
 opt.smartindent = true
 opt.smoothscroll = true
-opt.spelllang = { "en" }
 opt.splitbelow = true
 opt.splitkeep = "screen"
 opt.splitright = true

@@ -6,12 +6,14 @@
 # Run (rootless podman: root in the container is you on the host, so files in
 # the mounted project stay yours):
 #   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local kide [FILE…]
+# A shell (fish, with the IDE's aliases from fish/):
+#   podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint fish kide
 # See podman/README.md.
 
 # --- build: the RHEL9 toolchain + build.sh (as test/Containerfile) -----------
 FROM registry.access.redhat.com/ubi9/ubi:latest AS build
 RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
-        git-core file gcc-c++ clang-tools-extra gdb lldb \
+        git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
     && dnf clean all
 COPY . /src
 RUN /src/build.sh /opt/kide
@@ -19,7 +21,8 @@ RUN /src/build.sh /opt/kide
 # --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
 FROM registry.access.redhat.com/ubi9/ubi:latest
 # python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), and the
-# C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap)
+# C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap).
+# tmux is built by build.sh; its libevent and ncurses-libs are in the base image.
 RUN dnf -y install python3 git-core file findutils diffutils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
     && dnf clean all
@@ -27,7 +30,16 @@ COPY --from=build /opt/kide /opt/kide
 # what PREFIX/bashrc does on an install
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
-# a shell inside the container (podman run … --entrypoint bash kide) sets the same
+# fish is the default shell: $SHELL (nvim's :terminal and terminal windows,
+# lazygit, yazi) and root's login shell. Its config is the bundled one
+# (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME, aliases).
+ENV SHELL=/opt/kide/bin/fish
+RUN echo /opt/kide/bin/fish >>/etc/shells \
+    && sed -i 's|^\(root:.*:\)/bin/bash$|\1/opt/kide/bin/fish|' /etc/passwd \
+    && grep -q '^root:.*:/opt/kide/bin/fish$' /etc/passwd \
+    && mkdir -p /root/.config/fish \
+    && echo 'source /opt/kide/share/kreatos-ide/fish/config.fish' >/root/.config/fish/config.fish
+# bash stays as a fallback (--entrypoint bash) and sets the same
 RUN echo '. /opt/kide/bashrc' >>/root/.bashrc
 WORKDIR /work
 ENTRYPOINT ["kide"]

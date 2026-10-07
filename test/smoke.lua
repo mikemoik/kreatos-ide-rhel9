@@ -229,10 +229,21 @@ local function run()
     local version = (res.stdout or "") .. (res.stderr or "")
     check(t[1] .. " " .. versions[t[2]], res.code == 0 and version:find(versions[t[2]], 1, true) ~= nil, version)
   end
+  local tres = vim.system({ "tmux", "-V" }, { text = true }):wait()
+  check("tmux " .. versions.tmux, tres.code == 0 and (tres.stdout or ""):find(versions.tmux, 1, true) ~= nil, tres.stdout)
   local found = vim.fn.system({ "fd", "--type", "f", "CMakeLists", src .. "/test/proj/customers-cpp" })
   check("fd finds files", vim.v.shell_error == 0 and found:find("app/CMakeLists.txt", 1, true) ~= nil, found)
   local picked = vim.fn.system({ "fzf", "--filter", "cstdb" }, "customer_db.cpp\nreport.cpp\n")
   check("fzf filters", vim.trim(picked) == "customer_db.cpp", picked)
+
+  -- snacks writes lazygit's theme into the cache dir (<leader>gg); kide creates it
+  check("cache dir exists", vim.fn.isdirectory(vim.fn.stdpath("cache")) == 1, vim.fn.stdpath("cache"))
+  -- no spell checking, no spell file download prompt
+  check("no spell file download", #vim.api.nvim_get_autocmds({ event = "SpellFileMissing" }) == 0)
+  local txt = vim.fn.tempname() .. ".txt"
+  vim.cmd.edit(txt)
+  check("text file: wrap, no spell", vim.bo.filetype == "text" and vim.wo.wrap and not vim.wo.spell, vim.bo.filetype)
+  vim.cmd("bwipeout!")
 
   -- completion engine starts with the Lua fuzzy matcher
   vim.api.nvim_exec_autocmds("InsertEnter", {})

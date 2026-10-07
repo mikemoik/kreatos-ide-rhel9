@@ -1,0 +1,172 @@
+# rsconf: the missing cargo crate
+
+[![crates.io](https://img.shields.io/crates/v/rsconf.svg)](https://crates.io/crates/rsconf)
+[![docs.rs](https://docs.rs/rsconf/badge.svg)](https://docs.rs/rsconf/latest/rsconf/)
+
+`rsconf` is a minimal (zero dependency), cross-platform build-time helper for testing a target system from a `build.rs` to unlock conditional compilation (via rustc's features or cfg flags) and link against the right system libraries, particularly for ffi purposes. Think of it as an autoconf replacement, but sane and intelligible.
+
+It also provides a simple api-based frontend for interacting with and influencing Cargo instead of relying on the somewhat brittle `println!("cargo::xxx-yyy=zzz")` interface to control various aspects of the build process and to set up the environment your crate will be built under.
+
+## Features
+
+Functionality for facilitating ffi and other system interop:
+
+* [X] Check for system libraries
+* [X] Check for symbols in libc or external libraries
+* [X] Check for system or 3rd party headers
+* [X] Check for specific types defined in system or external headers
+* [X] Test C `#ifdef` preprocessor defines at build-time
+* [X] Evaluate and test C `#if` preprocessor expressions at build-time
+* [X] Test linking against named library/libraries
+* [X] (Recursively) get value of `#define` macros
+* [X] Get values of compile-time constants (but see #3)
+
+We also expose a simple api to control how Cargo builds the crate:
+
+* [X] Add to the library search path
+* [X] Enable/disable named cfg features
+* [X] Link against an external library (optionally using an environment variable to influence how, specifically)
+* [X] Emit build-time warnings or errors
+* [X] Set cfg values for the crate
+* [X] Set build-time environment values for the crate
+* [X] Control when `build.rs` is rerun (when an environment variable is changed, when a path is changed, etc)
+* [X] Declare known features (and their known values) by the codebase (to avoid warnings about unrecognized features under rust 1.80+)
+* [ ] Builder-style api for declaring/enabling cfgs and values (under consideration)
+* [ ] Friendly api for dynamically declaring rust values instead of manually writing out rust code
+
+## Usage
+
+`rsconf` is currently architectured as two separate components with [`rsconf::Target`](https://docs.rs/rsconf/latest/rsconf/struct.Target.html) being the primary means of testing the targeted system for the presence of libraries, symbols, system headers, types, and extracting compile-time constants; and the freestanding top-level functions in the `rsconf` crate's root namespace facilitating easier manipulation of Cargo and rustc (typically by wrapping the `println!("cargo:{...}")` messages [that influence how crates are built](https://rustwiki.org/en/cargo/reference/build-scripts.html)).
+
+[`rsconf::Target`](https://docs.rs/rsconf/latest/rsconf/struct.Target.html) is built on top of [the `cc` crate](https://docs.rs/cc/latest/cc/) and uses it to obtain a working toolchain for the target platform. `Target` can be initialized with `Target::new()` (which internally initializes a `cc::Build` instance with the default configuration) or you can pass in a configured/customized `cc::Build` for `Target` to use for all subsequent tests via [`Target::new_from()`](https://docs.rs/rsconf/latest/rsconf/struct.Target.html#method.new_from).
+
+## Design notes
+
+Special care is taken to distinguish features that are compatible with cross-compilation from those that aren't. Currently the bulk of `rsconf::Target` tests are designed with cross-compilation in mind, but the functions to extract compile-time constants from the C standard library or system header files (the [`Target::get_xxx_value()`](https://docs.rs/rsconf/latest/rsconf/struct.Target.html#method.get_i32_value)] family of functions) are currently not compatible with cross-compilation as they require the ability to execute an test executable compiled for the target system. There is a possibility that these may become cross-compilation-safe in the future as a different approach is explored.
+
+`rsconf` intentionally does not expose a facility to extract values that are *not* compile-time constants (e.g. `Target::has_symbol()` can be used to check for the presence of a symbol in an external library but the `get_xxx_value()` functions do not provide a facility for linking against system libraries) because anything only defined at run-time cannot be assumed to not change its value during the course of execution or to have the same value across different systems - the correct approach here is to test for the presence of a symbol (in a library or in the standard C library) and then declare it in your code either as an `extern "C" fn` or as a `#[no_mangle]` static variable and obtain the value at run-time.
+
+At this time, `rsconf` does not expose any functionality for package discovery (as opposed to searching for headers and libraries in either the default system paths or those search paths that the `cc::Build` instance was configured with then passed to `Target::new_from()`. If you need that functionality you are encouraged to use a crate such as [`pkg_config`](https://docs.rs/pkg-config/latest/pkg_config/) to find the path to the library or header files and then configure the `cc::Build` instance with those paths before passing it in to `Target::new_from()`.
+
+## Exposed/mapped environment variables
+
+The environment variables set by `cargo` when invoking `build.rs` or other crate build scripts have been mapped to the following wrapper functions:
+
+| Environment variable | Equivalent function |
+| :--- | :--- |
+| `CARGO_CFG_TARGET_ABI` | `Target::abi()` |
+| `CARGO_CFG_TARGET_ARCH` | `Target::arch()` |
+| `CARGO_CFG_TARGET_ENDIAN` | `Target::endian()` |
+| `CARGO_CFG_TARGET_ENV` | `Target::env()` |
+| `CARGO_CFG_TARGET_FAMILY` | `Target::family()` |
+| `CARGO_CFG_TARGET_FEATURE` | `Target::cpu_features()` |
+| `CARGO_CFG_TARGET_HAS_ATOMIC_EQUAL_ALIGNMENT`<sup>†</sup> | `Target::has_atomic_equal_alignment<T>()`<sup>†</sup> |
+| `CARGO_CFG_TARGET_HAS_ATOMIC_LOAD_STORE`<sup>†</sup> | `Target::has_atomic_load_store<T>()`<sup>†</sup> |
+| `CARGO_CFG_TARGET_HAS_ATOMIC` | `Target::has_atomic<T>()` |
+| `CARGO_CFG_TARGET_OS` | `Target::os()` |
+| `CARGO_CFG_TARGET_POINTER_WIDTH` | `Target::pointer_width()` |
+| `CARGO_CFG_TARGET_UNIX` | `Target::is_unix()` |
+| `CARGO_CFG_TARGET_VENDOR` | `Target::vendor()` |
+| `CARGO_CFG_TARGET_WINDOWS` | `Target::is_windows()` |
+| `CARGO_ENCODED_RUSTFLAGS` | `rsconf::rustflags()` |
+| `DEBUG` | `rsconf::debug()` |
+| `HOST` | `rsconf::host_triple()` |
+| `NUM_JOBS` | `rsconf::num_jobs()` |
+| `OPT_LEVEL` | `rsconf::opt_level()` |
+| `OUT_DIR` | `rsconf::out_dir()` |
+| `PROFILE` | `rsconf::profile()` |
+| `RUSTC_LINKER` | `rsconf::rustc_linker()` |
+| `RUSTC_WORKSPACE_WRAPPER` | `rsconf::rustc_workspace_wrapper()` |
+| `RUSTC_WRAPPER` | `rsconf::rustc_wrapper()` |
+| `RUSTC` | `rsconf::rustc()` |
+| `RUSTDOC` | `rsconf::rustdoc()` |
+| `RUSTFLAGS` | `rsconf::rustflags()` |
+| `TARGET` | `rsconf::target_triple()`, `Target::triple()` |
+
+<sup>†</sup> *indicates a nightly-only feature of the compiler with a corresponding api method only available when `rsconf` is compiled with the `nightly` feature.*
+
+## Crate features
+
+The `rsconf` crate has one optional feature (i.e. not enabled by default) at this time:
+
+* **nightly**: enables `Target::has_atomic_load_store<T>()` and `Target::has_atomic_equal_alignment<T>()`
+
+## Usage example
+
+Here's an example of how to check for a symbol in multiple libraries in your `build.rs` build script with `rsconf`, then use that information from your crate to conditionally compile code. Here we'll test for a low-level curses library and verify that the one we found has the symbols we need before using those from rust.
+
+In `build.rs`:
+
+```rust
+use rsconf::{LinkType, Target};
+
+fn find_curses(system: &Target) -> bool {
+    // We need to try different library names depending on the platform
+    for lib in [ "tinfo", "terminfo" ] {
+        if !system.has_library(lib) {
+            continue;
+        }
+        if system.has_symbol_in("cur_term", lib)
+            && system.has_symbol_in("setupterm", lib)
+        {
+            // We found what we need, so make sure we link against it.
+            rsconf::link_library(lib, LinkType::Default);
+            return true;
+        }
+    }
+    return false;
+}
+
+fn main() {
+    let system = Target::new();
+    if find_curses(&system) {
+        rsconf::enable_cfg("curses");
+    } else {
+        rsconf::warn!("Unable to find a curses library!");
+    }
+}
+```
+
+then in `src/main.rs`:
+
+```rust
+#[cfg(curses)]
+extern "C" {
+    static mut cur_term: *const libc::c_void;
+    fn setupterm(term: *const libc::c_void, fd: libc::c_int, err: &mut libc::c_int);
+}
+
+/// A safe wrapper around the curses `setupterm()` API.
+#[cfg(not(curses)]
+fn setup_term() -> bool { return false; }
+
+/// A safe wrapper around the curses `setupterm()` API.
+#[cfg(curses)]
+fn setup_term() -> bool {
+    let mut error: i32 = 0;
+    let result = unsafe {
+        setupterm(std::ptr::null(), libc::STDOUT_FILENO, &mut error)
+    };
+
+    result == 0
+}
+```
+
+Note that there are actually [convenience methods](https://docs.rs/rsconf/latest/rsconf/) that significantly reduce the boilerplate above, but the more verbose api has been used for illustration purposes; for example, `find_curses()` from above can be simplified as follows:
+
+```rust
+fn find_curses(system: &Target) -> bool {
+    // Check which of {tinfo, terminfo} contains both cur_term and setupterm
+    if let Some(lib) = system.find_first_library_with(
+        [ "tinfo", "terminfo" ], [ "cur_term", "setupterm" ]) {
+        // We found what we need, so make sure to link against it
+        rsconf::link_library(lib, LinkType::Default);
+        return true;
+    }
+    return false;
+}
+```
+
+## License
+
+`rsconf` is released under a dual MIT and Apache 2.0 license. All rights are otherwise reserved, copyright Mahmoud Al-Qudsi 2024.

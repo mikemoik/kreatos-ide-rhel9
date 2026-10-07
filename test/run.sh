@@ -19,4 +19,14 @@ docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash 
   /src/build.sh /opt/kide
   echo "==> smoke test"
   /opt/kide/bin/kide --headless "+lua dofile(\"/src/test/smoke.lua\")"
+  echo "==> fish smoke test"
+  /opt/kide/bin/fish -i -c "
+    source /opt/kide/share/kreatos-ide/fish/config.fish
+    test \$PATH[1] = /opt/kide/bin; or exit 1
+    test \$YAZI_CONFIG_HOME = /opt/kide/share/kreatos-ide/yazi; or exit 1
+    functions -q vi lg y ll ff ffex tm; or exit 1
+    command -q lazygit; or exit 1
+    command -q tmux; or exit 1
+    echo fish ok: (fish --version)
+  "
 '

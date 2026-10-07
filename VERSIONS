@@ -127,6 +127,180 @@ crate/fd/wit-bindgen-rust-macro-0.51.0 https://crates.io                        
 crate/fd/wit-component-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/fd/wit-parser-0.244.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/fd/zmij-1.0.21         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
+crate/fish/allocator-api2-0.2.21 https://crates.io                                            Cargo.lock
+crate/fish/anstream-1.0.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/anstyle-1.0.14    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/anstyle-parse-1.0.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/anstyle-query-1.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/anstyle-wincon-3.0.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/anyhow-1.0.102    https://crates.io                                            Cargo.lock
+crate/fish/assert_matches-1.5.0 https://crates.io                                            Cargo.lock
+crate/fish/autocfg-1.5.1     https://crates.io                                            Cargo.lock
+crate/fish/bitflags-2.11.1   https://crates.io                                            Cargo.lock
+crate/fish/block-buffer-0.10.4 https://crates.io                                            Cargo.lock
+crate/fish/bstr-1.12.1       https://crates.io                                            Cargo.lock
+crate/fish/cc-1.2.63         https://crates.io                                            Cargo.lock
+crate/fish/cfg_aliases-0.2.1 https://crates.io                                            Cargo.lock
+crate/fish/cfg-if-1.0.4      https://crates.io                                            Cargo.lock
+crate/fish/chacha20-0.10.0   https://crates.io                                            Cargo.lock
+crate/fish/clap-4.6.1        https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/clap_builder-4.6.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/clap_complete-4.6.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/clap_derive-4.6.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/clap_lex-1.1.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/colorchoice-1.0.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/cpufeatures-0.2.17 https://crates.io                                            Cargo.lock
+crate/fish/cpufeatures-0.3.0 https://crates.io                                            Cargo.lock
+crate/fish/crossbeam-deque-0.8.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/crossbeam-epoch-0.9.18 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/crossbeam-utils-0.8.21 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/crypto-common-0.1.7 https://crates.io                                            Cargo.lock
+crate/fish/digest-0.10.7     https://crates.io                                            Cargo.lock
+crate/fish/dirs-6.0.0        https://crates.io                                            Cargo.lock
+crate/fish/dirs-sys-0.5.0    https://crates.io                                            Cargo.lock
+crate/fish/displaydoc-0.2.6  https://crates.io                                            Cargo.lock
+crate/fish/either-1.16.0     https://crates.io                                            Cargo.lock
+crate/fish/equivalent-1.0.2  https://crates.io                                            Cargo.lock
+crate/fish/fastrand-2.4.1    https://crates.io                                            Cargo.lock
+crate/fish/find-msvc-tools-0.1.9 https://crates.io                                            Cargo.lock
+crate/fish/fluent-0.17.0     https://crates.io                                            Cargo.lock
+crate/fish/fluent-bundle-0.16.0 https://crates.io                                            Cargo.lock
+crate/fish/fluent-ftl-tools-0.1.0 https://crates.io                                            Cargo.lock
+crate/fish/fluent-langneg-0.13.1 https://crates.io                                            Cargo.lock
+crate/fish/fluent-syntax-0.12.0 https://crates.io                                            Cargo.lock
+crate/fish/foldhash-0.1.5    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/foldhash-0.2.0    https://crates.io                                            Cargo.lock
+crate/fish/generic-array-0.14.7 https://crates.io                                            Cargo.lock
+crate/fish/getrandom-0.2.17  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/getrandom-0.3.4   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/getrandom-0.4.2   https://crates.io                                            Cargo.lock
+crate/fish/gettext-po-file-parser-0.0.0 https://crates.io                                            Cargo.lock
+crate/fish/globset-0.4.18    https://crates.io                                            Cargo.lock
+crate/fish/hashbrown-0.15.5  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/hashbrown-0.17.1  https://crates.io                                            Cargo.lock
+crate/fish/heck-0.5.0        https://crates.io                                            Cargo.lock
+crate/fish/id-arena-2.3.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/ignore-0.4.25     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/indexmap-2.14.0   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/intl-memoizer-0.5.3 https://crates.io                                            Cargo.lock
+crate/fish/intl_pluralrules-7.0.2 https://crates.io                                            Cargo.lock
+crate/fish/is_executable-1.0.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/is_terminal_polyfill-1.70.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/itertools-0.14.0  https://crates.io                                            Cargo.lock
+crate/fish/itoa-1.0.18       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/jobserver-0.1.34  https://crates.io                                            Cargo.lock
+crate/fish/leb128fmt-0.1.0   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/libc-0.2.186      https://crates.io                                            Cargo.lock
+crate/fish/libredox-0.1.17   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/lock_api-0.4.14   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/log-0.4.30        https://crates.io                                            Cargo.lock
+crate/fish/lru-0.18.0        https://crates.io                                            Cargo.lock
+crate/fish/macro_rules_attribute-0.2.2 https://crates.io                                            Cargo.lock
+crate/fish/macro_rules_attribute-proc_macro-0.2.2 https://crates.io                                            Cargo.lock
+crate/fish/memchr-2.8.1      https://crates.io                                            Cargo.lock
+crate/fish/nix-0.30.1        https://crates.io                                            Cargo.lock
+crate/fish/nix-0.31.3        https://crates.io                                            Cargo.lock
+crate/fish/num-traits-0.2.19 https://crates.io                                            Cargo.lock
+crate/fish/once_cell-1.21.4  https://crates.io                                            Cargo.lock
+crate/fish/once_cell_polyfill-1.70.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/option-ext-0.2.0  https://crates.io                                            Cargo.lock
+crate/fish/parking_lot-0.12.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/parking_lot_core-0.9.12 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/paste-1.0.15      https://crates.io                                            Cargo.lock
+crate/fish/pcre2-0.2.9       https://crates.io                                            Cargo.lock
+crate/fish/pcre2-sys-0.2.9   https://crates.io                                            Cargo.lock
+crate/fish/phf-0.13.1        https://crates.io                                            Cargo.lock
+crate/fish/phf_codegen-0.13.1 https://crates.io                                            Cargo.lock
+crate/fish/phf_generator-0.13.1 https://crates.io                                            Cargo.lock
+crate/fish/phf_shared-0.13.1 https://crates.io                                            Cargo.lock
+crate/fish/pkg-config-0.3.33 https://crates.io                                            Cargo.lock
+crate/fish/portable-atomic-1.13.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/prettyplease-0.2.37 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/proc-macro2-1.0.106 https://crates.io                                            Cargo.lock
+crate/fish/quote-1.0.45      https://crates.io                                            Cargo.lock
+crate/fish/rand-0.10.1       https://crates.io                                            Cargo.lock
+crate/fish/rand_core-0.10.1  https://crates.io                                            Cargo.lock
+crate/fish/redox_syscall-0.5.18 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/redox_users-0.5.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/r-efi-5.3.0       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/r-efi-6.0.0       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/regex-automata-0.4.14 https://crates.io                                            Cargo.lock
+crate/fish/regex-syntax-0.8.10 https://crates.io                                            Cargo.lock
+crate/fish/rsconf-0.3.0      https://crates.io                                            Cargo.lock
+crate/fish/rustc-hash-2.1.2  https://crates.io                                            Cargo.lock
+crate/fish/rustc_version-0.4.1 https://crates.io                                            Cargo.lock
+crate/fish/rust-embed-8.11.0 https://crates.io                                            Cargo.lock
+crate/fish/rust-embed-impl-8.11.0 https://crates.io                                            Cargo.lock
+crate/fish/rust-embed-utils-8.11.0 https://crates.io                                            Cargo.lock
+crate/fish/same-file-1.0.6   https://crates.io                                            Cargo.lock
+crate/fish/scc-2.4.0         https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/scopeguard-1.2.0  https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/sdd-3.0.10        https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/self_cell-1.2.2   https://crates.io                                            Cargo.lock
+crate/fish/semver-1.0.28     https://crates.io                                            Cargo.lock
+crate/fish/serde-1.0.228     https://crates.io                                            Cargo.lock
+crate/fish/serde_core-1.0.228 https://crates.io                                            Cargo.lock
+crate/fish/serde_derive-1.0.228 https://crates.io                                            Cargo.lock
+crate/fish/serde_json-1.0.150 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/serial_test-3.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/serial_test_derive-3.4.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/sha2-0.10.9       https://crates.io                                            Cargo.lock
+crate/fish/shellexpand-3.1.2 https://crates.io                                            Cargo.lock
+crate/fish/shlex-1.3.0       https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/shlex-2.0.1       https://crates.io                                            Cargo.lock
+crate/fish/siphasher-1.0.3   https://crates.io                                            Cargo.lock
+crate/fish/smallvec-1.15.1   https://crates.io                                            Cargo.lock
+crate/fish/strsim-0.11.1     https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/strum_macros-0.28.0 https://crates.io                                            Cargo.lock
+crate/fish/syn-2.0.117       https://crates.io                                            Cargo.lock
+crate/fish/thiserror-2.0.18  https://crates.io                                            Cargo.lock
+crate/fish/thiserror-impl-2.0.18 https://crates.io                                            Cargo.lock
+crate/fish/tinystr-0.8.3     https://crates.io                                            Cargo.lock
+crate/fish/type-map-0.5.1    https://crates.io                                            Cargo.lock
+crate/fish/typenum-1.20.1    https://crates.io                                            Cargo.lock
+crate/fish/unic-langid-0.9.6 https://crates.io                                            Cargo.lock
+crate/fish/unic-langid-impl-0.9.6 https://crates.io                                            Cargo.lock
+crate/fish/unicode-ident-1.0.24 https://crates.io                                            Cargo.lock
+crate/fish/unicode-segmentation-1.13.2 https://crates.io                                            Cargo.lock
+crate/fish/unicode-width-0.2.2 https://crates.io                                            Cargo.lock
+crate/fish/unicode-xid-0.2.6 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/unix_path-1.0.1   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/unix_str-1.0.0    https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/utf8parse-0.2.2   https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/version_check-0.9.5 https://crates.io                                            Cargo.lock
+crate/fish/walkdir-2.5.0     https://crates.io                                            Cargo.lock
+crate/fish/wasi-0.11.1+wasi-snapshot-preview1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wasip2-1.0.1+wasi-0.2.4 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wasm-encoder-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wasm-metadata-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wasmparser-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/widestring-1.2.1  https://crates.io                                            Cargo.lock
+crate/fish/winapi-util-0.1.11 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_aarch64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_aarch64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_i686_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_i686_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_i686_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows-link-0.2.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows-sys-0.60.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows-sys-0.61.2 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows-targets-0.53.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_x86_64_gnu-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_x86_64_gnullvm-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/windows_x86_64_msvc-0.53.1 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-bindgen-0.46.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-bindgen-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-bindgen-core-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-bindgen-rust-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-bindgen-rust-macro-0.51.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-component-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/wit-parser-0.244.0 https://crates.io                                            Cargo.lock (stub: not built on Linux)
+crate/fish/xterm-color-1.0.2 https://crates.io                                            Cargo.lock
+crate/fish/zerofrom-0.1.8    https://crates.io                                            Cargo.lock
+crate/fish/zerovec-0.11.6    https://crates.io                                            Cargo.lock
+crate/fish/zmij-1.0.21       https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/neocmakelsp/aho-corasick-1.1.4 https://crates.io                                            Cargo.lock
 crate/neocmakelsp/android_system_properties-0.1.5 https://crates.io                                            Cargo.lock (stub: not built on Linux)
 crate/neocmakelsp/anstream-1.0.0 https://crates.io                                            Cargo.lock
@@ -1611,11 +1785,13 @@ plugin/trouble.nvim          https://github.com/folke/trouble.nvim              
 plugin/which-key.nvim        https://github.com/folke/which-key.nvim                      3aab2147e74890957785941f0c1ad87d0a44c15a
 tool/debugpy                 https://pypi.org/project/debugpy                             1.8.21
 tool/fd                      https://github.com/sharkdp/fd                                v10.5.0
+tool/fish                    https://github.com/fish-shell/fish-shell                     4.9.3
 tool/fzf                     https://github.com/junegunn/fzf                              v0.74.4
 tool/lazygit                 https://github.com/jesseduffield/lazygit                     v0.65.1
 tool/neocmakelsp             https://github.com/neocmakelsp/neocmakelsp                   v0.11.0
 tool/ruff                    https://github.com/astral-sh/ruff                            0.15.11
 tool/shfmt                   https://github.com/mvdan/sh                                  v3.13.1
+tool/tmux                    https://github.com/tmux/tmux                                 3.7c
 tool/yazi                    https://github.com/sxyazi/yazi                               v26.1.22
 tool/yazi-prebuilt           https://github.com/yazi-rs/prebuilt                          2d52c0b8b399aa476bfeff36a6256cffe76eb2a5
 tool/yazi-prebuilt/syntaxes/cmake https://github.com/zyxar/Sublime-CMakeLists.git              eb40ede56c2d4d5a4a129b2a5bc7095a2df46bb1

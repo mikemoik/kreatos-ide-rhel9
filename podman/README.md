@@ -42,7 +42,45 @@ Edit the current directory:
 
 A shell in the container (lazygit, yazi, cmake, gdb, … are all on `PATH`):
 
-    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint bash kide
+    podman run --rm -it -v "$PWD:/work:Z" -v kide-data:/root/.local --entrypoint fish kide
+
+## Shell: fish
+
+fish is the container's default shell: `$SHELL` and root's login shell, so
+terminals opened in kide (`:terminal`, the terminal window) and shells started
+from lazygit or yazi are fish too. It is built from source by `build.sh`, like the other tools
+(a normal install gets `PREFIX/bin/fish` too; its login shell stays bash).
+
+The IDE's shell helpers live in the repo's `fish/` directory, installed to
+`/opt/kide/share/kreatos-ide/fish` and sourced from root's
+`~/.config/fish/config.fish`:
+
+- `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`
+- `aliases.fish`: aliases for interactive shells
+
+| Alias | Runs |
+|---|---|
+| `vi` | `kide` |
+| `lg` | `lazygit` |
+| `y` | `yazi` |
+| `ll` | `ls -alh` |
+| `ff` | pick a file with `fzf` (preview: first 200 lines), open it in `kide` |
+| `ffex` | pick an exported variable with `fzf`, copy it to the clipboard (OSC 52: not in PuTTY) |
+
+Functions (`fish/functions/`, autoloaded):
+
+| Function | Does |
+|---|---|
+| `tm NAME` | attach to the tmux session `NAME`, or create it: one window split top/bottom (lower pane a third of the height), focus in the upper pane. Inside tmux it switches to the session. |
+
+New helpers go into `fish/` (aliases into `aliases.fish`, functions into
+`functions/NAME.fish`) and the tables above;
+the image has to be built again to pick them up. fish's history is in
+`~/.local/share/fish`, so it survives the container with the `kide-data`
+volume. `--entrypoint bash` still works as a fallback.
+
+fish is built without its man pages (they need Sphinx), so builtins' `--help`
+has no page to show; `help` points to <https://fishshell.com/docs/current/>.
 
 A short alias for `~/.bashrc`:
 
@@ -56,4 +94,6 @@ A short alias for `~/.bashrc`:
   only works where Neovim falls back to OSC 52 and the terminal allows it.
 - C/C++ builds and debugging run inside the container with RHEL9's compilers,
   not the host's.
+- tmux (3.7c) is built from source by `build.sh`, like the other tools; it
+  needs no RHEL repo beyond UBI's.
 - Updating: pull/checkout the new version and build the image again.

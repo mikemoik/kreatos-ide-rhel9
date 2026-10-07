@@ -15,10 +15,10 @@ set -euo pipefail
 
 KIDE_TARBALL=${KIDE_TARBALL:-https://github.com/mikemoik/kreatos-ide-rhel9/archive/refs/heads/main.tar.gz}
 
-# build toolchain, tar (download), git (gitsigns, lazygit), file (yazi), and
-# the C/C++ tools kide uses from RHEL
+# build toolchain, tar (download), git (gitsigns, lazygit), file (yazi), the
+# C/C++ tools kide uses from RHEL, and libevent/ncurses headers (tmux build)
 PKGS=(gcc make cmake python3 rust-toolset golang findutils diffutils tar
-      git-core gcc-c++ clang-tools-extra gdb lldb file)
+      git-core gcc-c++ clang-tools-extra gdb lldb file libevent-devel ncurses-devel)
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 

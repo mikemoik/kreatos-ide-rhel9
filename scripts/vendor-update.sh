@@ -124,6 +124,8 @@ done <"$TMP/parsers.lock.tsv"
 
 # --- tools (LSP servers, formatters, build helpers) ----------------------------
 # kind tarball: release tarball of a tag
+# kind release: the release asset NAME-TAG.tar.gz of a github release (has a
+#               generated configure, unlike the tag tarball)
 # kind git:     shallow clone of a tag, branch or commit with all submodules
 #               (their commits go to VERSIONS); a submodule whose upstream is
 #               gone is skipped with a warning
@@ -139,6 +141,10 @@ while IFS=$'\t' read -r name kind url ref packages; do
   case $kind in
     tarball | cargo | gomod)
       fetch_tar "$url/archive/refs/tags/$ref.tar.gz" "$dest"
+      record "tool/$name" "$url" "$ref"
+      ;;
+    release)
+      fetch_tar "$url/releases/download/$ref/$name-$ref.tar.gz" "$dest"
       record "tool/$name" "$url" "$ref"
       ;;
     pypi)

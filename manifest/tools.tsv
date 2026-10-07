@@ -7,3 +7,5 @@ yazi	cargo	https://github.com/sxyazi/yazi	v26.1.22	yazi-fm,yazi-cli
 yazi-prebuilt	git	https://github.com/yazi-rs/prebuilt	2d52c0b8b399aa476bfeff36a6256cffe76eb2a5	yazi-prebuilt
 lazygit	gomod	https://github.com/jesseduffield/lazygit	v0.65.1	-
 fzf	gomod	https://github.com/junegunn/fzf	v0.74.4	-
+fish	cargo	https://github.com/fish-shell/fish-shell	4.9.3	fish
+tmux	release	https://github.com/tmux/tmux	3.7c	-
