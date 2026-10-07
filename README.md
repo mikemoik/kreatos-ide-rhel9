@@ -437,7 +437,7 @@ stands in for that here. The
 podman image also has the newest `pip` and `uv` for Python 3.12, installed
 by the image's user, not root (`python3.12 -m pip install --user --upgrade pip uv`,
 in its `~/.local/bin`, on `PATH` in fish and bash); root only sets up
-`/etc/pip.conf`, `/etc/uv/uv.toml` and the machine certificate (see
+`/etc/pip.conf`, `/etc/uv/uv.toml` and the user's pip client certificate `pip-server.crt` (see
 [podman/README.md](podman/README.md) § Another base image).
 
 ### Terminal tools

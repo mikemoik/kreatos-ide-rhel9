@@ -56,30 +56,29 @@ with its own dnf repos):
   repo root): files copied into the image — `repos.sh` (below), `ubi.repo` to
   `/etc/yum.repos.d/` (both stages, before any `dnf install`), and in the
   runtime stage, system-wide as root:
-  - `pip.conf` to `/etc/pip.conf` (e.g. `[global]` `index-url = …`)
-  - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the index
-    goes here too, e.g. `[[index]]` `url = "https://<mirror>/simple"`
-    `default = true`
-  - `machine.crt` is the **client certificate** (mTLS: certificate and its
-    private key in one PEM file; the build stops if the key is missing). It
-    does not go into the trust store: `KIDE_USER` keeps it as
-    `~/.pip/machine.crt` (mode 600), and its fish and bash config set
-    `PIP_CLIENT_CERT` (pip) and `SSL_CLIENT_CERT` (uv, which has no
-    `uv.toml` setting for it) to it, so `pip.conf` needs no `client-cert`
-    line. Empty: no client certificate.
-  - every other `*.crt` is a **CA** (PEM, also a chain with several
-    certificates, or DER) and goes into the system trust store
-    (`/etc/pki/ca-trust/source/anchors/kide-<name>.pem`, `update-ca-trust`).
-    The build checks that each certificate is in
-    `/etc/pki/tls/certs/ca-bundle.crt` and stops if one is not, or if such a
-    file holds a private key (a client certificate under another name) or no
-    certificate. `PIP_CERT` and `SSL_CERT_FILE` point pip and uv (and
-    Python's `ssl`) at that bundle, so no `cert =` line is needed; git and
-    curl use it anyway. Empty files and no `*.crt` at all add nothing.
+  - `pip.conf` to `/etc/pip.conf`: `index-url` (the company pip package
+    repo) and `client-cert = ~/.pip/pip-server.crt` (pip expands `~` per
+    user)
+  - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the repo
+    goes here too (`[[index]]` with `default = true`), plus
+    `system-certs = true` (server certificate checked against the system
+    trust store) and `python-preference = "only-system"`,
+    `python-downloads = "never"`
+  - `pip-server.crt`: the user's **client certificate** for the pip server
+    (mTLS: certificate and its private key in one PEM file; the build stops
+    if the key is missing). `KIDE_USER` keeps it as `~/.pip/pip-server.crt`
+    (mode 600). Every pip and uv call uses it, at build time and at runtime,
+    with or without a shell (`podman exec`, kide, quadlet): pip through
+    `client-cert` in `/etc/pip.conf`, uv through the image `ENV`
+    `SSL_CLIENT_CERT=/etc/kide/pip-server.crt` (a symlink to that file; uv
+    has no config setting for it).
 
   Then `KIDE_USER` runs `python3.12 -m pip install --user --upgrade pip uv`
-  with that config and the client certificate. `podman/conf` holds empty
-  placeholders; point `CONF_DIR` at a directory with the real ones (it has
+  with that config and the client certificate. `podman/conf` holds
+  **dummies**: `pip.conf` and `uv.toml` with the repo URL
+  `https://pypi.example.com/simple`, a self-signed `pip-server.crt`, an
+  empty `ubi.repo`. Replace them with the real ones on prod. With the dummy
+  URL the build stops at that pip install (the repo does not exist). Point `CONF_DIR` at a directory with the real ones (it has
   to be inside the build context).
 - `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
   Default: enables CRB and EPEL (Rocky's stand-in for the target repos).

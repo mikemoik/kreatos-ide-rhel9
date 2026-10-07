@@ -1,0 +1,54 @@
+# DUMMY client certificate for the pip server (mTLS), not a real one: a
+# self-signed certificate and its private key, generated for the repo so the
+# podman build works without the real file. On prod, replace this file with
+# the real client certificate (certificate + private key, PEM, one file).
+# podman/Containerfile installs it as KIDE_USER's ~/.pip/pip-server.crt.
+-----BEGIN CERTIFICATE-----
+MIIDXzCCAkegAwIBAgIUef1d60mqChRceJ5yg3mM2xp7GA4wDQYJKoZIhvcNAQEL
+BQAwPjE8MDoGA1UEAwwza2lkZSBkdW1teSBwaXAgY2xpZW50IGNlcnRpZmljYXRl
+IC0gcmVwbGFjZSBvbiBwcm9kMCAXDTI2MTAwNzE1NTc0NFoYDzIxMjYwOTEzMTU1
+NzQ0WjA+MTwwOgYDVQQDDDNraWRlIGR1bW15IHBpcCBjbGllbnQgY2VydGlmaWNh
+dGUgLSByZXBsYWNlIG9uIHByb2QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQDLc8fJoVgUqWQw7TSi5RGY3aXE60mRPna5a/jKFi2F70c7sStrJcROQ6UP
+pbiJDe5pZ//XYQKVXzMHQ/cJc+yEZwjDzmoUcJOyo1oxMtw/TC+cse7EB/rxzp+p
+DO6bLEEkjkoUaBMCQWp+YdrZ48kZuNRJk9v1J6O+/G30j4YoCyVnCFQLaEtNlI6s
+Eu1A2/5qxRv+XkyyWZHHsRom0WVXeEOIJoQJ6sdl3yXIYSNUwWM/z/fuWmUY/8jg
+ykGKuPYwaSUVfq6CO/AMTbYJeNMs3Tz/U18Fp8dwRGzySQj99E30rJWgyfzsFN0a
+aCaD33ClTPxZXeWGiS/gc5sR7dVrAgMBAAGjUzBRMB0GA1UdDgQWBBRp9Ql9HSCw
+tjJcz3cb/yecjdeFhjAfBgNVHSMEGDAWgBRp9Ql9HSCwtjJcz3cb/yecjdeFhjAP
+BgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBrvK8/rTD0mMpxxHkw
+8U2r3gAfclqT3mypDbHnmRIew0qcACggs1efnqlpTt9s+XG2rsn8OWEOlIviY4jY
+8JP02r+DoeoWcSjC5GNTDjyyQuR3y7ceXxqQ6z58uzAgOkVgtk465h4rVeONRiqq
+fMCKbP00x9aApjMC+YelphLZUSYVdkz9PzAJgx8di2g8787Bif0g9HVgDKo1djhI
+WR6vIREGXBU977IbbEFbwu6eYld+tuUnlHma4dA2AlK67zuEGaGQ/GOPfVr2Z74T
+zLE0ji6Nmo2ww+cTNlHK0X/0hVVFSnxbr7ubvBuz2JS0Zc6fsbSeXkZeEuDic15N
+vUaN
+-----END CERTIFICATE-----
+-----BEGIN PRIVATE KEY-----
+MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDLc8fJoVgUqWQw
+7TSi5RGY3aXE60mRPna5a/jKFi2F70c7sStrJcROQ6UPpbiJDe5pZ//XYQKVXzMH
+Q/cJc+yEZwjDzmoUcJOyo1oxMtw/TC+cse7EB/rxzp+pDO6bLEEkjkoUaBMCQWp+
+YdrZ48kZuNRJk9v1J6O+/G30j4YoCyVnCFQLaEtNlI6sEu1A2/5qxRv+XkyyWZHH
+sRom0WVXeEOIJoQJ6sdl3yXIYSNUwWM/z/fuWmUY/8jgykGKuPYwaSUVfq6CO/AM
+TbYJeNMs3Tz/U18Fp8dwRGzySQj99E30rJWgyfzsFN0aaCaD33ClTPxZXeWGiS/g
+c5sR7dVrAgMBAAECggEAE5d/qrv9xmeVfVyqT/FtI2JcvzzFJdZ1CmAKYjOGiLpF
+CsuB2dyWLc83yuzze0c7KS1Zprzxyb6UJGP4GxHtucZOQsTS1EsO/gna+pfiO7oz
+b4x26Ku4D6cNGvNi2tCFKWcGXTa0degkwCzeLVNRH0f8MWWqrc32Z8LZN87GZX6Z
+DIDW7/iT1aoHbnAWvhk6PGTLQhHFY0SxbnZwCeVJSfnKqrlEfEmWoVEoi0D9e3pz
+HqhcgdI1pll2Ik/81mq+zjARzMC/lX/oOkQH+VWBraczzpYxXAuVCrhvrj67iu4j
+GmrjqJrWXQSxm/hY+EzmzY9ajKx4PgbhQhSnOCltCQKBgQD/eoKhKzQtkYbHKpZa
+dStAYOzPWnzmPU+ZSAHX+8KbsP/jh0UgBKvsWtRTyN84IMEzL5m0e6rx9sB71VZw
+gy2tnkgLHQVD4tA/jphFqbUduM9nAbhR2JkRdR1XGhAHkg7lE/nDTotECDbuH1Tg
+gvFST5jou60FsYl6WR7OGMstLwKBgQDL3hYCBiaTXFP97IOfzyO6XMwajI4QIpwD
+fD3xT3icp3DDchj0fL6OBAiDh8f70L4/MHtBnX3xQ/OWt+KsDyV/yADk4SCwbGlj
+aYmzfisGaayqjhhQyWTTLMiixvdXRM4qQ8wCP3v5rUPtQAk3SwvEQ4Y8GQupAoG+
++06+lJdkhQKBgQDk04plaRkXJ52cjpyU8RWIWEhDgT0VzBybok9kcO9iHCtWVDap
+8wU6cjBzyxuEXnItspjte0cl6mmFgRQnOpeTRo4oxhmNMH5uLv5chyDeOkYqcPPy
++xo+9LMO7R0masBElpvDP3qluOXaat3PKfmUTA8dhdv3mYkVuPVKjBKPqQKBgQDE
+PKaalCkVt83xonSgo9cUULb250zoIyhiAnntij3jLRnSSEXVMS6LrT40vcK2lhxK
+3vQGGP9d+bbD4YWDcaD6+x5BMqMwr2pSkwhFirEHnzjhg53MRc+TpowKg9MaYdTB
+wjjiARHpJ+s2uGkmnEpbRVQ1DTa4HP2fRHBr6sQ/sQKBgQDUULiOatGewvKuOLpX
+jRxZEca4tEiW0bu0bENdtpzXsYMmKv9yfTKeH/pSM7ZjKmwxsDHIksufgXtkvh+3
+6v2EWF9Iv3yOPhW3c8mIS9QJZHf0B1APBMApShCcToYU+6k7kszxi4+b8CxcBgIN
+R4GLI0bdtWZLs0bq+dZdQhVqLA==
+-----END PRIVATE KEY-----

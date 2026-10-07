@@ -1,47 +1,29 @@
 # uv's system-wide config, copied to /etc/uv/uv.toml (podman/Containerfile).
-# uv does not read pip.conf: a company index has to be set here too.
-# Everything below is a commented sample; uncomment and adjust for your site.
+# uv does not read pip.conf: the company repo is set here too.
+# DUMMY values: replace the URL with the company's pip package repo on prod
+# (the same as index-url in pip.conf).
 # Reference: https://docs.astral.sh/uv/reference/settings/
 #
 # Order matters (TOML): the plain settings must stay above the first [[index]]
 # block, otherwise they belong to that index and uv ignores them.
 
-# --- Python interpreters -------------------------------------------------------
 # Use the RHEL Pythons (python3.12 from dnf) and never download one from the
 # internet (no access to GitHub on the target).
-#
-# python-preference = "only-system"
-# python-downloads = "never"
+python-preference = "only-system"
+python-downloads = "never"
 
-# --- TLS -----------------------------------------------------------------------
-# Not needed in the image: SSL_CERT_FILE points uv at the system CA bundle,
-# which holds the CA *.crt from CONF_DIR. Use the system trust store on hosts
-# without that variable (uv 0.12: `system-certs`; `native-tls` is deprecated).
-#
-# system-certs = true
+# Check the repo's server certificate against the system trust store (where a
+# company CA lives), not uv's own bundled roots. uv 0.12: `system-certs`
+# (`native-tls` is deprecated).
+system-certs = true
 
-# The client certificate (mTLS, CONF_DIR/machine.crt) has no setting here: uv
-# reads it from SSL_CLIENT_CERT, which the image sets for KIDE_USER.
+# The client certificate (CONF_DIR/pip-server.crt) has no setting in this
+# file: uv only reads it from SSL_CLIENT_CERT, which the image sets as ENV to
+# /etc/kide/pip-server.crt (a link to KIDE_USER's ~/.pip/pip-server.crt), at
+# build time and runtime.
 
-# Only if the index has no valid certificate at all (better: add its CA as a
-# *.crt next to this file).
-#
-# allow-insecure-host = ["pypi.example.com"]
-
-# --- package indexes (keep these last) -----------------------------------------
-# The company mirror/proxy of PyPI, used instead of pypi.org. Same URL as
-# `index-url` in pip.conf.
-#
-# [[index]]
-# name = "company"
-# url = "https://pypi.example.com/simple"
-# default = true
-
-# An extra internal index next to the default one (e.g. in-house packages).
-# Pin a package to it in a project's pyproject.toml, in the table
-# tool.uv.sources: mypkg = { index = "internal" }
-#
-# [[index]]
-# name = "internal"
-# url = "https://gitlab.example.com/api/v4/projects/123/packages/pypi/simple"
-# explicit = true
+# The company pip package repo, used instead of pypi.org.
+[[index]]
+name = "company"
+url = "https://pypi.example.com/simple"
+default = true
