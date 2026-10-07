@@ -106,12 +106,12 @@ Edit your `~/workspace` (create it once on the host: `mkdir -p ~/workspace`):
     podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
 - `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
-  mounted as the container user's `~/workspace`, the working directory: kide
-  and fish start there, whatever directory you start from. `/workspace` is a
-  symlink to it, so the command does not depend on that user's home. `:Z`
-  relabels it for SELinux (needed on RHEL). A file argument is relative to
-  `~/workspace` (e.g. `kide myproject/src/main.py`). fish sources every `*.fish` in
-  `~/workspace/.container/fish/` last, in name order: your own fish config
+  mounted on `/workspace`, the container's working directory: kide and fish
+  start there, whatever directory you start from. `:Z` relabels it for SELinux
+  (needed on RHEL). A file argument is relative to it (e.g.
+  `kide myproject/src/main.py`). fish sources every `*.fish` in
+  `~/workspace/.container/fish/` (in the container
+  `/workspace/.container/fish/`) last, in name order: your own fish config
   (aliases, PATH, …), kept on the host.
 - `-v kide-data:/var/lib/kide`: kide's data and state (undo history, shada,
   swap files, sessions, fish history) survive the container. Leave it out for

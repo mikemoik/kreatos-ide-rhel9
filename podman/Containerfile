@@ -131,12 +131,10 @@ ENV XDG_DATA_HOME=/var/lib/kide/share \
 # otherwise created with KIDE_UID/KIDE_GID. Gets fish as login shell and the
 # fish and bash config (with ~/.local/bin, where its pip and uv go, on PATH),
 # owns /var/lib/kide.
-# ~/workspace is the mount point for the host's ~/workspace and the working
-# directory. /workspace is a symlink to it, so `podman run -v
-# ~/workspace:/workspace` does not depend on KIDE_USER's home (e.g.
-# /opt/app-root/src in Red Hat's images); podman follows the symlink.
-# fish sources every *.fish in ~/workspace/.container/fish/ last, in name
-# order (the user's own fish config, kept on the host; none: nothing happens).
+# /workspace is the WORKDIR, a plain directory owned by KIDE_USER: the mount
+# point for the host's ~/workspace (podman run -v "$HOME/workspace:/workspace:Z").
+# fish sources every *.fish in /workspace/.container/fish/ (on the host:
+# ~/workspace/.container/fish/) last, in name order; none: nothing happens.
 ARG KIDE_USER
 ARG KIDE_UID
 ARG KIDE_GID
@@ -148,13 +146,12 @@ RUN set -e; \
     usermod -s /opt/kide/bin/fish "$KIDE_USER"; \
     home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
     group=$(id -g "$KIDE_USER"); \
-    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state "$home/workspace"; \
-    ln -s "$home/workspace" /workspace; \
+    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /workspace; \
     printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' \
-      'for f in ~/workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
+      'for f in /workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
     printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' '. /opt/kide/bashrc' >>"$home/.bashrc"; \
     chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
-    chown -R "$KIDE_USER:$group" "$home/.config" "$home/workspace" /var/lib/kide
+    chown -R "$KIDE_USER:$group" "$home/.config" /workspace /var/lib/kide
 USER $KIDE_USER
 # as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
 # (pip install --user, with /etc/pip.conf: company repo, trusted via pip-server.crt);

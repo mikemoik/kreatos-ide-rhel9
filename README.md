@@ -158,12 +158,12 @@ Run it on your `~/workspace` (rootless podman, as your normal user — not
     podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
 - `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
-  mounted as the container user's `~/workspace`, the working directory: kide
-  and fish start there, whatever directory you start from. `/workspace` is a
-  symlink to it, so the command does not depend on that user's home. `:Z`
-  relabels it for SELinux (needed on RHEL). A file argument is relative to
-  `~/workspace` (e.g. `kide myproject/src/main.py`). fish sources every `*.fish` in
-  `~/workspace/.container/fish/` last, in name order: your own fish config
+  mounted on `/workspace`, the container's working directory: kide and fish
+  start there, whatever directory you start from. `:Z` relabels it for SELinux
+  (needed on RHEL). A file argument is relative to it (e.g.
+  `kide myproject/src/main.py`). fish sources every `*.fish` in
+  `~/workspace/.container/fish/` (in the container
+  `/workspace/.container/fish/`) last, in name order: your own fish config
   (aliases, PATH, …), kept on the host.
 - `-v kide-data:/var/lib/kide`: kide's data and state survive the container;
   leave it out for a throwaway session.
@@ -319,9 +319,9 @@ user, without sudo.
 
    If that is refused, an admin runs `sudo loginctl enable-linger <your user>`.
 
-2. The directory kide may see is your `~/workspace`, mounted as the
-   container user's `~/workspace` (every project under it is reachable from
-   the one kide):
+2. The directory kide may see is your `~/workspace`, mounted on the
+   container's `/workspace` (every project under it is reachable from the
+   one kide):
 
        mkdir -p ~/workspace
 
@@ -368,7 +368,7 @@ As an alias in `~/.bashrc` on the RHEL box:
 | close PuTTY, log out, connection drops | same as `:detach` |
 | `kide-attach` | back where you left off |
 | `:qa` | kide really quits (asks about unsaved files); systemd starts a fresh, empty one, ready for the next `kide-attach` |
-| `:e ~/…` | only `~/workspace` is mounted (the host's `~/workspace`); open files as `:e ~/workspace/<project>/…` or `:cd ~/workspace/<project>` first |
+| `:e ~/…` | not visible: only `/workspace` (= the host's `~/workspace`) is mounted; open files as `:e /workspace/<project>/…` or `:cd /workspace/<project>` first |
 
 Maintenance:
 
