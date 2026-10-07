@@ -12,10 +12,10 @@
 # Every step that installs or writes system files runs as root (USER root, also
 # when the base image defaults to another user); the image runs as KIDE_USER.
 # Run with rootless podman, mapping you on the host to that user, so files in
-# the mounted project stay yours:
-#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide [FILE…]
+# the mounted ~/workspace stay yours (create it on the host first):
+#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide [FILE…]
 # A shell (fish, with the IDE's aliases from fish/):
-#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 # See podman/README.md.
 
 ARG BASE
@@ -101,6 +101,12 @@ COPY --from=build /opt/kide /opt/kide
 # the dynamic linker finds ACE/TAO/OpenDDS (lib) and onnxruntime (lib64) for
 # every program in the container, also ones built without an RPATH
 RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ldconfig
+# git trusts every repo (/etc/gitconfig): mounted projects are owned by whatever
+# uid the user namespace maps the host owner to, which often isn't the
+# container user (no or another --userns, files of another host user, --user
+# root), and git then refuses with "dubious ownership". The check guards
+# against other users' repos on a shared machine, which a container doesn't have.
+RUN git config --system --add safe.directory '*'
 # what PREFIX/bashrc does on an install
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
@@ -124,7 +130,13 @@ ENV XDG_DATA_HOME=/var/lib/kide/share \
 # image if it has it (e.g. "default" in Red Hat's application images),
 # otherwise created with KIDE_UID/KIDE_GID. Gets fish as login shell and the
 # fish and bash config (with ~/.local/bin, where its pip and uv go, on PATH),
-# owns /var/lib/kide and /work.
+# owns /var/lib/kide.
+# ~/workspace is the mount point for the host's ~/workspace and the working
+# directory. /workspace is a symlink to it, so `podman run -v
+# ~/workspace:/workspace` does not depend on KIDE_USER's home (e.g.
+# /opt/app-root/src in Red Hat's images); podman follows the symlink.
+# fish sources every *.fish in ~/workspace/.container/fish/ last, in name
+# order (the user's own fish config, kept on the host; none: nothing happens).
 ARG KIDE_USER
 ARG KIDE_UID
 ARG KIDE_GID
@@ -136,11 +148,13 @@ RUN set -e; \
     usermod -s /opt/kide/bin/fish "$KIDE_USER"; \
     home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
     group=$(id -g "$KIDE_USER"); \
-    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /work; \
-    printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' >"$home/.config/fish/config.fish"; \
+    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state "$home/workspace"; \
+    ln -s "$home/workspace" /workspace; \
+    printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' \
+      'for f in ~/workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
     printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' '. /opt/kide/bashrc' >>"$home/.bashrc"; \
     chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
-    chown -R "$KIDE_USER:$group" "$home/.config" /var/lib/kide /work
+    chown -R "$KIDE_USER:$group" "$home/.config" "$home/workspace" /var/lib/kide
 USER $KIDE_USER
 # as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
 # (pip install --user, with /etc/pip.conf: company repo, trusted via pip-server.crt);
@@ -148,5 +162,5 @@ USER $KIDE_USER
 # image may put a venv's python first on PATH (e.g. /opt/app-root in Red Hat's
 # Python images), and pip refuses --user inside a venv.
 RUN /usr/bin/python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
-WORKDIR /work
+WORKDIR /workspace
 ENTRYPOINT ["kide"]

@@ -151,13 +151,20 @@ Either way the `dnf install` steps in the Containerfile download packages
 build needs internet or a mirror. For a box without either, see the end of
 this section.
 
-Run it on the current directory (rootless podman, as your normal user — not
+Run it on your `~/workspace` (rootless podman, as your normal user — not
 `sudo podman` — so files kide writes stay yours):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide src/main.py
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
-- `-v "$PWD:/work:Z"`: the project; `:Z` relabels it for SELinux (needed on RHEL).
+- `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
+  mounted as the container user's `~/workspace`, the working directory: kide
+  and fish start there, whatever directory you start from. `/workspace` is a
+  symlink to it, so the command does not depend on that user's home. `:Z`
+  relabels it for SELinux (needed on RHEL). A file argument is relative to
+  `~/workspace` (e.g. `kide myproject/src/main.py`). fish sources every `*.fish` in
+  `~/workspace/.container/fish/` last, in name order: your own fish config
+  (aliases, PATH, …), kept on the host.
 - `-v kide-data:/var/lib/kide`: kide's data and state survive the container;
   leave it out for a throwaway session.
 - `--userns=keep-id:uid=1001,gid=1001`: the image runs as the user `default`
@@ -169,7 +176,7 @@ Run it on the current directory (rootless podman, as your normal user — not
 
 As an alias in `~/.bashrc`:
 
-    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide'
+    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
 Offline box: build the image on a machine with internet and carry it over as
 a file:
@@ -203,10 +210,11 @@ background and colours match kreatos. It also sets JetBrainsMono Nerd Font Mono
 10 pt, terminal type `xterm-256color`, 24-bit colour, and as *Connection → SSH →
 Remote command* it starts the kide container with fish as its shell:
 
-    podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+    podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 
-The remote command runs in your home directory on the RHEL box, so `/work` in
-the container is your home; `cd` to the project there, `kide` opens it. Leaving
+The container mounts your `~/workspace` on the RHEL box (create it once:
+`mkdir -p ~/workspace`) and starts fish there; `cd` to the project, `kide`
+opens it. The `*.fish` files in `~/workspace/.container/fish/` are sourced as your own fish config. Leaving
 fish (`exit`) ends the container and the PuTTY session. Needs the `kide` image
 on the RHEL box ([In a podman container](#in-a-podman-container)). For a plain
 login shell instead (e.g. a normal install), clear the remote command in PuTTY
@@ -242,7 +250,7 @@ that session; host, port and other settings stay. Not tested on Windows yet.
    of step 3.
 3. `cd` to the project on the RHEL box and start kide:
 
-       podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide
+       podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
 
    - `-e TERM` hands PuTTY's `xterm-256color` to the container (podman would
      set plain `xterm`).
@@ -252,7 +260,7 @@ that session; host, port and other settings stay. Not tested on Windows yet.
 
    As an alias in `~/.bashrc` on the RHEL box:
 
-       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide'
+       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
    With a normal install (no container) it is just `kide`.
 
@@ -311,10 +319,11 @@ user, without sudo.
 
    If that is refused, an admin runs `sudo loginctl enable-linger <your user>`.
 
-2. Pick the directory kide may see; it is mounted as `/work` (here
-   `~/projects`; every project under it is reachable from the one kide):
+2. The directory kide may see is your `~/workspace`, mounted as the
+   container user's `~/workspace` (every project under it is reachable from
+   the one kide):
 
-       mkdir -p ~/projects
+       mkdir -p ~/workspace
 
 3. Create the unit file `~/.config/containers/systemd/kide.container`
    (`mkdir -p ~/.config/containers/systemd` first):
@@ -327,7 +336,7 @@ user, without sudo.
        ContainerName=kide
        # the image's entrypoint is kide; this makes it a server, no UI
        Exec=--headless --listen /tmp/kide.sock
-       Volume=%h/projects:/work:Z
+       Volume=%h/workspace:/workspace:Z
        Volume=kide-data:/var/lib/kide
        UserNS=keep-id:uid=1001,gid=1001
        Environment=TERM=xterm-256color SSH_CONNECTION=persistent
@@ -359,7 +368,7 @@ As an alias in `~/.bashrc` on the RHEL box:
 | close PuTTY, log out, connection drops | same as `:detach` |
 | `kide-attach` | back where you left off |
 | `:qa` | kide really quits (asks about unsaved files); systemd starts a fresh, empty one, ready for the next `kide-attach` |
-| `:e ~/…` | not visible: only `/work` (= `~/projects`) is mounted; open files as `:e /work/<project>/…` or `:cd /work/<project>` first |
+| `:e ~/…` | only `~/workspace` is mounted (the host's `~/workspace`); open files as `:e ~/workspace/<project>/…` or `:cd ~/workspace/<project>` first |
 
 Maintenance:
 

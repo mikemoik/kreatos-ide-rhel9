@@ -100,13 +100,19 @@ leaves out `.git` and `vendor.staging`).
 
 ## Run
 
-Edit the current directory:
+Edit your `~/workspace` (create it once on the host: `mkdir -p ~/workspace`):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide src/main.py
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
-- `-v "$PWD:/work:Z"`: the project, the container's working directory. `:Z`
-  relabels it for SELinux (needed on RHEL).
+- `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
+  mounted as the container user's `~/workspace`, the working directory: kide
+  and fish start there, whatever directory you start from. `/workspace` is a
+  symlink to it, so the command does not depend on that user's home. `:Z`
+  relabels it for SELinux (needed on RHEL). A file argument is relative to
+  `~/workspace` (e.g. `kide myproject/src/main.py`). fish sources every `*.fish` in
+  `~/workspace/.container/fish/` last, in name order: your own fish config
+  (aliases, PATH, …), kept on the host.
 - `-v kide-data:/var/lib/kide`: kide's data and state (undo history, shada,
   swap files, sessions, fish history) survive the container. Leave it out for
   a throwaway session. The image points `XDG_DATA_HOME`/`XDG_STATE_HOME` there
@@ -121,10 +127,13 @@ Edit the current directory:
 - Root inside for a one-off (e.g. `dnf install` to try a package): add
   `--user root` and leave out `--userns=…`; root then is you on the host.
   Not kept: the next container starts from the image again.
+- git trusts every repo in the container (`safe.directory = *` in
+  `/etc/gitconfig`), so it never stops with "dubious ownership", whichever
+  uid the project appears as inside.
 
 A shell in the container (lazygit, yazi, cmake, gdb, … are all on `PATH`):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 
 ## Shell: fish
 
@@ -168,7 +177,7 @@ has no page to show; `help` points to <https://fishshell.com/docs/current/>.
 
 A short alias for `~/.bashrc`:
 
-    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$PWD:/work:Z" -v kide-data:/var/lib/kide kide'
+    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
 ## VS Code dev container
 
@@ -188,8 +197,8 @@ with podman instead of docker. Not tested yet.
    {
      "name": "kide",
      "image": "localhost/kide",
-     "workspaceMount": "source=${localWorkspaceFolder},target=/work,type=bind,Z",
-     "workspaceFolder": "/work",
+     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,Z",
+     "workspaceFolder": "/workspace",
      "mounts": ["source=kide-data,target=/var/lib/kide,type=volume"],
      "runArgs": ["--userns=keep-id:uid=1001,gid=1001"],
      "containerUser": "default",
