@@ -15,15 +15,19 @@
 #                          cargo, packages = the crates build.sh builds
 #                          (comma-separated); needs `cargo`. A git tool
 #                          with packages (not -) gets its crates vendored too
+#   manifest/dist.tsv      upstream release tarballs kept as-is in dist/
+#                          (cmake, onnxruntime, ACE+TAO, OpenDDS, RapidJSON),
+#                          sha256-checked
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 # everything is fetched into a staging dir; vendor/ is replaced only when the
 # whole run succeeded
 V=$ROOT/vendor.staging
+D=$ROOT/dist.staging
 TMP=$(mktemp -d)
-trap 'rm -rf "$TMP" "$V"' EXIT
-rm -rf "$V"
+trap 'rm -rf "$TMP" "$V" "$D"' EXIT
+rm -rf "$V" "$D"
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 
@@ -225,13 +229,29 @@ print(u["url"], u["digests"]["sha256"])')
   fi
 done <"$ROOT/manifest/tools.tsv"
 
+# --- dist: release tarballs, kept as-is ----------------------------------------
+# a tarball already in dist/ with the pinned sha256 is reused, not downloaded
+mkdir -p "$D"
+while IFS=$'\t' read -r name kind version file url sha; do
+  [[ -z $name || $name == \#* ]] && continue
+  if [[ -f $ROOT/dist/$file ]] && echo "$sha  $ROOT/dist/$file" | sha256sum -c --quiet - 2>/dev/null; then
+    cp "$ROOT/dist/$file" "$D/$file"
+  else
+    log "dist $name $version"
+    curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors "$url" -o "$D/$file"
+    echo "$sha  $D/$file" | sha256sum -c --quiet - || { echo "sha256 mismatch: $url" >&2; exit 1; }
+  fi
+  record "dist/$name" "$url" "$version ($kind)"
+done <"$ROOT/manifest/dist.tsv"
+
 # --- strip + record ----------------------------------------------------------
 log "stripping non-text files"
 python3 "$ROOT/scripts/check-sources.py" --strip "$V"
 sort "$TMP/versions" >"$ROOT/VERSIONS"
 cp "$TMP/parsers.lock.tsv" "$ROOT/manifest/parsers.lock.tsv"
-rm -rf "$ROOT/vendor"
+rm -rf "$ROOT/vendor" "$ROOT/dist"
 mv "$V" "$ROOT/vendor"
+mv "$D" "$ROOT/dist"
 # upstream .gitignore files (fzf ignores its own vendor/) would keep vendored
 # sources out of the commit; the build only sees them in this checkout
 ignored=$(git -C "$ROOT" status --ignored --porcelain vendor | sed -n 's/^!! //p')

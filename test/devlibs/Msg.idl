@@ -1,0 +1,7 @@
+module Kide {
+  @topic
+  struct Msg {
+    @key long id;
+    string text;
+  };
+};

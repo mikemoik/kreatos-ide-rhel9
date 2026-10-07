@@ -1,8 +1,14 @@
 # kide in a podman container
 
 kide without installing anything on the host except podman: the image is
-UBI9 with kide built into `/opt/kide` and the RHEL packages it uses (python3,
-git, file, gcc/g++, make, cmake, clangd/clang-format/clang-tidy, gdb, lldb).
+Rocky Linux 9 (RHEL9-compatible) with kide built into `/opt/kide` and the RHEL
+packages it uses (python3, git, file, gcc/g++, make, cmake,
+clangd/clang-format/clang-tidy, gdb, lldb), plus what C/C++ projects build
+against: CMake 4, onnxruntime, ACE+TAO and OpenDDS in `/opt/kide` (from
+`dist/`), and from CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with numpy and
+pybind11, opencv, glew, glfw. pip (newest) and uv for Python 3.12 are
+pip-installed into `/usr/local`. Not UBI9: UBI lacks packages the EPEL ones
+depend on (Qt5, gdal, protobuf for opencv; GL libraries for glew/glfw).
 The build stage is `build.sh`, as on a normal install; the Rust and Go
 toolchains stay in the build stage and are not in the final image.
 
@@ -21,14 +27,14 @@ Without a checkout, straight from GitHub (no curl needed):
 
     podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
 
-The build stage has two layers: the compile step (`vendor/`, `manifest/`,
+The build stage has two layers: the compile step (`vendor/`, `dist/`, `manifest/`,
 `scripts/`, `build.sh`) and the config step (`config/`, `yazi/`, `fish/`, run
 with `build.sh --no-build`). After a change to the config only, podman reuses
 the compiled layer and the rebuild takes seconds; a change to the compile
 inputs rebuilds everything (~10–15 min).
 
-The `dnf install` steps need the RHEL/UBI repos; `build.sh` itself never
-touches the network. The build context is what git tracks (`.containerignore`
+The `dnf install` steps need the Rocky and EPEL repos and the `pip install`
+step PyPI; `build.sh` itself never touches the network. The build context is what git tracks (`.containerignore`
 leaves out `.git` and `vendor.staging`).
 
 ## Run
@@ -137,5 +143,5 @@ with podman instead of docker. Not tested yet.
 - C/C++ builds and debugging run inside the container with RHEL9's compilers,
   not the host's.
 - tmux (3.7c) is built from source by `build.sh`, like the other tools; it
-  needs no RHEL repo beyond UBI's.
+  needs only base packages (libevent, ncurses).
 - Updating: pull/checkout the new version and build the image again.

@@ -1629,6 +1629,11 @@ crate/yazi/zune-core-0.5.1   https://crates.io                                  
 crate/yazi/zune-inflate-0.2.54 https://crates.io                                            Cargo.lock
 crate/yazi/zune-jpeg-0.4.21  https://crates.io                                            Cargo.lock
 crate/yazi/zune-jpeg-0.5.11  https://crates.io                                            Cargo.lock
+dist/ace-tao                 https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2 8.0.8 (source)
+dist/cmake                   https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz 4.4.4 (prebuilt)
+dist/onnxruntime             https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz 1.30.0 (prebuilt)
+dist/opendds                 https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz 3.34.0 (source)
+dist/rapidjson               https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz fd3dc29a5c2852df569e1ea81dbde2c412ac5051 (source)
 gomod/fzf/github.com/charlievieth/fastwalk https://github.com/charlievieth/fastwalk                     v1.0.14
 gomod/fzf/github.com/gdamore/encoding https://github.com/gdamore/encoding                          v1.0.1
 gomod/fzf/github.com/gdamore/tcell/v2 https://github.com/gdamore/tcell/v2                          v2.9.0

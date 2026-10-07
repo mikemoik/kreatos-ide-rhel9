@@ -29,4 +29,15 @@ docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash 
     command -q tmux; or exit 1
     echo fish ok: (fish --version)
   "
+  echo "==> C/C++ libraries (cmake 4, onnxruntime, ACE+TAO, OpenDDS)"
+  export PATH=/opt/kide/bin:$PATH
+  cmake --version | grep -q "^cmake version 4\\."
+  cmake -S /src/test/devlibs -B /tmp/devlibs -D CMAKE_BUILD_TYPE=Release >/tmp/devlibs.log ||
+    { cat /tmp/devlibs.log; exit 1; }
+  cmake --build /tmp/devlibs -j "$(nproc)" >>/tmp/devlibs.log || { tail -40 /tmp/devlibs.log; exit 1; }
+  /tmp/devlibs/devlibs
+  # the installed tools run from PREFIX alone ($ORIGIN-relative RPATH)
+  rm -rf "${KIDE_BUILD_DIR:-/tmp/kide-build}/dds"
+  tao_idl -V 2>&1 | grep -m1 "TAO_IDL_FE"
+  opendds_idl --version 2>&1 | head -1
 '

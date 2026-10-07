@@ -2,7 +2,9 @@
 
 misw's kreatos Neovim setup, packaged to build **offline from source** on
 RHEL9. Everything the build needs is in this repo; the build never touches the
-network, and the repo holds no binaries (checked by `scripts/check-sources.py`).
+network, and `vendor/` holds no binaries (checked by `scripts/check-sources.py`).
+The one exception is `dist/`: upstream release tarballs kept as shipped, two of
+them prebuilt (CMake 4, onnxruntime), see [C/C++ libraries](#cc-libraries).
 
 ## Install (on the RHEL9 box)
 
@@ -10,10 +12,13 @@ One call does everything:
 
     curl -fsSL https://raw.githubusercontent.com/mikemoik/kreatos-ide-rhel9/main/install.sh | bash
 
-1. Installs the RHEL packages that are missing (from the RHEL repos only;
-   asks for your sudo password): the build toolchain (gcc, make, cmake,
-   python3, rust-toolset, golang, libevent-devel and ncurses-devel for tmux),
-   tar, git-core, and the C/C++ tools below.
+1. Installs the RHEL packages that are missing (asks for your sudo
+   password): the build toolchain (gcc, make, cmake, python3, rust-toolset,
+   golang, libevent-devel and ncurses-devel for tmux, perl, perl-Dumpvalue
+   and bzip2 for ACE+TAO/OpenDDS), tar, git-core, the C/C++ tools below, and
+   the [C/C++ libraries](#cc-libraries) RHEL ships. Those come partly from
+   CRB and EPEL, which it enables first (CRB via `subscription-manager` on
+   RHEL; EPEL by installing `epel-release`).
 2. Downloads this repo as a tarball into a temp dir (removed afterwards).
 3. Builds and installs kreatos-ide offline into `~/.local/kreatos-ide`
    (`build.sh`, ~5 min).
@@ -64,8 +69,15 @@ from somewhere.
    installed beforehand: `install.sh` only calls `dnf` for packages that are
    missing, and stops if `dnf` fails. The full list:
 
+       sudo subscription-manager repos --enable codeready-builder-for-rhel-9-$(uname -m)-rpms
+       sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
        sudo dnf install gcc make cmake python3 rust-toolset golang findutils diffutils tar \
-           git-core gcc-c++ clang-tools-extra gdb lldb file libevent-devel ncurses-devel
+           git-core gcc-c++ clang-tools-extra gdb lldb file libevent-devel ncurses-devel \
+           perl perl-Dumpvalue bzip2 python3.12 python3.12-pip python3.12-numpy \
+           python3.12-pybind11 python3.12-pybind11-devel opencv-devel glew-devel glfw glfw-devel
+
+   (The first two lines enable CRB and EPEL; on an offline box the mirror has
+   to carry them too.)
 
 4. Unpack and install (into `~/.local/kreatos-ide`, ~5 min; an argument picks
    another prefix, e.g. `./install.sh /opt/kide`):
@@ -84,8 +96,10 @@ Updating offline: bring over a new tarball, unpack it, and run `./install.sh`
 ### In a podman container
 
 No install on the host at all, only podman: `podman/Containerfile` builds a
-UBI9 image with kide in `/opt/kide` plus the RHEL packages it uses (details
-and limits: [podman/README.md](podman/README.md)).
+Rocky Linux 9 image (RHEL9-compatible; UBI9 lacks what the EPEL packages
+need) with kide in `/opt/kide`, the RHEL packages it uses, the
+[C/C++ libraries](#cc-libraries), and the newest pip plus uv for Python 3.12
+(details and limits: [podman/README.md](podman/README.md)).
 
 Build the image (~5–10 min). The build does not use the tarball itself: it
 copies the repo **directory** you point it at into the image (`COPY . /src`)
@@ -110,9 +124,10 @@ Two ways to give it the repo:
 
       podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
 
-Either way the `dnf install` steps in the Containerfile download RHEL
-packages, so the build needs the RHEL/UBI repos (internet or a mirror). For a
-box without either, see the end of this section.
+Either way the `dnf install` steps in the Containerfile download packages
+(Rocky + EPEL repos) and the `pip install` step pip and uv (PyPI), so the
+build needs internet or a mirror. For a box without either, see the end of
+this section.
 
 Run it on the current directory (rootless podman, as your normal user — not
 `sudo podman` — so files kide writes stay yours):
@@ -322,6 +337,33 @@ and doxygen parsers. Keys:
 cmake-tools builds into `build/<BuildType>` and links `compile_commands.json`
 into the project root, which is what clangd reads.
 
+<a id="cc-libraries"></a>
+#### C/C++ libraries
+
+For C/C++ projects built against them (task 126). Into `PREFIX`, from the
+upstream release tarballs in `dist/` (`manifest/dist.tsv`, sha256-checked by
+`build.sh`):
+
+| What | From | In `PREFIX` |
+|---|---|---|
+| CMake 4.4.4 | upstream's prebuilt Linux x86_64 tarball | `bin/cmake`, `ctest`, `cpack`: first on `PATH`, ahead of RHEL's cmake 3.31 |
+| onnxruntime 1.30.0 (CPU) | upstream's prebuilt Linux x64 tarball | `include/onnxruntime`, `lib64`; `find_package(onnxruntime)` → `onnxruntime::onnxruntime`, `pkg-config libonnxruntime` |
+| ACE 8.0.8 + TAO 4.0.8 | source, compiled by `build.sh` | `lib/libACE*`, `libTAO*`, `include/{ace,tao,orbsvcs}`, `bin/tao_idl` |
+| OpenDDS 3.34.0 (+ RapidJSON headers) | source, compiled by `build.sh` with OpenDDS's `configure` | `lib/libOpenDDS_*`, `include/dds`, `bin/opendds_idl`; `find_package(OpenDDS)` with `opendds_target_sources()` |
+
+ACE+TAO and OpenDDS ship no prebuilt Linux binaries, so they are the only
+part that compiles (~7 min on 24 cores, release build, no tests). Their
+libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
+`LD_LIBRARY_PATH`. The bundled cmake finds both packages without hints (it
+searches its own prefix); a different cmake needs
+`-D CMAKE_PREFIX_PATH=PREFIX`.
+
+From RHEL instead (installed by `install.sh`, in the podman image too):
+`python3.12` with `numpy` and `pybind11` (+ `-devel`, CRB), `opencv-devel`,
+`glew-devel`, `glfw`/`glfw-devel` (EPEL), `perl` + `perl-Dumpvalue`. The
+podman image also has the newest `pip` and `uv` for Python 3.12
+(`python3.12 -m pip install --upgrade pip uv`, in `/usr/local/bin`).
+
 ### Terminal tools
 
 Also built from source and put on `PATH` with kide (upstream defaults; yazi
@@ -474,6 +516,7 @@ off TLS checks instead.
 | `vendor/grammars` | treesitter grammar repos (`grammar.js` + generated `src/parser.c`) |
 | `vendor/tools` | LSP servers, formatters, debugger (`manifest/tools.tsv`): ruff + ty, neocmakelsp, shfmt, debugpy, fd, fzf, lazygit, yazi, yazi-prebuilt (the syntax repos for yazi's previews); Go tools carry their modules in their own `vendor/` |
 | `vendor/crates` | the Rust crates of each cargo tool (`cargo vendor --locked`), plus the cargo source config |
+| `dist` | upstream release tarballs kept as shipped (`manifest/dist.tsv`): CMake 4 and onnxruntime (prebuilt), ACE+TAO, OpenDDS, RapidJSON (source) |
 | `config` | the nvim config (kreatos `home/nvim`, adapted, see below) |
 | `yazi` | the yazi config bundled with kide (text files open in kide) |
 | `manifest/` | the pins; `parsers.lock.tsv` is generated from `parsers.txt`; `licenses.tsv` holds license facts the inventory cannot detect |
@@ -534,6 +577,7 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 | 4 | shfmt 3.13.1, debugpy 1.8.21 (last release for Python 3.9) | done, passes in UBI9 offline |
 | C++ | parsers, neocmakelsp 0.11.0 (newest that builds with Rust 1.92), clangd_extensions, cmake-tools, neotest-gtest, neogen; config for RHEL's clangd/clang-format/gdb/lldb-dap | task 123 |
 | tools | fd 10.5.0, fzf 0.74.4, lazygit 0.65.1, yazi 26.1.22 (newest that builds with Rust 1.92; later ones need 1.95) | in progress |
+| libs | CMake 4.4.4, onnxruntime 1.30.0, ACE+TAO 8.0.8, OpenDDS 3.34.0 (`dist/`); RHEL/CRB/EPEL dev packages; podman image on Rocky 9 with pip + uv | task 126 |
 
 ## Updating the pins (on a connected machine)
 
@@ -563,10 +607,17 @@ clang-tools-extra, gdb and lldb): a small CMake project is configured and
 built, clangd reports an error, neocmakelsp attaches, clang-format formats,
 gdb and lldb-dap each stop at a breakpoint in the built program, cmake-tools,
 clangd_extensions and neotest-gtest load, neogen writes a Doxygen comment.
+C/C++ libraries (`test/devlibs`): the bundled cmake is 4.x and builds a
+project that finds onnxruntime and OpenDDS, generates code from an IDL file
+(tao_idl + opendds_idl) and links both; it runs, and `tao_idl` and
+`opendds_idl` still start once the build directory is gone. The RHEL/EPEL
+packages and pip/uv are not in the UBI test image (UBI cannot install the
+EPEL ones); building `podman/Containerfile` covers them.
 
-To try the install by hand in the same container (the image has every
-package, so `install.sh` only builds; the container and its install are gone
-on exit):
+To try the install by hand in the same container (the container and its
+install are gone on exit; without network, `install.sh` stops at the CRB/EPEL
+packages the UBI image lacks — use `build.sh /opt/kide` there to skip the
+package step):
 
     docker run --rm -it --network=none -v "$PWD:/src:ro" kreatos-ide-rhel9-test /src/install.sh
 
@@ -580,6 +631,11 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 
 | Component | Upstream | Version / commit | License |
 |---|---|---|---|
+| dist/ace-tao | <https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2> | `8.0.8 (source)` | DOC |
+| dist/cmake | <https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz> | `4.4.4 (prebuilt)` | BSD-3-Clause |
+| dist/onnxruntime | <https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz> | `1.30.0 (prebuilt)` | MIT |
+| dist/opendds | <https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz> | `3.34.0 (source)` | LicenseRef-OpenDDS |
+| dist/rapidjson | <https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz> | `fd3dc29a5c28` | MIT |
 | gomod/fzf/github.com/charlievieth/fastwalk | <https://github.com/charlievieth/fastwalk> | `v1.0.14` | MIT |
 | gomod/fzf/github.com/gdamore/encoding | <https://github.com/gdamore/encoding> | `v1.0.1` | Apache-2.0 |
 | gomod/fzf/github.com/gdamore/tcell/v2 | <https://github.com/gdamore/tcell/v2> | `v2.9.0` | Apache-2.0 |

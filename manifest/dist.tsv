@@ -1,0 +1,10 @@
+# Upstream release tarballs kept as-is in dist/ (not unpacked into vendor/).
+# scripts/vendor-update.sh downloads them, build.sh checks the sha256 before
+# use. kind prebuilt = upstream's own Linux x86_64 build, used as shipped;
+# kind source = compiled by build.sh.
+# name	kind	version	file	url	sha256
+cmake	prebuilt	4.4.4	cmake-4.4.4-linux-x86_64.tar.gz	https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz	e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb
+onnxruntime	prebuilt	1.30.0	onnxruntime-linux-x64-1.30.0.tgz	https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz	a5ed5a3cac51fbb2e90da632ae43d19212faaa20e76484e62bcb7c23ddb3b3fd
+ace-tao	source	8.0.8	ACE+TAO-src-8.0.8.tar.bz2	https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2	803747be9aecc45f0530a5beff8617a6afff7e48e1c9f59a127a2fc3869c8528
+opendds	source	3.34.0	OpenDDS-3.34.0.tar.gz	https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz	72168cb60c6e66424d9006535015ade1072581111a27507dbfffab3faffde6e2
+rapidjson	source	fd3dc29a5c2852df569e1ea81dbde2c412ac5051	rapidjson-fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz	https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz	c8ed60cbf2976aa94491af7d6024d029a5232e23f21998a78bbc0725188cf3aa

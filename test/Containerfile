@@ -1,9 +1,10 @@
 # Clean RHEL9 with only packages from the RHEL repos. The build itself runs
 # with --network=none (see test/run.sh).
 FROM registry.access.redhat.com/ubi9/ubi:latest
-# build toolchain (+ libevent/ncurses headers for tmux)
+# build toolchain (+ libevent/ncurses headers for tmux, perl and bzip2 for
+# ACE+TAO/OpenDDS)
 RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
-        libevent-devel ncurses-devel \
+        libevent-devel ncurses-devel perl perl-Dumpvalue bzip2 \
     && dnf clean all
 # runtime: git (gitsigns, lazygit), file (yazi); C/C++ development tools RHEL
 # ships itself, used by kide instead of bundling them (clangd/clang-format/

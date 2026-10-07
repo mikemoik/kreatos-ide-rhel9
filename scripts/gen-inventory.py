@@ -113,6 +113,9 @@ def source_dir(name):
         "tool": lambda: os.path.join(V, "tools", rest),
         "crate": lambda: os.path.join(V, "crates", rest),
         # gomod/<tool>/<module path>: inside the tool's own vendor/ dir
+        # dist/<name>: a release tarball kept packed; its license comes from
+        # manifest/licenses.tsv
+        "dist": lambda: os.path.join(ROOT, "dist"),
         "gomod": lambda: os.path.join(V, "tools", rest.split("/", 1)[0], "vendor", rest.split("/", 1)[1]),
     }[kind]()
 

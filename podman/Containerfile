@@ -1,5 +1,7 @@
-# kide in a RHEL9 (UBI9) container — no install on the host, only podman.
-# Build from the repo root (dnf needs the RHEL repos; build.sh itself runs offline):
+# kide in a RHEL9-compatible (Rocky Linux 9) container — no install on the
+# host, only podman. Rocky, not UBI: the EPEL packages (opencv, glew, glfw)
+# need packages UBI does not carry.
+# Build from the repo root (dnf needs the Rocky + EPEL repos; build.sh itself runs offline):
 #   podman build -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub:
 #   podman build -t kide -f podman/Containerfile https://github.com/mikemoik/kreatos-ide-rhel9.git
@@ -11,15 +13,17 @@
 # See podman/README.md.
 
 # --- build: the RHEL9 toolchain + build.sh (as test/Containerfile) -----------
-FROM registry.access.redhat.com/ubi9/ubi:latest AS build
+FROM docker.io/rockylinux/rockylinux:9 AS build
 RUN dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
         git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
+        perl perl-Dumpvalue bzip2 \
     && dnf clean all
 # Two layers, so that a config-only change rebuilds in seconds:
-# 1. compile: only what the binaries are built from (vendor/, manifest/,
-#    scripts/, build.sh). podman reuses this layer until one of them changes.
+# 1. compile: only what the binaries are built from (vendor/, dist/,
+#    manifest/, scripts/, build.sh). podman reuses this layer until one of them changes.
 #    The config dirs are empty here; build.sh still copies them.
 COPY build.sh /src/
+COPY dist /src/dist
 COPY manifest /src/manifest
 COPY scripts /src/scripts
 COPY vendor /src/vendor
@@ -31,13 +35,22 @@ COPY fish /src/fish
 RUN /src/build.sh --no-build /opt/kide
 
 # --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
-FROM registry.access.redhat.com/ubi9/ubi:latest
+FROM docker.io/rockylinux/rockylinux:9
 # python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), and the
 # C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap).
 # tmux is built by build.sh; its libevent and ncurses-libs are in the base image.
-RUN dnf -y install python3 git-core file findutils diffutils \
+# For C/C++ projects: perl + perl-Dumpvalue (MPC, ACE+TAO/OpenDDS tooling),
+# Python 3.12 with numpy and pybind11 (CRB), opencv, glew, glfw (EPEL).
+RUN dnf -y install dnf-plugins-core epel-release \
+    && dnf config-manager --set-enabled crb \
+    && dnf -y install python3 git-core file findutils diffutils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
+        perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
+        python3.12-pybind11 python3.12-pybind11-devel \
+        opencv-devel glew-devel glfw glfw-devel \
     && dnf clean all
+# newest pip, and uv, for Python 3.12 (into /usr/local)
+RUN python3.12 -m pip install --no-cache-dir --root-user-action=ignore --upgrade pip uv
 COPY --from=build /opt/kide /opt/kide
 # what PREFIX/bashrc does on an install
 ENV PATH=/opt/kide/bin:$PATH \

@@ -22,3 +22,8 @@ tool/lua-language-server/meta/3rd/skynet	NOASSERTION	no license upstream (LuaCAT
 gomod/lazygit/github.com/kr/logfmt	MIT	Readme (MIT text), LICENSE on GitHub
 tool/yazi-prebuilt	MIT	Cargo.toml license field (no license file)
 tool/yazi-prebuilt/syntaxes/official	LicenseRef-SublimeHQ-Packages	LICENSE: permissive (copy, use, modify, sell, distribute), files with own license excepted
+dist/cmake	BSD-3-Clause	Copyright.txt in the source; the binary tarball bundles its third-party notices in doc/cmake
+dist/onnxruntime	MIT	LICENSE in the tarball (ThirdPartyNotices.txt next to it)
+dist/ace-tao	DOC	ACE_wrappers/COPYING
+dist/opendds	LicenseRef-OpenDDS	LICENSE in the tarball (permissive OCI license, no SPDX id)
+dist/rapidjson	MIT	license.txt (bin/jsonchecker is under the JSON license; not used)
