@@ -2,7 +2,6 @@
 
 alias vi="kide"
 alias lg="lazygit"
-alias y="yazi"
 alias ll="ls -alh"
 # pick a file with fzf (preview: its first lines) and open it in kide
 alias ff='kide (fzf --preview="head -n 200 {}")'

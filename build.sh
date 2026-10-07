@@ -215,9 +215,15 @@ ln -sf fish "$PREFIX/bin/fish_key_reader"
 
 log "tmux"
 # the release tarball (manifest kind release) has a generated configure and
-# cmd-parse.c: no autotools or yacc. Links RHEL's libevent and ncurses.
+# cmd-parse.c, so no autotools or yacc are needed (RHEL/UBI have no yacc):
+# - configure still insists on finding one; YACC=true satisfies the check
+# - git keeps no mtimes, so cmd-parse.y or configure.ac can look newer than
+#   what was generated from them; one mtime for all files stops make from
+#   regenerating them
+# Links RHEL's libevent and ncurses (libtinfo).
 cp -a "$ROOT/vendor/tools/tmux" "$TOOLS/tmux"
-(cd "$TOOLS/tmux" && ./configure --prefix="$PREFIX" >configure.log && make -j "$JOBS" >make.log) ||
+find "$TOOLS/tmux" -exec touch -h -d @1700000000 {} +
+(cd "$TOOLS/tmux" && ./configure YACC=true --prefix="$PREFIX" >configure.log && make -j "$JOBS" >make.log) ||
   { tail -30 "$TOOLS/tmux/configure.log" "$TOOLS/tmux/make.log" 2>/dev/null; exit 1; }
 install -m755 "$TOOLS/tmux/tmux" "$PREFIX/bin/"
 

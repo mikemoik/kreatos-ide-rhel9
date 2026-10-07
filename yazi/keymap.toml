@@ -1,0 +1,7 @@
+# keymap bundled with kide: swaps yazi's two quit keys. With fish's `y`,
+# Q quits and cds the shell to the directory yazi was in; q just quits.
+[mgr]
+prepend_keymap = [
+	{ on = "Q", run = "quit",               desc = "Quit and cd the shell to the current directory" },
+	{ on = "q", run = "quit --no-cwd-file", desc = "Quit (no cd)" },
+]

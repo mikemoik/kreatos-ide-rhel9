@@ -1,5 +1,5 @@
-# yazi config bundled with kide (PREFIX/share/kreatos-ide/yazi, used through
-# the PREFIX/bin/yazi wrapper). Everything else is upstream's default.
+# yazi config bundled with kide (PREFIX/share/kreatos-ide/yazi, via
+# YAZI_CONFIG_HOME). keymap.toml swaps q/Q; everything else is upstream's default.
 
 # text files (Enter, `o`) open in kide instead of $EDITOR
 [opener]

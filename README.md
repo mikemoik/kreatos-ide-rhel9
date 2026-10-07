@@ -331,7 +331,7 @@ gets one setting, see below):
 - `tmux` — terminal multiplexer; `tm NAME` (fish) attaches to or creates a
   session with a top/bottom split
 - `fish` — shell; the podman container's default shell, with the IDE's
-  helpers from `fish/` (`config.fish`, `aliases.fish`: `vi` = kide, `lg` = lazygit, `y` = yazi, `ll` = ls -alh, `ff` = fzf → kide, `ffex` = fzf over exported variables → clipboard; function `tm NAME` = tmux session). A
+  helpers from `fish/` (`config.fish`, `aliases.fish`: `vi` = kide, `lg` = lazygit, `y` = yazi (`Q` quits into its directory), `ll` = ls -alh, `ff` = fzf → kide, `ffex` = fzf over exported variables → clipboard; function `tm NAME` = tmux session). A
   normal install builds it too but keeps bash as the login shell.
 - `yazi` + `ya` — file manager; text files (Enter, `o`) open in kide. `PREFIX/bashrc`
   sets `YAZI_CONFIG_HOME` to the bundled config (`yazi/yazi.toml`, installed

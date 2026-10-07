@@ -62,7 +62,6 @@ The IDE's shell helpers live in the repo's `fish/` directory, installed to
 |---|---|
 | `vi` | `kide` |
 | `lg` | `lazygit` |
-| `y` | `yazi` |
 | `ll` | `ls -alh` |
 | `ff` | pick a file with `fzf` (preview: first 200 lines), open it in `kide` |
 | `ffex` | pick an exported variable with `fzf`, copy it to the clipboard (OSC 52: not in PuTTY) |
@@ -71,6 +70,7 @@ Functions (`fish/functions/`, autoloaded):
 
 | Function | Does |
 |---|---|
+| `y [ARGS]` | `yazi`; quitting with `Q` cds the shell to the directory yazi was in (`q` quits without cd) |
 | `tm NAME` | attach to the tmux session `NAME`, or create it: one window split top/bottom (lower pane a third of the height), focus in the upper pane. Inside tmux it switches to the session. |
 
 New helpers go into `fish/` (aliases into `aliases.fish`, functions into
