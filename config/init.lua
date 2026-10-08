@@ -1,9 +1,9 @@
 -- kreatos-ide-rhel9: misw's kreatos nvim config, built offline from source.
--- Plugins are vendored (see manifest/plugins.tsv) and installed by build.sh as
+-- Plugins are vendored (see manifest/plugins.tsv) and installed by build-ide.sh as
 -- opt packages under site/; parsers and queries live in site/ too. Nothing
 -- here downloads: no vim.pack, no claudecode, no JSON schemas.
 
--- layout installed by build.sh: <share>/config (this file) and <share>/site
+-- layout installed by build-ide.sh: <share>/config (this file) and <share>/site
 local config = vim.fs.dirname(vim.uv.fs_realpath(debug.getinfo(1, "S").source:sub(2)))
 vim.g.kide_site = vim.fs.joinpath(vim.fs.dirname(config), "site")
 vim.opt.rtp:prepend(config)

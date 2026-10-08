@@ -1,6 +1,6 @@
 -- Treesitter (nvim-treesitter main branch): parsers, highlight, indent, folds,
 -- and textobject motions ]f [f ]c [c ]a [a (+ uppercase = end).
--- Parsers are compiled from vendored grammar sources by build.sh into
+-- Parsers are compiled from vendored grammar sources by build-ide.sh into
 -- site/parser (list: manifest/parsers.txt); nvim-treesitter never installs.
 local util = require("misw.util")
 local M = {}

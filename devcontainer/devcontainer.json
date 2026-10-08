@@ -1,0 +1,35 @@
+// Template: copy to <project>/.devcontainer/devcontainer.json.
+// Image: kide-dev (devcontainer/Containerfile), built once with
+//   podman build --build-arg-file podman/base.conf -t kide-dev -f devcontainer/Containerfile .
+// VS Code needs "dev.containers.dockerPath": "podman". uid/gid 1001 and the
+// user "default" are KIDE_UID/KIDE_GID/KIDE_USER from podman/base.conf.
+{
+  "name": "kide-dev",
+  "image": "localhost/kide-dev",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,Z",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=kide-dev-vscode,target=/home/default/.vscode-server,type=volume"
+  ],
+  "runArgs": ["--userns=keep-id:uid=1001,gid=1001", "--http-proxy=false"],
+  "containerUser": "default",
+  "remoteUser": "default",
+  "updateRemoteUserUID": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "llvm-vs-code-extensions.lldb-dap",
+        "ms-vscode.cmake-tools",
+        "ms-python.python"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "cmake.cmakePath": "/opt/kide/bin/cmake",
+        "clangd.path": "/usr/bin/clangd",
+        "lldb-dap.executable-path": "/usr/bin/lldb-dap",
+        "python.defaultInterpreterPath": "/usr/bin/python3.12"
+      }
+    }
+  }
+}

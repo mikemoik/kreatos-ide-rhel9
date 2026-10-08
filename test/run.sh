@@ -16,7 +16,8 @@ git -C "$ROOT" ls-files -z | tar -C "$ROOT" --null -T - -cf - | tar -C "$SRC" -x
 
 docker build -q -t "$IMAGE" -f "$ROOT/test/Containerfile" "$ROOT/test" >/dev/null
 docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash -euc '
-  /src/build.sh /opt/kide
+  /src/build-dist.sh /opt/kide
+  /src/build-ide.sh /opt/kide
   echo "==> smoke test"
   /opt/kide/bin/kide --headless "+lua dofile(\"/src/test/smoke.lua\")"
   echo "==> fish smoke test"

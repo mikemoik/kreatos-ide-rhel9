@@ -5,7 +5,7 @@
 # repos), ubi.repo, pip.conf, uv.toml, pip-server.crt; KIDE_USER/KIDE_UID/KIDE_GID, the
 # user the image runs as). Replace those for another base; this file stays as
 # it is.
-# Build from the repo root (dnf needs the repos; build.sh itself runs offline):
+# Build from the repo root (dnf needs the repos; build-ide.sh itself runs offline):
 #   podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
 # or without a checkout, straight from GitHub (the default base, no arg file):
 #   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
@@ -23,7 +23,7 @@ ARG BASE
 # CONF_DIR (podman/base.conf): repos.sh, ubi.repo, pip.conf, uv.toml, pip-server.crt
 ARG CONF_DIR
 
-# --- build: the RHEL9 toolchain + build.sh (as test/Containerfile) -----------
+# --- build: the RHEL9 toolchain + build-dist.sh + build-ide.sh (as test/run.sh) -
 FROM $BASE AS build
 USER root
 ARG CONF_DIR
@@ -33,21 +33,27 @@ RUN /tmp/repos.sh && dnf -y install gcc make cmake python3 rust-toolset golang f
         git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
         perl perl-Dumpvalue bzip2 \
     && dnf clean all
-# Two layers, so that a config-only change rebuilds in seconds:
-# 1. compile: only what the binaries are built from (vendor/, dist/,
-#    manifest/, scripts/, build.sh). podman reuses this layer until one of them changes.
-#    The config dirs are empty here; build.sh still copies them.
-COPY build.sh /src/
+# Three layers, so that a change rebuilds only what depends on it:
+# 1. libs: the C/C++ libraries from dist/ (build-dist.sh: CMake 4, onnxruntime,
+#    ACE+TAO + OpenDDS; the slow one). Reused until dist/, manifest/dist.tsv
+#    or build-dist.sh change.
+# 2. IDE compile: nvim, parsers, tools (build-ide.sh from vendor/, manifest/,
+#    scripts/). Reused until one of them changes.
+#    The config dirs are empty here; build-ide.sh still copies them.
+COPY build-dist.sh /src/
+COPY manifest/dist.tsv /src/manifest/dist.tsv
 COPY dist /src/dist
+RUN /src/build-dist.sh /opt/kide
+COPY build-ide.sh /src/
 COPY manifest /src/manifest
 COPY scripts /src/scripts
 COPY vendor /src/vendor
-RUN mkdir -p /src/config /src/yazi /src/fish && /src/build.sh /opt/kide
-# 2. config: nvim, yazi and fish config, plugins, launcher (build.sh --no-build)
+RUN mkdir -p /src/config /src/yazi /src/fish && /src/build-ide.sh /opt/kide
+# 3. config: nvim, yazi and fish config, plugins, launcher (build-ide.sh --no-build)
 COPY config /src/config
 COPY yazi /src/yazi
 COPY fish /src/fish
-RUN /src/build.sh --no-build /opt/kide
+RUN /src/build-ide.sh --no-build /opt/kide
 
 # --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
 FROM $BASE
@@ -55,7 +61,7 @@ FROM $BASE
 USER root
 # python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), and the
 # C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap).
-# tmux is built by build.sh; its libevent and ncurses-libs are in the base image.
+# tmux is built by build-ide.sh; its libevent and ncurses-libs are in the base image.
 # For C/C++ projects: perl + perl-Dumpvalue (MPC, ACE+TAO/OpenDDS tooling),
 # Python 3.12 with numpy and pybind11, opencv, glew, glfw, gdal, Qt5, libtiff. shadow-utils
 # (useradd/usermod) for KIDE_USER below.
@@ -116,7 +122,7 @@ RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ld
 # root), and git then refuses with "dubious ownership". The check guards
 # against other users' repos on a shared machine, which a container doesn't have.
 RUN git config --system --add safe.directory '*'
-# tmux (built by build.sh) reads /etc/tmux.conf first: mouse on, so a click
+# tmux (built by build-ide.sh) reads /etc/tmux.conf first: mouse on, so a click
 # selects a pane, dragging a border resizes, the wheel scrolls. Last, your own
 # tmux config from the mounted workspace, if present (host:
 # ~/workspace/.container/tmux.conf); -q: no error when it is missing.

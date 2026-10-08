@@ -1,7 +1,7 @@
 # Upstream release tarballs kept as-is in dist/ (not unpacked into vendor/).
-# scripts/vendor-update.sh downloads them, build.sh checks the sha256 before
+# scripts/vendor-update.sh downloads them, build-dist.sh checks the sha256 before
 # use. kind prebuilt = upstream's own Linux x86_64 build, used as shipped;
-# kind source = compiled by build.sh; kind rpm = a package build.sh only
+# kind source = compiled by build-dist.sh; kind rpm = a package build-dist.sh only
 # checks, installed by podman/Containerfile (runtime stage) with rpm.
 # name	kind	version	file	url	sha256
 cmake	prebuilt	4.4.4	cmake-4.4.4-linux-x86_64.tar.gz	https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz	e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb

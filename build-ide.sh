@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# build.sh [--no-build] [PREFIX] — offline build of kreatos-ide from vendor/
-# (no network).
+# build-ide.sh [--no-build] [PREFIX] — offline build of kreatos-ide from vendor/
+# (no network). The C/C++ libraries from dist/ (CMake 4, onnxruntime,
+# ACE+TAO + OpenDDS) are built separately by build-dist.sh.
 #
 # --no-build: refresh an existing install's plugins, nvim + yazi config,
 # launcher and bashrc only; nvim, the parsers and the tools are not rebuilt.
 #
 # Needs only the RHEL9 toolchain: gcc, make, cmake, python3, rust-toolset
-# (cargo), golang, libevent-devel + ncurses-devel (tmux), and perl,
-# perl-Dumpvalue + bzip2 (ACE+TAO/OpenDDS). The repo itself is never written to (it can be mounted
+# (cargo), golang, libevent-devel + ncurses-devel (tmux). The repo itself is never written to (it can be mounted
 # read-only); intermediate files go to $KIDE_BUILD_DIR (default:
 # $TMPDIR/kide-build).
 #
@@ -24,13 +24,6 @@
 #                                     + fish_indent, fish_key_reader links
 #   PREFIX/bin/tmux                   terminal multiplexer (fish's `tm`)
 #   PREFIX/bin/kide-python            python3 with the bundled debugpy (nvim-dap)
-#   PREFIX/bin/{cmake,ctest,cpack}    CMake 4 (upstream's prebuilt, dist/),
-#                                     ahead of RHEL's cmake on PATH
-#   PREFIX/{include,lib64}            onnxruntime (upstream's prebuilt, dist/):
-#                                     find_package(onnxruntime), pkg-config
-#   PREFIX/{bin,include,lib,share}    ACE+TAO 8 + OpenDDS 3.34 built from dist/
-#                                     (ACE+TAO complete: all of TAO + orbsvcs
-#                                     services, tao_idl, opendds_idl; find_package(OpenDDS))
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/yazi     yazi/ (yazi.toml: text opens in kide)
@@ -71,7 +64,7 @@ fi
 # (not indented: the heredocs below must stay at column 0)
 if ((!NO_BUILD)); then
 
-for tool in cc make cmake python3 cargo go perl bzip2; do
+for tool in cc make cmake python3 cargo go; do
   command -v "$tool" >/dev/null || { echo "missing build tool: $tool" >&2; exit 1; }
 done
 
@@ -302,96 +295,6 @@ exec python3 "$@"
 WRAPPER
 chmod +x "$PREFIX/bin/kide-python"
 
-# --- C/C++ libraries from dist/: cmake, onnxruntime, ACE+TAO + OpenDDS -------
-# upstream release tarballs (manifest/dist.tsv), sha256-checked first. cmake
-# and onnxruntime are upstream's own Linux x86_64 builds, unpacked as shipped;
-# ACE+TAO, OpenDDS and RapidJSON are source and compiled here.
-log "dist: checking tarballs"
-awk -F'\t' '!/^#/ && NF { print $6 "  " $4 }' "$ROOT/manifest/dist.tsv" |
-  (cd "$ROOT/dist" && sha256sum -c --quiet -)
-dist() { echo "$ROOT/dist/$(awk -F'\t' -v n="$1" '$1 == n { print $4 }' "$ROOT/manifest/dist.tsv")"; }
-
-log "cmake (prebuilt)"
-# without the docs and the Qt GUI (cmake-gui and its desktop files)
-rm -rf "$PREFIX"/share/cmake-[0-9]*
-tar -xzf "$(dist cmake)" -C "$PREFIX" --strip-components=1 \
-  --exclude='cmake-*/doc' --exclude='cmake-*/bin/cmake-gui' --exclude='cmake-*/share/applications' \
-  --exclude='cmake-*/share/icons' --exclude='cmake-*/share/mime'
-
-log "onnxruntime (prebuilt)"
-# into lib64/ and include/onnxruntime/: where the tarball's own CMake config
-# and pkg-config file look (the tarball itself has lib/ and include/)
-ort=$BUILD/onnxruntime
-rm -rf "$ort" "$PREFIX/include/onnxruntime" "$PREFIX"/lib64/libonnxruntime* "$PREFIX/lib64/cmake/onnxruntime"
-mkdir -p "$ort" "$PREFIX/include/onnxruntime" "$PREFIX/lib64" "$PREFIX/share/doc/onnxruntime"
-tar -xzf "$(dist onnxruntime)" -C "$ort" --strip-components=1
-cp -a "$ort/include/." "$PREFIX/include/onnxruntime/"
-cp -a "$ort/lib/." "$PREFIX/lib64/"
-cp "$ort/LICENSE" "$ort/ThirdPartyNotices.txt" "$PREFIX/share/doc/onnxruntime/"
-sed -i "s|^prefix=.*|prefix=$PREFIX|" "$PREFIX/lib64/pkgconfig/libonnxruntime.pc"
-
-log "ACE+TAO + OpenDDS"
-# OpenDDS's configure + GNU make build: unlike its CMake build, it installs
-# ACE/TAO too (libs, headers, tao_idl). Release build, no tests; RPATHs are
-# $ORIGIN-relative, so nothing needs LD_LIBRARY_PATH. RapidJSON (headers) is
-# the commit OpenDDS pins; it is installed to PREFIX/include/rapidjson.
-# ACE+TAO complete: OpenDDS's own workspace (DDS_TAOv2.mwc) builds only the
-# ACE/TAO subset OpenDDS needs (ACE_TAO_for_OpenDDS.mwc). full.mwc is the same
-# workspace with that subset replaced by ACE+TAO's full one (TAO/TAO_ACE.mwc:
-# ACE, ACEXML, Kokyu, protocols, gperf, all of TAO, TAO_IDL, the TAO utils and
-# orbsvcs with their services; no tests/examples). Projects that need an MPC
-# feature that is off by default (ssl, zlib, xerces, Qt/Xt/Tk/Fl/Fox) are skipped.
-dds=$BUILD/dds
-rm -rf "$dds"
-mkdir -p "$dds/rapidjson"
-tar -xjf "$(dist ace-tao)" -C "$dds"
-tar -xzf "$(dist opendds)" -C "$dds"
-tar -xzf "$(dist rapidjson)" -C "$dds/rapidjson" --strip-components=1
-cat >"$dds/full.mwc" <<'MWC'
-workspace {
-  $(ACE_ROOT)/ace
-  $(ACE_ROOT)/apps/gperf/src
-  $(ACE_ROOT)/ACEXML/common
-  $(ACE_ROOT)/ACEXML/parser/parser
-  $(ACE_ROOT)/ACEXML/apps/svcconf
-  $(ACE_ROOT)/Kokyu/Kokyu.mpc
-  $(ACE_ROOT)/protocols
-  $(TAO_ROOT)/tao
-  $(TAO_ROOT)/TAO_IDL
-  $(TAO_ROOT)/utils
-  $(TAO_ROOT)/orbsvcs
-  dds
-  tools
-  java
-  DevGuideExamples
-  exclude {
-    $(ACE_ROOT)/protocols/tests
-    $(ACE_ROOT)/protocols/examples
-    $(TAO_ROOT)/orbsvcs/tests
-    $(TAO_ROOT)/orbsvcs/performance-tests
-    $(TAO_ROOT)/orbsvcs/examples
-    $(TAO_ROOT)/orbsvcs/DevGuideExamples
-    java/jms
-    tools/modeling/tests
-  }
-}
-MWC
-(cd "$dds"/OpenDDS-* &&
-  ./configure --prefix="$PREFIX" --ace="$dds/ACE_wrappers" --tao="$dds/ACE_wrappers/TAO" \
-    --mpc="$dds/ACE_wrappers/MPC" --ace-tao=ace8tao4 --rapidjson="$dds/rapidjson" \
-    --workspace="$dds/full.mwc" \
-    --no-debug --optimize --install-origin-relative >"$dds/configure.log" &&
-  make -j "$JOBS" >"$dds/make.log" 2>&1 && make install >"$dds/install.log" 2>&1) ||
-  { tail -30 "$dds/configure.log" "$dds/make.log" "$dds/install.log" 2>/dev/null; exit 1; }
-# the installed config.cmake still names the build tree's ACE/TAO/MPC/RapidJSON,
-# which would win over PREFIX (its OPENDDS_USE_PREFIX_PATH) and break once
-# $BUILD is gone: drop them
-sed -i -E '/^set\(OPENDDS_(SOURCE_DIR|MPC|ACE|TAO|RAPIDJSON) /d' "$PREFIX/share/cmake/OpenDDS/config.cmake"
-if grep -v '^#' "$PREFIX/share/cmake/OpenDDS/config.cmake" | grep -qF "$dds"; then
-  echo "OpenDDS config.cmake still refers to $dds" >&2
-  exit 1
-fi
-
 fi # binaries
 
 # --- plugins + config ----------------------------------------------------------
@@ -425,7 +328,7 @@ chmod +x "$PREFIX/bin/kide"
 # PREFIX is one line in ~/.bashrc sourcing it (added once)
 log "PATH: $PREFIX/bin first ($PREFIX/bashrc, sourced from ~/.bashrc)"
 cat >"$PREFIX/bashrc" <<EOF
-# kreatos-ide (written by build.sh): its executables come first
+# kreatos-ide (written by build-ide.sh): its executables come first
 case "\$PATH" in
   "$PREFIX/bin:"*) ;;
   *) PATH="$PREFIX/bin:\$PATH" ;;

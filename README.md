@@ -24,7 +24,8 @@ everything:
    have to carry them.
 2. Downloads this repo as a tarball into a temp dir (removed afterwards).
 3. Builds and installs kreatos-ide offline into `~/.local/kreatos-ide`
-   (`build.sh`, ~5 min).
+   (`build-ide.sh`, ~5 min), and the [C/C++ libraries](#cc-libraries) into the
+   same prefix (`build-dist.sh`, ~7 min).
 4. Copies the sample projects to `~/kide-samples` (only if that does not
    exist yet): `customers-py` and `customers-cpp`, a multi-file customer
    database in Python and C++/CMake to try kide on (see their READMEs).
@@ -50,7 +51,7 @@ nvim, the treesitter parsers and the tools stay as they are:
 parser list or a tool still needs the full install.
 
 Everything is installed inside `PREFIX`. The only changes outside it are
-`~/kide-samples` and one line `build.sh` adds to `~/.bashrc` (once), sourcing
+`~/kide-samples` and one line `build-ide.sh` adds to `~/.bashrc` (once), sourcing
 `PREFIX/bashrc`, which
 puts `PREFIX/bin` at the front of `PATH`, so `kide` and the bundled tools are
 found first in every new shell.
@@ -123,7 +124,7 @@ need) with kide in `/opt/kide`, the RHEL packages it uses, the
 
 Build the image (~5–10 min). The build does not use the tarball itself: it
 copies the repo **directory** you point it at into the image (`COPY . /src`)
-and runs `build.sh` there. The last argument of `podman build` is that
+and runs `build-ide.sh` there. The last argument of `podman build` is that
 directory (the "build context"); `-f` names the Containerfile inside it.
 Two ways to give it the repo:
 
@@ -433,14 +434,14 @@ into the project root, which is what clangd reads.
 
 For C/C++ projects built against them (task 126). Into `PREFIX`, from the
 upstream release tarballs in `dist/` (`manifest/dist.tsv`, sha256-checked by
-`build.sh`):
+`build-dist.sh`, which builds them separately from the IDE's `build-ide.sh`):
 
 | What | From | In `PREFIX` |
 |---|---|---|
 | CMake 4.4.4 | upstream's prebuilt Linux x86_64 tarball | `bin/cmake`, `ctest`, `cpack`: first on `PATH`, ahead of RHEL's cmake 3.31 |
 | onnxruntime 1.30.0 (CPU) | upstream's prebuilt Linux x64 tarball | `include/onnxruntime`, `lib64`; `find_package(onnxruntime)` → `onnxruntime::onnxruntime`, `pkg-config libonnxruntime` |
-| ACE 8.0.8 + TAO 4.0.8 | source, compiled by `build.sh` | `lib/libACE*`, `libTAO*`, `include/{ace,tao,orbsvcs}`, `bin/tao_idl` |
-| OpenDDS 3.34.0 (+ RapidJSON headers) | source, compiled by `build.sh` with OpenDDS's `configure` | `lib/libOpenDDS_*`, `include/dds`, `bin/opendds_idl`; `find_package(OpenDDS)` with `opendds_target_sources()` |
+| ACE 8.0.8 + TAO 4.0.8 | source, compiled by `build-dist.sh` | `lib/libACE*`, `libTAO*`, `include/{ace,tao,orbsvcs}`, `bin/tao_idl` |
+| OpenDDS 3.34.0 (+ RapidJSON headers) | source, compiled by `build-dist.sh` with OpenDDS's `configure` | `lib/libOpenDDS_*`, `include/dds`, `bin/opendds_idl`; `find_package(OpenDDS)` with `opendds_target_sources()` |
 
 ACE+TAO and OpenDDS ship no prebuilt Linux binaries, so they are the only
 part that compiles (~7 min on 24 cores, release build, no tests). Their
@@ -449,7 +450,7 @@ libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
 The fish config sets `ACE_ROOT`, `TAO_ROOT` and `DDS_ROOT` (`PREFIX/share/{ace,tao,dds}`)
-for running `opendds_idl` or MPC by hand. `build.sh` removes the build-tree
+for running `opendds_idl` or MPC by hand. `build-dist.sh` removes the build-tree
 paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
 the package resolves to `PREFIX`.
 
@@ -649,7 +650,7 @@ untouched):
   yazi 26.1.22 expects (the pinned `generate.rs` still compresses), and
   without syntect's own default dumps (stripped). ring's four DER
   templates (13–41 byte PKCS#8/AlgorithmIdentifier headers, included by
-  yazi's SFTP code) are written from hex in `build.sh`. Both go into a copy
+  yazi's SFTP code) are written from hex in `build-ide.sh`. Both go into a copy
   of the crate dir.
 
 Why the Rust crates are vendored: ruff and ty are Rust programs, and
@@ -659,11 +660,11 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 
 ## Differences from the kreatos config
 
-- No `vim.pack`: plugins are installed by `build.sh` as opt packages and
+- No `vim.pack`: plugins are installed by `build-ide.sh` as opt packages and
   loaded with `packadd` in the same order.
 - No claudecode.nvim (`<leader>a`), no jsonls / JSON schemas.
 - blink.cmp uses its pure-Lua fuzzy matcher (the Rust one needs nightly Rust).
-- Treesitter parsers are compiled by `build.sh`; nvim-treesitter never
+- Treesitter parsers are compiled by `build-ide.sh`; nvim-treesitter never
   installs anything.
 - nvim-dap-python starts the bundled debugpy through `kide-python` (python3
   with the bundled debugpy on `PYTHONPATH`) instead of a system debugpy.
@@ -698,7 +699,7 @@ even in CRB), so every crate the build needs is in `vendor/crates` as source.
 ## Testing
 
 `test/run.sh` builds a clean `registry.access.redhat.com/ubi9/ubi` image with
-only the toolchain RPMs, then runs `build.sh` and `test/smoke.lua` in it with
+only the toolchain RPMs, then runs `build-ide.sh` and `test/smoke.lua` in it with
 `--network=none` and a read-only copy of the files git tracks (what the
 install tarball holds: no untracked or ignored files, no empty directories;
 `git add` new files first). The smoke test checks: clean
@@ -721,7 +722,7 @@ EPEL ones); building `podman/Containerfile` covers them.
 
 To try the install by hand in the same container (the container and its
 install are gone on exit; without network, `install.sh` stops at the CRB/EPEL
-packages the UBI image lacks (opencv etc.) — use `build.sh /opt/kide`
+packages the UBI image lacks (opencv etc.) — use `build-ide.sh /opt/kide`
 there to skip the package step):
 
     docker run --rm -it --network=none -v "$PWD:/src:ro" kreatos-ide-rhel9-test /src/install.sh

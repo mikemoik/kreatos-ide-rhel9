@@ -1,4 +1,4 @@
--- LSP: servers built from source by build.sh (ruff, ty, neocmakelsp) and from
+-- LSP: servers built from source by build-ide.sh (ruff, ty, neocmakelsp) and from
 -- RHEL9 (clangd, see misw.cpp),
 -- configs from nvim-lspconfig, native vim.lsp.enable. A server whose binary is
 -- not on PATH is skipped. Keymaps are set per buffer for what the server

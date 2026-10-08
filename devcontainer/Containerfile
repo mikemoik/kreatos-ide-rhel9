@@ -1,0 +1,106 @@
+# kide-dev: the C/C++/Python toolchain of podman/Containerfile as a VS Code dev
+# container, without the terminal IDE (no nvim, yazi, fish, tmux, fd, fzf,
+# lazygit, LSP/formatter builds): VS Code is the editor, bash the shell.
+# Same base and repo setup as podman/Containerfile (podman/base.conf and its
+# CONF_DIR), same RHEL packages, same C/C++ libraries from dist/ in /opt/kide
+# (build-dist.sh: CMake 4, onnxruntime, ACE+TAO + OpenDDS) and the
+# gdal-devel rpm; the build stage needs no Rust or Go.
+# Build from the repo root:
+#   podman build --build-arg-file podman/base.conf -t kide-dev -f devcontainer/Containerfile .
+# Use it from a project's .devcontainer/devcontainer.json (template:
+# devcontainer/devcontainer.json). See devcontainer/README.md.
+
+ARG BASE
+# CONF_DIR (podman/base.conf): repos.sh, ubi.repo, pip.conf, uv.toml, pip-server.crt
+ARG CONF_DIR
+
+# --- build: the C/C++ libraries from dist/ -----------------------------------
+FROM $BASE AS build
+USER root
+ARG CONF_DIR
+COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
+RUN /tmp/repos.sh && dnf -y install gcc gcc-c++ make findutils diffutils tar gzip bzip2 \
+        perl perl-Dumpvalue \
+    && dnf clean all
+COPY build-dist.sh /src/
+COPY manifest/dist.tsv /src/manifest/dist.tsv
+COPY dist /src/dist
+RUN /src/build-dist.sh /opt/kide
+
+# --- runtime: the RHEL packages + /opt/kide ----------------------------------
+# As podman/Containerfile's runtime stage, minus the IDE (fish, tmux config,
+# kide data dirs, ENTRYPOINT).
+FROM $BASE
+USER root
+ARG CONF_DIR
+COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
+COPY dist/gdal-devel-3.10.3-3.fc43.x86_64.rpm /tmp/
+RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
+        gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
+        perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
+        python3.12-pybind11 python3.12-pybind11-devel \
+        opencv-devel glew-devel glfw glfw-devel \
+        gdal gdal-libs qt5 libtiff libtiff-devel \
+    && dnf clean all \
+    && rpm -i --nodeps /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm \
+    && rm /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm
+# pip server certificate into the system trust store (see podman/Containerfile)
+COPY $CONF_DIR/pip-server.crt /tmp/pip-server.crt
+RUN set -e; \
+    grep -q -- '-----BEGIN CERTIFICATE-----' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must be a PEM certificate (BEGIN CERTIFICATE)" >&2; exit 1; }; \
+    ! grep -q 'PRIVATE KEY' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must not contain a private key (it goes into the trust store)" >&2; exit 1; }; \
+    sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /tmp/pip-server.crt \
+      >/etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    chmod 644 /etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    rm /tmp/pip-server.crt; \
+    update-ca-trust
+# pip and uv config, system-wide (templates: @PIP_INDEX_URL@ from podman/base.conf)
+ARG PIP_INDEX_URL
+COPY $CONF_DIR/pip.conf /etc/pip.conf
+COPY $CONF_DIR/uv.toml /etc/uv/uv.toml
+RUN set -e; \
+    [ -n "$PIP_INDEX_URL" ] || { echo "PIP_INDEX_URL is not set (podman/base.conf)" >&2; exit 1; }; \
+    url=$(printf '%s' "$PIP_INDEX_URL" | sed 's/[&|\\]/\\&/g'); \
+    sed -i "s|@PIP_INDEX_URL@|$url|g" /etc/pip.conf /etc/uv/uv.toml; \
+    ! grep -n '@[A-Z_]*@' /etc/pip.conf /etc/uv/uv.toml \
+      || { echo "unreplaced placeholder in pip.conf/uv.toml (above)" >&2; exit 1; }; \
+    chmod 644 /etc/pip.conf /etc/uv/uv.toml; \
+    echo "pip and uv use $PIP_INDEX_URL"
+COPY --from=build /opt/kide /opt/kide
+# the dynamic linker finds ACE/TAO/OpenDDS (lib) and onnxruntime (lib64)
+RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ldconfig
+# mounted projects may show up under another uid: no "dubious ownership"
+RUN git config --system --add safe.directory '*'
+# CMake 4, tao_idl, opendds_idl, … ahead of RHEL's on PATH
+ENV PATH=/opt/kide/bin:$PATH
+# KIDE_USER (podman/base.conf): taken from the base image if it has it,
+# otherwise created with KIDE_UID/KIDE_GID; bash as login shell, ~/.local/bin
+# (its pip and uv) on PATH, the host's proxy variables unset in its shells.
+# ~/.vscode-server exists and is its own, so the volume devcontainer.json
+# mounts there starts out owned by KIDE_USER (VS Code's server survives a
+# rebuilt container).
+ARG KIDE_USER
+ARG KIDE_UID
+ARG KIDE_GID
+RUN set -e; \
+    if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
+      getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
+      useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
+    fi; \
+    usermod -s /bin/bash "$KIDE_USER"; \
+    home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
+    group=$(id -g "$KIDE_USER"); \
+    mkdir -p "$home/.vscode-server" /workspace; \
+    printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' \
+      'unset http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY' \
+      >>"$home/.bashrc"; \
+    chown "$KIDE_USER:$group" "$home" "$home/.bashrc" "$home/.vscode-server" /workspace
+USER $KIDE_USER
+# as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
+RUN /usr/bin/python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
+WORKDIR /workspace
+CMD ["sleep", "infinity"]

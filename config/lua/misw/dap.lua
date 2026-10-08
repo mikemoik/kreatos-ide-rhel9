@@ -1,5 +1,5 @@
 -- Debugging (misw's own setup): nvim-dap + dap-ui + virtual text + dap-python
--- (debugpy bundled by build.sh, started through kide-python; tests via pytest),
+-- (debugpy bundled by build-ide.sh, started through kide-python; tests via pytest),
 -- gdb + lldb-dap for C/C++ (see misw.cpp).
 local M = {}
 

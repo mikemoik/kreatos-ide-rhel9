@@ -1,4 +1,4 @@
-# kreatos-ide fish config (container shell). build.sh installs this directory
+# kreatos-ide fish config (container shell). build-ide.sh installs this directory
 # to PREFIX/share/kreatos-ide/fish; the container's ~/.config/fish/config.fish
 # sources this file. The IDE's shell helpers (aliases, functions) live here.
 

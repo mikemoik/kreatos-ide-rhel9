@@ -4,7 +4,7 @@
 # Re-fetches every pinned source listed in manifest/ into vendor/, strips
 # non-text files, and writes VERSIONS. Run it deliberately (on a connected
 # machine with curl, tar, sha256sum, python3 and nvim), review the diff,
-# commit. build.sh never downloads anything.
+# commit. build-ide.sh never downloads anything.
 #
 #   manifest/neovim.txt    Neovim release tag; its cmake.deps/deps.txt pins the deps
 #   manifest/plugins.tsv   name <TAB> url <TAB> commit
@@ -12,7 +12,7 @@
 #                          vendored nvim-treesitter's parsers.lua
 #   manifest/tools.tsv     name <TAB> kind <TAB> url <TAB> tag <TAB> packages
 #                          (LSP servers, formatters, build helpers); for kind
-#                          cargo, packages = the crates build.sh builds
+#                          cargo, packages = the crates build-ide.sh builds
 #                          (comma-separated); needs `cargo`. A git tool
 #                          with packages (not -) gets its crates vendored too
 #   manifest/dist.tsv      upstream release tarballs kept as-is in dist/
@@ -176,7 +176,7 @@ print(u["url"], u["digests"]["sha256"])')
         'printf "%s\t%s\t%s\n" "$displaypath" "$(git config --get remote.origin.url)" "$sha1"' \
         >"$TMP/submodules"
       find "$dest" -name .git -prune -exec rm -rf {} +
-      # yazi's syntax set is compiled by build.sh from the .sublime-syntax
+      # yazi's syntax set is compiled by build-ide.sh from the .sublime-syntax
       # files alone (yazi-prebuilt's generate.rs); drop the repos' tests etc.
       if [[ $name == yazi-prebuilt ]]; then
         find "$dest/syntaxes" -type f ! -name '*.sublime-syntax' \
@@ -211,7 +211,7 @@ print(u["url"], u["digests"]["sha256"])')
   fi
   if [[ $kind == cargo || ($kind == git && $packages != -) ]]; then
     # the source replacement config cargo prints, with the crate dir as a
-    # placeholder that build.sh fills in
+    # placeholder that build-ide.sh fills in
     (cd "$dest" && cargo vendor --locked --versioned-dirs "$V/crates/$name" 2>/dev/null) |
       sed "s|$V/crates/$name|@CRATES@|" >"$V/crates/$name.cargo-config.toml"
     grep -q '@CRATES@' "$V/crates/$name.cargo-config.toml" || { echo "cargo vendor printed no config" >&2; exit 1; }

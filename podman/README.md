@@ -14,14 +14,14 @@ pip-installed by the image's user (`KIDE_USER`) into its `~/.local`; root
 installs nothing with pip, it only sets up their config and certificate
 system-wide. Not UBI9: UBI lacks packages the EPEL ones
 depend on (Qt5, gdal, protobuf for opencv; GL libraries for glew/glfw).
-The build stage is `build.sh`, as on a normal install; the Rust and Go
+The build stage is `build-dist.sh` and `build-ide.sh`, as on a normal install; the Rust and Go
 toolchains stay in the build stage and are not in the final image.
 
 ## Build
 
 The last argument of `podman build` is the repo directory (the build
 context); the Containerfile copies all of it into the image and runs
-`build.sh`. From an unpacked tarball or a git checkout, run it in the repo's
+`build-ide.sh`. From an unpacked tarball or a git checkout, run it in the repo's
 top directory (where `install.sh` and `podman/` are; ~5–10 min):
 
     tar -xzf kreatos-ide-rhel9-main.tar.gz
@@ -32,11 +32,16 @@ Without a checkout, straight from GitHub (no curl needed):
 
     podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 
-The build stage has two layers: the compile step (`vendor/`, `dist/`, `manifest/`,
-`scripts/`, `build.sh`) and the config step (`config/`, `yazi/`, `fish/`, run
-with `build.sh --no-build`). After a change to the config only, podman reuses
-the compiled layer and the rebuild takes seconds; a change to the compile
-inputs rebuilds everything (~10–15 min).
+The build stage has three layers, each reused until its inputs change:
+
+1. libs: the C/C++ libraries (`build-dist.sh`, from `dist/` and
+   `manifest/dist.tsv`; ~7 min, mostly ACE+TAO/OpenDDS)
+2. IDE compile: nvim, parsers, tools (`build-ide.sh`, from `vendor/`,
+   `manifest/`, `scripts/`; ~5 min)
+3. config: `config/`, `yazi/`, `fish/` (`build-ide.sh --no-build`; seconds)
+
+A config change rebuilds only layer 3, and an IDE or vendor change rebuilds layers 2 and 3.
+Only a change to `dist/` (or `build-dist.sh`) rebuilds all three.
 
 ### Libraries: no LD_LIBRARY_PATH
 
@@ -100,7 +105,7 @@ with its own dnf repos):
   with `--userns=keep-id:uid=<KIDE_UID>,gid=<KIDE_GID>`: change the numbers
   there too if you change them here.
 
-The `dnf install` steps need those repos and the `pip install` step PyPI; `build.sh` itself never touches the network. The build context is what git tracks (`.containerignore`
+The `dnf install` steps need those repos and the `pip install` step PyPI; `build-ide.sh` itself never touches the network. The build context is what git tracks (`.containerignore`
 leaves out `.git` and `vendor.staging`).
 
 ## Run
@@ -163,7 +168,7 @@ A shell in the container (lazygit, yazi, cmake, gdb, … are all on `PATH`):
 fish is the container's default shell: `$SHELL` and the login shell of
 `KIDE_USER` and root, so
 terminals opened in kide (`:terminal`, the terminal window) and shells started
-from lazygit or yazi are fish too. It is built from source by `build.sh`, like the other tools
+from lazygit or yazi are fish too. It is built from source by `build-ide.sh`, like the other tools
 (a normal install gets `PREFIX/bin/fish` too; its login shell stays bash).
 
 The IDE's shell helpers live in the repo's `fish/` directory, installed to
@@ -204,7 +209,10 @@ A short alias for `~/.bashrc`:
 
 ## VS Code dev container
 
-The image also works as a VS Code dev container (Dev Containers extension)
+For VS Code without the terminal IDE, use the slimmer `kide-dev` image
+instead: `devcontainer/` (see `devcontainer/README.md`).
+
+The `kide` image itself also works as a VS Code dev container (Dev Containers extension)
 with podman instead of docker. Not tested yet.
 
 1. Point the extension at podman (VS Code settings):
@@ -246,6 +254,6 @@ with podman instead of docker. Not tested yet.
   only works where Neovim falls back to OSC 52 and the terminal allows it.
 - C/C++ builds and debugging run inside the container with RHEL9's compilers,
   not the host's.
-- tmux (3.7c) is built from source by `build.sh`, like the other tools; it
+- tmux (3.7c) is built from source by `build-ide.sh`, like the other tools; it
   needs only base packages (libevent, ncurses).
 - Updating: pull/checkout the new version and build the image again.

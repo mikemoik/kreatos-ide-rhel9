@@ -2,7 +2,7 @@
 # install.sh [--no-build] [PREFIX] — the whole install in one call:
 #
 #   curl -fsSL <REPO>/install.sh | KIDE_TARBALL=<REPO tarball URL> bash
-#   curl -fsSL …/install.sh | KIDE_TARBALL=… bash -s -- --no-build   # config only, see build.sh
+#   curl -fsSL …/install.sh | KIDE_TARBALL=… bash -s -- --no-build   # config only, see build-ide.sh
 #   ./install.sh [--no-build] [PREFIX]          # from a checkout (no download, no KIDE_TARBALL)
 #
 # The script holds no repo URL: piped from curl it needs KIDE_TARBALL (the
@@ -10,8 +10,9 @@
 #
 #   1. installs the missing RHEL packages (dnf; asks for the sudo password)
 #   2. piped from curl: downloads the repo tarball $KIDE_TARBALL to a temp dir
-#   3. builds kreatos-ide offline into PREFIX (build.sh, default ~/.local/kreatos-ide);
-#      with --no-build only refreshes plugins, config, launcher and bashrc
+#   3. builds kreatos-ide offline into PREFIX (build-ide.sh, default ~/.local/kreatos-ide)
+#      and the C/C++ libraries from dist/ (build-dist.sh); with --no-build only
+#      refreshes plugins, config, launcher and bashrc
 #   4. copies the sample projects (test/proj) to ~/kide-samples, if not there yet
 #   5. starts a new shell in which `kide` is on PATH
 set -euo pipefail
@@ -36,7 +37,7 @@ main() {
   # piped from curl (no checkout next to the script): the tarball URL must be
   # given; checked before dnf so nothing is installed for nothing
   src=$(dirname "${BASH_SOURCE[0]:-}")
-  if [ ! -f "$src/build.sh" ] && [ -z "${KIDE_TARBALL:-}" ]; then
+  if [ ! -f "$src/build-ide.sh" ] && [ -z "${KIDE_TARBALL:-}" ]; then
     echo "install.sh: set KIDE_TARBALL to the repo tarball URL, e.g." >&2
     echo "  curl -fsSL <REPO>/install.sh | KIDE_TARBALL=<REPO>/…/main.tar.gz bash" >&2
     exit 1
@@ -50,7 +51,7 @@ main() {
     fi
   fi
 
-  if [ ! -f "$src/build.sh" ]; then
+  if [ ! -f "$src/build-ide.sh" ]; then
     tmp=$(mktemp -d)
     trap "rm -rf '$tmp'" EXIT
     log "downloading $KIDE_TARBALL"
@@ -58,7 +59,13 @@ main() {
     src=$tmp
   fi
 
-  "$src/build.sh" "$@"
+  "$src/build-ide.sh" "$@"
+  # the C/C++ libraries (dist/) into the same PREFIX; not with --no-build
+  nobuild=0 prefix=()
+  for arg in "$@"; do
+    if [ "$arg" = --no-build ]; then nobuild=1; else prefix=("$arg"); fi
+  done
+  if [ "$nobuild" = 0 ]; then "$src/build-dist.sh" "${prefix[@]}"; fi
 
   # sample projects to try kide on; never overwrites an existing copy
   if [ ! -e "$HOME/kide-samples" ]; then
