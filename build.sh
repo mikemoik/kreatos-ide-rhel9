@@ -29,7 +29,8 @@
 #   PREFIX/{include,lib64}            onnxruntime (upstream's prebuilt, dist/):
 #                                     find_package(onnxruntime), pkg-config
 #   PREFIX/{bin,include,lib,share}    ACE+TAO 8 + OpenDDS 3.34 built from dist/
-#                                     (tao_idl, opendds_idl; find_package(OpenDDS))
+#                                     (ACE+TAO complete: all of TAO + orbsvcs
+#                                     services, tao_idl, opendds_idl; find_package(OpenDDS))
 #   PREFIX/lib/kreatos-ide/python     debugpy (pure Python)
 #   PREFIX/share/kreatos-ide/config   config/ (init.lua, lua/misw, …)
 #   PREFIX/share/kreatos-ide/yazi     yazi/ (yazi.toml: text opens in kide)
@@ -334,15 +335,51 @@ log "ACE+TAO + OpenDDS"
 # ACE/TAO too (libs, headers, tao_idl). Release build, no tests; RPATHs are
 # $ORIGIN-relative, so nothing needs LD_LIBRARY_PATH. RapidJSON (headers) is
 # the commit OpenDDS pins; it is installed to PREFIX/include/rapidjson.
+# ACE+TAO complete: OpenDDS's own workspace (DDS_TAOv2.mwc) builds only the
+# ACE/TAO subset OpenDDS needs (ACE_TAO_for_OpenDDS.mwc). full.mwc is the same
+# workspace with that subset replaced by ACE+TAO's full one (TAO/TAO_ACE.mwc:
+# ACE, ACEXML, Kokyu, protocols, gperf, all of TAO, TAO_IDL, the TAO utils and
+# orbsvcs with their services; no tests/examples). Projects that need an MPC
+# feature that is off by default (ssl, zlib, xerces, Qt/Xt/Tk/Fl/Fox) are skipped.
 dds=$BUILD/dds
 rm -rf "$dds"
 mkdir -p "$dds/rapidjson"
 tar -xjf "$(dist ace-tao)" -C "$dds"
 tar -xzf "$(dist opendds)" -C "$dds"
 tar -xzf "$(dist rapidjson)" -C "$dds/rapidjson" --strip-components=1
+cat >"$dds/full.mwc" <<'MWC'
+workspace {
+  $(ACE_ROOT)/ace
+  $(ACE_ROOT)/apps/gperf/src
+  $(ACE_ROOT)/ACEXML/common
+  $(ACE_ROOT)/ACEXML/parser/parser
+  $(ACE_ROOT)/ACEXML/apps/svcconf
+  $(ACE_ROOT)/Kokyu/Kokyu.mpc
+  $(ACE_ROOT)/protocols
+  $(TAO_ROOT)/tao
+  $(TAO_ROOT)/TAO_IDL
+  $(TAO_ROOT)/utils
+  $(TAO_ROOT)/orbsvcs
+  dds
+  tools
+  java
+  DevGuideExamples
+  exclude {
+    $(ACE_ROOT)/protocols/tests
+    $(ACE_ROOT)/protocols/examples
+    $(TAO_ROOT)/orbsvcs/tests
+    $(TAO_ROOT)/orbsvcs/performance-tests
+    $(TAO_ROOT)/orbsvcs/examples
+    $(TAO_ROOT)/orbsvcs/DevGuideExamples
+    java/jms
+    tools/modeling/tests
+  }
+}
+MWC
 (cd "$dds"/OpenDDS-* &&
   ./configure --prefix="$PREFIX" --ace="$dds/ACE_wrappers" --tao="$dds/ACE_wrappers/TAO" \
     --mpc="$dds/ACE_wrappers/MPC" --ace-tao=ace8tao4 --rapidjson="$dds/rapidjson" \
+    --workspace="$dds/full.mwc" \
     --no-debug --optimize --install-origin-relative >"$dds/configure.log" &&
   make -j "$JOBS" >"$dds/make.log" 2>&1 && make install >"$dds/install.log" 2>&1) ||
   { tail -30 "$dds/configure.log" "$dds/make.log" "$dds/install.log" 2>/dev/null; exit 1; }

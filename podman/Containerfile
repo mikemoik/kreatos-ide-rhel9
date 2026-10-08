@@ -116,6 +116,11 @@ RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ld
 # root), and git then refuses with "dubious ownership". The check guards
 # against other users' repos on a shared machine, which a container doesn't have.
 RUN git config --system --add safe.directory '*'
+# tmux (built by build.sh) reads /etc/tmux.conf first: mouse on, so a click
+# selects a pane, dragging a border resizes, the wheel scrolls. Last, your own
+# tmux config from the mounted workspace, if present (host:
+# ~/workspace/.container/tmux.conf); -q: no error when it is missing.
+RUN printf '%s\n' 'set -g mouse on' 'source-file -q /workspace/.container/tmux.conf' >/etc/tmux.conf
 # what PREFIX/bashrc does on an install
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi

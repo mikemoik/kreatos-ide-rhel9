@@ -133,7 +133,9 @@ By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
   `kide myproject/src/main.py`). fish sources every `*.fish` in
   `~/workspace/.container/fish/` (in the container
   `/workspace/.container/fish/`) last, in name order: your own fish config
-  (aliases, PATH, …), kept on the host.
+  (aliases, PATH, …), kept on the host. Likewise tmux reads
+  `~/workspace/.container/tmux.conf` last, if it exists, after the image's
+  `/etc/tmux.conf` (mouse on).
 - `-v kide-data:/var/lib/kide`: kide's data and state (undo history, shada,
   swap files, sessions, fish history) survive the container. Leave it out for
   a throwaway session. The image points `XDG_DATA_HOME`/`XDG_STATE_HOME` there
