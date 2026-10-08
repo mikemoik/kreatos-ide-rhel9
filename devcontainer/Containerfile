@@ -77,6 +77,9 @@ RUN printf '/opt/kide/lib\n/opt/kide/lib64\n' >/etc/ld.so.conf.d/kide.conf && ld
 RUN git config --system --add safe.directory '*'
 # CMake 4, tao_idl, opendds_idl, … ahead of RHEL's on PATH
 ENV PATH=/opt/kide/bin:$PATH
+# pkg-config finds ACE, TAO, TAO_* (lib) and libonnxruntime (lib64); RHEL's
+# default path is only /usr/lib64/pkgconfig:/usr/share/pkgconfig
+ENV PKG_CONFIG_PATH=/opt/kide/lib/pkgconfig:/opt/kide/lib64/pkgconfig
 # KIDE_USER (podman/base.conf): taken from the base image if it has it,
 # otherwise created with KIDE_UID/KIDE_GID; bash as login shell, ~/.local/bin
 # (its pip and uv) on PATH, the host's proxy variables unset in its shells.

@@ -50,6 +50,10 @@ Only a change to `dist/` (or `build-dist.sh`) rebuilds all three.
 them, also binaries built without an RPATH (plain `g++ -L… -l…`, or
 `cmake --install`ed elsewhere). No `LD_LIBRARY_PATH` is set.
 
+`PKG_CONFIG_PATH` is `/opt/kide/lib/pkgconfig:/opt/kide/lib64/pkgconfig`, so
+`pkg-config` (and CMake's `pkg_check_modules`) finds `ACE`, `TAO`, the
+`TAO_*` libraries (e.g. `TAO_Messaging`) and `libonnxruntime`.
+
 ### Another base image
 
 The Containerfile names no base image and sets up no repos itself;

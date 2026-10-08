@@ -130,6 +130,9 @@ RUN printf '%s\n' 'set -g mouse on' 'source-file -q /workspace/.container/tmux.c
 # what PREFIX/bashrc does on an install
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
+# pkg-config finds ACE, TAO, TAO_* (lib) and libonnxruntime (lib64); RHEL's
+# default path is only /usr/lib64/pkgconfig:/usr/share/pkgconfig
+ENV PKG_CONFIG_PATH=/opt/kide/lib/pkgconfig:/opt/kide/lib64/pkgconfig
 # fish is the default shell: $SHELL (nvim's :terminal and terminal windows,
 # lazygit, yazi) and the login shell of KIDE_USER and root. Its config is the
 # bundled one (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME,

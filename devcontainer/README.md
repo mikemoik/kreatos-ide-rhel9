@@ -13,7 +13,8 @@ What is in it, the same as in `kide`:
 - in `/opt/kide` (built by `build-dist.sh`, the same step as in the kide
   image): CMake 4 (ahead of RHEL's on `PATH`), onnxruntime, ACE+TAO 8 + OpenDDS
   3.34 (`tao_idl`, `opendds_idl`, `find_package(OpenDDS)`); found by the
-  dynamic linker through `/etc/ld.so.conf.d/kide.conf`
+  dynamic linker through `/etc/ld.so.conf.d/kide.conf`, and by pkg-config
+  (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`) through `PKG_CONFIG_PATH`
 - pip/uv config and the pip server certificate from `CONF_DIR`, and pip + uv
   in `KIDE_USER`'s `~/.local`
 - `safe.directory = *` for git
