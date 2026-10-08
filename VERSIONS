@@ -1631,6 +1631,7 @@ crate/yazi/zune-jpeg-0.4.21  https://crates.io                                  
 crate/yazi/zune-jpeg-0.5.11  https://crates.io                                            Cargo.lock
 dist/ace-tao                 https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2 8.0.8 (source)
 dist/cmake                   https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz 4.4.4 (prebuilt)
+dist/gdal-devel              https://kojipkgs.fedoraproject.org/packages/gdal/3.10.3/3.fc43/x86_64/gdal-devel-3.10.3-3.fc43.x86_64.rpm 3.10.3-3.fc43 (rpm)
 dist/onnxruntime             https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz 1.30.0 (prebuilt)
 dist/opendds                 https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz 3.34.0 (source)
 dist/rapidjson               https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz fd3dc29a5c2852df569e1ea81dbde2c412ac5051 (source)

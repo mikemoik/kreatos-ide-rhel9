@@ -5,8 +5,11 @@ Rocky Linux 9 (RHEL9-compatible) with kide built into `/opt/kide` and the RHEL
 packages it uses (python3, git, file, gcc/g++, make, cmake,
 clangd/clang-format/clang-tidy, gdb, lldb), plus what C/C++ projects build
 against: CMake 4, onnxruntime, ACE+TAO and OpenDDS in `/opt/kide` (from
-`dist/`), and from CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with numpy and
-pybind11, opencv, glew, glfw. pip (newest) and uv for Python 3.12 are
+`dist/`), and from AppStream/CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with
+numpy and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5 (`qt5`) and
+libtiff + libtiff-devel, plus
+`gdal-devel` 3.10.3-3.fc43 as an RPM from `dist/`, installed with
+`rpm -i --nodeps` (it pins Fedora's gdal-libs build). pip (newest) and uv for Python 3.12 are
 pip-installed by the image's user (`KIDE_USER`) into its `~/.local`; root
 installs nothing with pip, it only sets up their config and certificate
 system-wide. Not UBI9: UBI lacks packages the EPEL ones
@@ -114,9 +117,15 @@ takes the uid/gid from `podman/base.conf` and passes on `TERM` and
 
 By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
+    podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
+    podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
+- `--http-proxy=false`: podman would otherwise copy the host's proxy
+  variables (`http_proxy`, `https_proxy`, `HTTP_PROXY`, `HTTPS_PROXY`,
+  `ftp_proxy`, `no_proxy`, …) into the container; kide runs without them. The
+  build (`podman build`) still gets them, so dnf and pip can use the proxy.
+  As a fallback, the image's fish config unsets them too (a `podman run`
+  without the flag still has them in kide itself, which is not started from fish).
 - `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
   mounted on `/workspace`, the container's working directory: kide and fish
   start there, whatever directory you start from. `:Z` relabels it for SELinux
@@ -145,7 +154,7 @@ By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
 
 A shell in the container (lazygit, yazi, cmake, gdb, … are all on `PATH`):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+    podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 
 ## Shell: fish
 
@@ -189,7 +198,7 @@ has no page to show; `help` points to <https://fishshell.com/docs/current/>.
 
 A short alias for `~/.bashrc`:
 
-    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
+    alias kide='podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
 ## VS Code dev container
 
@@ -212,7 +221,7 @@ with podman instead of docker. Not tested yet.
      "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,Z",
      "workspaceFolder": "/workspace",
      "mounts": ["source=kide-data,target=/var/lib/kide,type=volume"],
-     "runArgs": ["--userns=keep-id:uid=1001,gid=1001"],
+     "runArgs": ["--userns=keep-id:uid=1001,gid=1001", "--http-proxy=false"],
      "containerUser": "default",
      "remoteUser": "default"
    }

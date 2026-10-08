@@ -8,7 +8,8 @@
 # host user is mapped to the image's user (KIDE_UID/KIDE_GID from
 # podman/base.conf next to this script, default 1001), so files written in
 # ~/workspace stay yours. kide's data and state are kept in the volume
-# kide-data. TERM and SSH_CONNECTION are passed on when set (PuTTY/SSH).
+# kide-data. TERM and SSH_CONNECTION are passed on when set (PuTTY/SSH); the
+# host's proxy variables (http_proxy, https_proxy, … ) are not (--http-proxy=false).
 set -euo pipefail
 
 KIDE_UID=1001
@@ -26,7 +27,7 @@ if [ "${1:-}" = --shell ]; then
 fi
 
 mkdir -p "$HOME/workspace"
-exec podman run --rm -it -e TERM -e SSH_CONNECTION \
+exec podman run --rm -it --http-proxy=false -e TERM -e SSH_CONNECTION \
     --userns="keep-id:uid=$KIDE_UID,gid=$KIDE_GID" \
     -v "$HOME/workspace:/workspace:Z" \
     -v kide-data:/var/lib/kide \

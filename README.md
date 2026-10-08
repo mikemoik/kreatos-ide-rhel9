@@ -164,8 +164,8 @@ takes the uid/gid from `podman/base.conf` and passes on `TERM` and
 
 By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
 
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
-    podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
+    podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
+    podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide myproject/src/main.py
 
 - `-v "$HOME/workspace:/workspace:Z"`: your `~/workspace` on the host (create it once: `mkdir -p ~/workspace`),
   mounted on `/workspace`, the container's working directory: kide and fish
@@ -186,7 +186,7 @@ By hand (`start.sh` also adds `-e TERM -e SSH_CONNECTION`):
 
 As an alias in `~/.bashrc`:
 
-    alias kide='podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
+    alias kide='podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
 Offline box: build the image on a machine with internet and carry it over as
 a file:
@@ -220,7 +220,7 @@ background and colours match kreatos. It also sets JetBrainsMono Nerd Font Mono
 10 pt, terminal type `xterm-256color`, 24-bit colour, and as *Connection → SSH →
 Remote command* it starts the kide container with fish as its shell:
 
-    podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+    podman run --rm -it --http-proxy=false -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 
 The container mounts your `~/workspace` on the RHEL box (create it once:
 `mkdir -p ~/workspace`) and starts fish there; `cd` to the project, `kide`
@@ -260,7 +260,7 @@ that session; host, port and other settings stay. Not tested on Windows yet.
    of step 3.
 3. `cd` to the project on the RHEL box and start kide:
 
-       podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
+       podman run --rm -it --http-proxy=false -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide
 
    - `-e TERM` hands PuTTY's `xterm-256color` to the container (podman would
      set plain `xterm`).
@@ -270,19 +270,25 @@ that session; host, port and other settings stay. Not tested on Windows yet.
 
    As an alias in `~/.bashrc` on the RHEL box:
 
-       alias kide='podman run --rm -it -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
+       alias kide='podman run --rm -it --http-proxy=false -e TERM -e SSH_CONNECTION --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide'
 
    With a normal install (no container) it is just `kide`.
 
 **Using it in PuTTY:**
 
-- Mouse works in kide (click, scroll, resize splits). Hold **Shift** to use
-  PuTTY's own selection instead.
+- Mouse works in kide (click, scroll, resize splits), so kide gets plain
+  clicks, right-click included. Hold **Shift** to use PuTTY's own selection
+  and paste instead (in the fish shell a plain right-click pastes).
+- **Ctrl+Shift+C / Ctrl+Shift+V**: off by default in PuTTY. Turn on
+  *Window → Selection → Shift+Ctrl+[C,V]: System clipboard* (the `kide`
+  session from `putty/kide.reg` has it on: `"CtrlShiftCV"="explicit"`).
 - **Copy to Windows**: Shift + drag selects text in PuTTY, which copies it to
-  the Windows clipboard right away. kide's own yank (`y`) does not reach
-  Windows: PuTTY does not support OSC 52.
-- **Paste from Windows**: in insert mode, Shift + right-click or
-  Shift + Insert; the text is pasted as is (no auto-indent mess).
+  the Windows clipboard right away (Ctrl+Shift+C copies the selection again).
+  kide's own yank (`y`) does not reach Windows: PuTTY does not support
+  OSC 52.
+- **Paste from Windows**: Ctrl+Shift+V, Shift + right-click or Shift + Insert.
+  It arrives as a bracketed paste, so the text is inserted as is (no
+  auto-indent mess), in insert and in normal mode.
 - Alt keys (`<A-j>`/`<A-k>` move lines) work: PuTTY sends Alt as Esc + key.
 - Window resize: drag the PuTTY window; kide redraws.
 - Only the mounted project directory is visible inside the container (see
@@ -349,6 +355,8 @@ user, without sudo.
        Volume=%h/workspace:/workspace:Z
        Volume=kide-data:/var/lib/kide
        UserNS=keep-id:uid=1001,gid=1001
+       # no proxy variables from the host (podman run --http-proxy=false)
+       PodmanArgs=--http-proxy=false
        Environment=TERM=xterm-256color SSH_CONNECTION=persistent
 
        [Service]
@@ -728,6 +736,7 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 |---|---|---|---|
 | dist/ace-tao | <https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2> | `8.0.8 (source)` | DOC |
 | dist/cmake | <https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz> | `4.4.4 (prebuilt)` | BSD-3-Clause |
+| dist/gdal-devel | <https://kojipkgs.fedoraproject.org/packages/gdal/3.10.3/3.fc43/x86_64/gdal-devel-3.10.3-3.fc43.x86_64.rpm> | `3.10.3-3.fc43 (rpm)` | MIT |
 | dist/onnxruntime | <https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz> | `1.30.0 (prebuilt)` | MIT |
 | dist/opendds | <https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz> | `3.34.0 (source)` | LicenseRef-OpenDDS |
 | dist/rapidjson | <https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz> | `fd3dc29a5c28` | MIT |

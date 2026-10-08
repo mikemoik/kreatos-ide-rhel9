@@ -27,3 +27,4 @@ dist/onnxruntime	MIT	LICENSE in the tarball (ThirdPartyNotices.txt next to it)
 dist/ace-tao	DOC	ACE_wrappers/COPYING
 dist/opendds	LicenseRef-OpenDDS	LICENSE in the tarball (permissive OCI license, no SPDX id)
 dist/rapidjson	MIT	license.txt (bin/jsonchecker is under the JSON license; not used)
+dist/gdal-devel	MIT	License tag of the rpm (Fedora 43 package, installed by podman/Containerfile)

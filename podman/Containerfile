@@ -14,9 +14,9 @@
 # Start it with podman/start.sh [--shell] [FILE…], which runs rootless podman,
 # mapping you on the host to that user, so files in the mounted ~/workspace
 # stay yours:
-#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide [FILE…]
+#   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide [FILE…]
 # A shell (fish, with the IDE's aliases from fish/):
-#   podman run --rm -it --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+#   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
 # See podman/README.md.
 
 ARG BASE
@@ -57,17 +57,25 @@ USER root
 # C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb, lldb-dap).
 # tmux is built by build.sh; its libevent and ncurses-libs are in the base image.
 # For C/C++ projects: perl + perl-Dumpvalue (MPC, ACE+TAO/OpenDDS tooling),
-# Python 3.12 with numpy and pybind11, opencv, glew, glfw. shadow-utils
+# Python 3.12 with numpy and pybind11, opencv, glew, glfw, gdal, Qt5, libtiff. shadow-utils
 # (useradd/usermod) for KIDE_USER below.
+# gdal-devel comes from dist/ (manifest/dist.tsv): Fedora 43's 3.10.3 build,
+# headers/CMake/pkg-config files for the same gdal version as the target's
+# gdal-libs (same libgdal.so.36). It pins gdal-libs = 3.10.3-3.fc43, so
+# rpm --nodeps.
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
 COPY $CONF_DIR/repos.sh /tmp/repos.sh
+COPY dist/gdal-devel-3.10.3-3.fc43.x86_64.rpm /tmp/
 RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb \
         perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
         python3.12-pybind11 python3.12-pybind11-devel \
         opencv-devel glew-devel glfw glfw-devel \
-    && dnf clean all
+        gdal gdal-libs qt5 libtiff libtiff-devel \
+    && dnf clean all \
+    && rpm -i --nodeps /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm \
+    && rm /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm
 # pip-server.crt is the pip server's certificate (or the company CA that signed
 # it; PEM, no private key; the repo has a dummy). It goes into the system trust
 # store, so every user and tool trusts the pip repo, at build time and runtime:
@@ -132,6 +140,9 @@ ENV XDG_DATA_HOME=/var/lib/kide/share \
 # otherwise created with KIDE_UID/KIDE_GID. Gets fish as login shell and the
 # fish and bash config (with ~/.local/bin, where its pip and uv go, on PATH),
 # owns /var/lib/kide.
+# No proxy at runtime: the run commands pass --http-proxy=false, and as a
+# fallback the fish config of KIDE_USER and root unsets the proxy variables
+# (podman build still passes them to the RUN steps, so dnf/pip may use them).
 # /workspace is the WORKDIR, a plain directory owned by KIDE_USER: the mount
 # point for the host's ~/workspace (podman run -v "$HOME/workspace:/workspace:Z").
 # fish sources every *.fish in /workspace/.container/fish/ (on the host:
@@ -140,6 +151,8 @@ ARG KIDE_USER
 ARG KIDE_UID
 ARG KIDE_GID
 RUN set -e; \
+    noproxy='set -e http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY'; \
+    echo "$noproxy" >>/root/.config/fish/config.fish; \
     if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
       getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
       useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
@@ -149,7 +162,7 @@ RUN set -e; \
     group=$(id -g "$KIDE_USER"); \
     mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /workspace; \
     printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' \
-      'for f in /workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
+      "$noproxy" 'for f in /workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
     printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' '. /opt/kide/bashrc' >>"$home/.bashrc"; \
     chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
     chown -R "$KIDE_USER:$group" "$home/.config" /workspace /var/lib/kide
