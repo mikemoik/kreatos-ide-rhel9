@@ -4,6 +4,7 @@
 #   PREFIX/bin/{cmake,ctest,cpack}    CMake 4 (upstream's prebuilt)
 #   PREFIX/{include,lib64}            onnxruntime (upstream's prebuilt)
 #   PREFIX/{bin,include,lib,share}    ACE+TAO 8 + OpenDDS 3.34 built from source
+#   PREFIX/share/tao/TAO_IDL/{include,be_include}  TAO_IDL headers (from source)
 # Separate from build-ide.sh (the IDE): install.sh and test/run.sh run both,
 # podman/Containerfile runs them as separate layers, devcontainer/Containerfile
 # only this one. Needs gcc/g++, make, perl, perl-Dumpvalue and bzip2. Intermediate
@@ -111,3 +112,12 @@ if grep -v '^#' "$PREFIX/share/cmake/OpenDDS/config.cmake" | grep -qF "$dds"; th
   echo "OpenDDS config.cmake still refers to $dds" >&2
   exit 1
 fi
+# TAO_IDL's headers (front end, driver, TAO's backend): make install leaves them
+# out, but OpenDDS's TAO::IDL_FE target (tao_group.cmake) has
+# share/tao/TAO_IDL/{include,be_include} as include dirs, and projects with
+# their own IDL compiler (own drv_*.cpp + libTAO_IDL_FE, like opendds_idl)
+# include them (drv_extern.h, idl_defines.h, ...)
+rm -rf "$PREFIX/share/tao/TAO_IDL"
+mkdir -p "$PREFIX/share/tao/TAO_IDL"
+cp -a "$dds/ACE_wrappers/TAO/TAO_IDL/include" "$dds/ACE_wrappers/TAO/TAO_IDL/be_include" \
+  "$PREFIX/share/tao/TAO_IDL/"
