@@ -59,8 +59,11 @@ log "ACE+TAO + OpenDDS"
 # ACE/TAO subset OpenDDS needs (ACE_TAO_for_OpenDDS.mwc). full.mwc is the same
 # workspace with that subset replaced by ACE+TAO's full one (TAO/TAO_ACE.mwc:
 # ACE, ACEXML, Kokyu, protocols, gperf, all of TAO, TAO_IDL, the TAO utils and
-# orbsvcs with their services; no tests/examples). Projects that need an MPC
-# feature that is off by default (ssl, zlib, xerces, Qt/Xt/Tk/Fl/Fox) are skipped.
+# orbsvcs with their services; no tests/examples), and of OpenDDS's own part
+# only dds and tools: its java (needs the off java feature) and
+# DevGuideExamples (Messenger etc., compiled but never installed) are left
+# out. Projects that need an MPC feature that is off by default (ssl, zlib,
+# xerces, Qt/Xt/Tk/Fl/Fox) are skipped.
 dds=$BUILD/dds
 rm -rf "$dds"
 mkdir -p "$dds/rapidjson"
@@ -82,8 +85,6 @@ workspace {
   $(TAO_ROOT)/orbsvcs
   dds
   tools
-  java
-  DevGuideExamples
   exclude {
     $(ACE_ROOT)/protocols/tests
     $(ACE_ROOT)/protocols/examples
@@ -91,7 +92,6 @@ workspace {
     $(TAO_ROOT)/orbsvcs/performance-tests
     $(TAO_ROOT)/orbsvcs/examples
     $(TAO_ROOT)/orbsvcs/DevGuideExamples
-    java/jms
     tools/modeling/tests
   }
 }
