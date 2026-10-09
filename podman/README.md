@@ -179,7 +179,8 @@ The IDE's shell helpers live in the repo's `fish/` directory, installed to
 `/opt/kide/share/kreatos-ide/fish` and sourced from `~/.config/fish/config.fish`
 (of `KIDE_USER` and root):
 
-- `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`
+- `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`, `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`,
+  `CMAKE_PREFIX_PATH=/opt/kide`, `CPLUS_INCLUDE_PATH=/opt/kide/include`
 - `aliases.fish`: aliases for interactive shells
 
 | Alias | Runs |

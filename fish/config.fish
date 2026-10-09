@@ -16,6 +16,10 @@ set -gx ACE_ROOT $kide_prefix/share/ace
 set -gx TAO_ROOT $kide_prefix/share/tao
 set -gx DDS_ROOT $kide_prefix/share/dds
 
+# CMake and the compiler find the libraries in PREFIX without -D/-I hints
+set -gx CMAKE_PREFIX_PATH $kide_prefix
+set -gx CPLUS_INCLUDE_PATH $kide_prefix/include
+
 # functions/: the IDE's fish functions (autoloaded, e.g. tm)
 set -l kide_functions (status dirname)/functions
 contains -- $kide_functions $fish_function_path

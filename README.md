@@ -450,7 +450,8 @@ libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
 The fish config sets `ACE_ROOT`, `TAO_ROOT` and `DDS_ROOT` (`PREFIX/share/{ace,tao,dds}`)
-for running `opendds_idl` or MPC by hand. `build-dist.sh` removes the build-tree
+for running `opendds_idl` or MPC by hand, plus `CMAKE_PREFIX_PATH=PREFIX` and
+`CPLUS_INCLUDE_PATH=PREFIX/include`. `build-dist.sh` removes the build-tree
 paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
 the package resolves to `PREFIX`.
 

@@ -82,7 +82,9 @@ ENV PATH=/opt/kide/bin:$PATH
 ENV PKG_CONFIG_PATH=/opt/kide/lib/pkgconfig:/opt/kide/lib64/pkgconfig
 # KIDE_USER (podman/base.conf): taken from the base image if it has it,
 # otherwise created with KIDE_UID/KIDE_GID; bash as login shell, ~/.local/bin
-# (its pip and uv) on PATH, the host's proxy variables unset in its shells.
+# (its pip and uv) on PATH, CMAKE_PREFIX_PATH and CPLUS_INCLUDE_PATH on
+# /opt/kide (as kide's fish config), the host's proxy variables unset in its
+# shells.
 # ~/.vscode-server exists and is its own, so the volume devcontainer.json
 # mounts there starts out owned by KIDE_USER (VS Code's server survives a
 # rebuilt container).
@@ -99,6 +101,7 @@ RUN set -e; \
     group=$(id -g "$KIDE_USER"); \
     mkdir -p "$home/.vscode-server" /workspace; \
     printf '%s\n' 'PATH="$HOME/.local/bin:$PATH"' \
+      'export CMAKE_PREFIX_PATH=/opt/kide CPLUS_INCLUDE_PATH=/opt/kide/include' \
       'unset http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY' \
       >>"$home/.bashrc"; \
     chown "$KIDE_USER:$group" "$home" "$home/.bashrc" "$home/.vscode-server" /workspace
