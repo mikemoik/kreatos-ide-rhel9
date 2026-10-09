@@ -120,7 +120,9 @@ Edit your `~/workspace` (create it once on the host: `mkdir -p ~/workspace`).
 takes the uid/gid from `podman/base.conf` and passes on `TERM` and
 `SSH_CONNECTION`); `--shell` starts fish instead of kide. For git over SSH
 with your host key it also passes in, when present: your SSH agent
-(`SSH_AUTH_SOCK`, e.g. Pageant via PuTTY's agent forwarding; with
+(`SSH_AUTH_SOCK`, e.g. Pageant via PuTTY's agent forwarding; without one,
+start.sh starts an ssh-agent for the session and loads your `~/.ssh/id_*` key,
+asking for its passphrase if it has one; with
 `--security-opt label=disable`, as SELinux blocks the agent socket otherwise),
 `~/.ssh/known_hosts` (read-only as `/etc/ssh/ssh_known_hosts`) and your git
 config (`~/.gitconfig` or `~/.config/git/config`, read-only, via
