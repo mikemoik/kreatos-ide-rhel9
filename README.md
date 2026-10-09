@@ -157,15 +157,12 @@ Run it on your `~/workspace` (rootless podman, as your normal user — not
 
 `podman/start.sh` does exactly this (it creates `~/workspace` if missing,
 takes the uid/gid from `podman/base.conf` and passes on `TERM` and
-`SSH_CONNECTION`); `--shell` starts fish instead of kide. For git over SSH
-with your host key it also passes in, when present: your SSH agent
-(`SSH_AUTH_SOCK`, e.g. Pageant via PuTTY's agent forwarding; without one,
-start.sh starts an ssh-agent for the session and loads every private key in
-`~/.ssh`, whatever its name, asking for a passphrase if one is set; with
+`SSH_CONNECTION`); `--shell` starts fish instead of kide. For git over SSH it
+loads your key `~/.ssh/gitlab` into an ssh-agent for the session (asking for
+its passphrase, if any) and passes the agent in (with
 `--security-opt label=disable`, as SELinux blocks the agent socket otherwise),
-`~/.ssh/known_hosts` (read-only as `/etc/ssh/ssh_known_hosts`) and your git
-config (`~/.gitconfig` or `~/.config/git/config`, read-only, via
-`GIT_CONFIG_GLOBAL`):
+plus `~/.ssh/known_hosts` and `~/.gitconfig` read-only; all three files must
+exist:
 
     podman/start.sh                       # kide in ~/workspace
     podman/start.sh myproject/src/main.py # a file, relative to ~/workspace
