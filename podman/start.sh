@@ -14,8 +14,8 @@
 # git over SSH with your host key: a running SSH agent (SSH_AUTH_SOCK, e.g.
 # Pageant through PuTTY's agent forwarding) is passed in, with SELinux
 # confinement off for this container (label=disable), since SELinux blocks the
-# container from the host's agent socket. Your ~/.ssh/known_hosts and
-# ~/.gitconfig, if present, go in read-only at home-independent paths (ssh's
+# container from the host's agent socket. Your ~/.ssh/known_hosts and git
+# config (~/.gitconfig, else ~/.config/git/config), if present, go in read-only at home-independent paths (ssh's
 # system-wide known_hosts, GIT_CONFIG_GLOBAL), so the image user's home
 # doesn't matter.
 set -euo pipefail
@@ -42,9 +42,12 @@ fi
 if [ -f "$HOME/.ssh/known_hosts" ]; then
     git+=(-v "$HOME/.ssh/known_hosts:/etc/ssh/ssh_known_hosts:ro")
 fi
-if [ -f "$HOME/.gitconfig" ]; then
-    git+=(-v "$HOME/.gitconfig:/run/gitconfig:ro" -e GIT_CONFIG_GLOBAL=/run/gitconfig)
-fi
+for f in "$HOME/.gitconfig" "${XDG_CONFIG_HOME:-$HOME/.config}/git/config"; do
+    if [ -f "$f" ]; then
+        git+=(-v "$f:/run/gitconfig:ro" -e GIT_CONFIG_GLOBAL=/run/gitconfig)
+        break
+    fi
+done
 
 mkdir -p "$HOME/workspace"
 exec podman run --rm -it --http-proxy=false -e TERM -e SSH_CONNECTION \
