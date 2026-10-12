@@ -10,20 +10,24 @@ What is in it, the same as in `kide`:
   gdb, lldb (`lldb-dap`), git, perl + perl-Dumpvalue, Python 3.12 with numpy
   and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5, libtiff, and
   `gdal-devel` 3.10.3 from `dist/`
-- in `/opt/kide` (built by `build-dist.sh`, the same step as in the kide
-  image): CMake 4 (ahead of RHEL's on `PATH`), onnxruntime, ACE+TAO 8 + OpenDDS
-  3.34 (`tao_idl`, `opendds_idl`, `find_package(OpenDDS)`); found by the
-  dynamic linker through `/etc/ld.so.conf.d/kide.conf`, and by pkg-config
-  (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`) through `PKG_CONFIG_PATH`; `~/.bashrc` sets
-  `CMAKE_PREFIX_PATH=/opt/kide` and `CPLUS_INCLUDE_PATH=/opt/kide/include`
+- `build-dist.sh` with `dist/` (in `/opt/kide/dist`, on `PATH`): run once in
+  the container, it builds CMake 4 (ahead of RHEL's on `PATH`), onnxruntime,
+  ACE+TAO 8 + OpenDDS 3.34 (`tao_idl`, `opendds_idl`, `find_package(OpenDDS)`)
+  into `/workspace/kide-dist/{bin,include,lib,lib64,share}`, that is, into
+  `kide-dist/` in the mounted project on the host (as in the kide image);
+  found by the dynamic linker through `LD_LIBRARY_PATH`, and by pkg-config
+  (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`) through `PKG_CONFIG_PATH`;
+  `~/.bashrc` sources `kide-dist/bin/kide-dist-env.sh` (`CMAKE_PREFIX_PATH`,
+  `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`, `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`)
 - pip/uv config and the pip server certificate from `CONF_DIR`, and pip + uv
   in `KIDE_USER`'s `~/.local`
 - `safe.directory = *` for git
 
 Left out: nvim/kide, yazi, fish, tmux, fd, fzf, lazygit, ruff/ty,
 neocmakelsp, shfmt, debugpy. With them gone, the build stage needs no Rust
-or Go and the image has no `kide-data` volume. The ACE+TAO/OpenDDS compile
-still takes most of the build time.
+or Go and the image has no `kide-data` volume. It has a single stage, and the
+ACE+TAO/OpenDDS compile (~7 min) happens later, in the container
+(`build-dist.sh`).
 
 ## Build
 
@@ -39,6 +43,11 @@ From the repo root, with the same `podman/base.conf` as the kide image
    If `podman/base.conf` sets a different `KIDE_USER`/`KIDE_UID`/`KIDE_GID`,
    change `default`, `1001`, and the home path in `mounts` to match.
 3. *Dev Containers: Reopen in Container*.
+4. Once per project, in the container's terminal: `build-dist.sh`. This
+   installs the C/C++ libraries into `kide-dist/` in the project directory
+   (add it to the project's `.gitignore`). New terminals pick up
+   `kide-dist-env.sh`; in the one it ran in, run
+   `. /workspace/kide-dist/bin/kide-dist-env.sh` once.
 
 What the template sets:
 
@@ -50,7 +59,7 @@ What the template sets:
 - The `kide-dev-vscode` volume on `~/.vscode-server` keeps VS Code's server
   and extensions across rebuilt containers.
 - Extensions: clangd, lldb-dap, CMake Tools, Python. Their settings point at
-  `/usr/bin/clangd`, `/usr/bin/lldb-dap`, `/opt/kide/bin/cmake` and
+  `/usr/bin/clangd`, `/usr/bin/lldb-dap`, `/workspace/kide-dist/bin/cmake` and
   `/usr/bin/python3.12`.
 
 To use the image without VS Code (a shell):

@@ -4,8 +4,9 @@ kide without installing anything on the host except podman: the image is
 Rocky Linux 9 (RHEL9-compatible) with kide built into `/opt/kide` and the RHEL
 packages it uses (python3, git, file, gcc/g++, make, cmake,
 clangd/clang-format/clang-tidy, gdb, lldb), plus what C/C++ projects build
-against: CMake 4, onnxruntime, ACE+TAO and OpenDDS in `/opt/kide` (from
-`dist/`), and from AppStream/CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with
+against: CMake 4, onnxruntime, ACE+TAO and OpenDDS (`dist/`, built once in
+the container into the mounted `/workspace/kide-dist` with `build-dist.sh`, see
+[Libraries](#libraries-built-into-workspace)), and from AppStream/CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with
 numpy and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5 (`qt5`) and
 libtiff + libtiff-devel, plus
 `gdal-devel` 3.10.3-3.fc43 as an RPM from `dist/`, installed with
@@ -32,25 +33,48 @@ Without a checkout, straight from GitHub (no curl needed):
 
     podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
 
-The build stage has three layers, each reused until its inputs change:
+The build stage has two layers, each reused until its inputs change:
 
-1. libs: the C/C++ libraries (`build-dist.sh`, from `dist/` and
-   `manifest/dist.tsv`; ~7 min, mostly ACE+TAO/OpenDDS)
-2. IDE compile: nvim, parsers, tools (`build-ide.sh`, from `vendor/`,
+1. IDE compile: nvim, parsers, tools (`build-ide.sh`, from `vendor/`,
    `manifest/`, `scripts/`; ~5 min)
-3. config: `config/`, `yazi/`, `fish/` (`build-ide.sh --no-build`; seconds)
+2. config: `config/`, `yazi/`, `fish/` (`build-ide.sh --no-build`; seconds)
 
-A config change rebuilds only layer 3, and an IDE or vendor change rebuilds layers 2 and 3.
-Only a change to `dist/` (or `build-dist.sh`) rebuilds all three.
+A config change rebuilds only layer 2, and an IDE or vendor change rebuilds both.
+The C/C++ libraries are not compiled at image build time (next section);
+`dist/`, `manifest/dist.tsv` and `build-dist.sh` are only copied into the image.
 
-### Libraries: no LD_LIBRARY_PATH
+### Libraries: built into /workspace/kide-dist
 
-`/etc/ld.so.conf.d/kide.conf` lists `/opt/kide/lib` (ACE, TAO, OpenDDS) and
-`/opt/kide/lib64` (onnxruntime), so every program in the container finds
-them, also binaries built without an RPATH (plain `g++ -L… -l…`, or
-`cmake --install`ed elsewhere). No `LD_LIBRARY_PATH` is set.
+The image contains `build-dist.sh` and `dist/` (in `/opt/kide/dist`,
+`build-dist.sh` on `PATH`), not the built libraries. Run it once in the
+container:
 
-`PKG_CONFIG_PATH` is `/opt/kide/lib/pkgconfig:/opt/kide/lib64/pkgconfig`, so
+    build-dist.sh
+
+It builds CMake 4, onnxruntime, ACE+TAO and OpenDDS into
+`/workspace/kide-dist/{bin,include,lib,lib64,share}` (its default `PREFIX`
+is `KIDE_DIST_PREFIX=/workspace/kide-dist`), which is the host's
+`~/workspace/kide-dist`, so they stay there for every later container. The
+idea is that your projects are built in the container, installed to
+`/workspace`, and run on the host against these libraries. See
+[C/C++ libraries](../README.md#cc-libraries) for the RPATH and RHEL-version
+conditions.
+
+With them it installs `kide-dist/bin/kide-dist-env.fish` and
+`kide-dist-env.sh`, which set the environment for building against the
+libraries (`CMAKE_PREFIX_PATH`, `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`,
+`ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`, …). fish (and bash with `--entrypoint
+bash`) sources them at start; in the shell `build-dist.sh` ran in, source
+`/workspace/kide-dist/bin/kide-dist-env.fish` once by hand. On the host the
+same files are in `~/workspace/kide-dist/bin`.
+
+`LD_LIBRARY_PATH` is `/workspace/kide-dist/lib:/workspace/kide-dist/lib64`
+(set in the image, also for programs not started from a shell), so every program in
+the container finds them, also binaries built without an RPATH. An
+`ld.so.conf.d` entry would not work, because the libraries only show up in the
+mount at run time, too late for `ldconfig`.
+
+`PKG_CONFIG_PATH` is `/workspace/kide-dist/lib/pkgconfig:/workspace/kide-dist/lib64/pkgconfig`, so
 `pkg-config` (and CMake's `pkg_check_modules`) finds `ACE`, `TAO`, the
 `TAO_*` libraries (e.g. `TAO_Messaging`) and `libonnxruntime`.
 
@@ -184,8 +208,10 @@ The IDE's shell helpers live in the repo's `fish/` directory, installed to
 `/opt/kide/share/kreatos-ide/fish` and sourced from `~/.config/fish/config.fish`
 (of `KIDE_USER` and root):
 
-- `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`, `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`,
-  `CMAKE_PREFIX_PATH=/opt/kide`, `CPLUS_INCLUDE_PATH=/opt/kide/include`
+- `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`, and
+  `kide-dist-env.fish` from the libraries' prefix (`KIDE_DIST_PREFIX=/workspace/kide-dist`
+  in the image) once `build-dist.sh` has installed it: `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`,
+  `CMAKE_PREFIX_PATH`, `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`
 - `aliases.fish`: aliases for interactive shells
 
 | Alias | Runs |

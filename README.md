@@ -118,8 +118,9 @@ Updating offline: bring over a new tarball, unpack it, and run `./install.sh`
 
 No install on the host at all, only podman: `podman/Containerfile` builds a
 Rocky Linux 9 image (RHEL9-compatible; UBI9 lacks what the EPEL packages
-need) with kide in `/opt/kide`, the RHEL packages it uses, the
-[C/C++ libraries](#cc-libraries), and the newest pip plus uv for Python 3.12
+need) with kide in `/opt/kide`, the RHEL packages it uses, `build-dist.sh`
+for the [C/C++ libraries](#cc-libraries) (run once in the container, it
+installs them into the mounted `~/workspace/kide-dist`), and the newest pip plus uv for Python 3.12
 (details and limits: [podman/README.md](podman/README.md)).
 
 Build the image (~5–10 min). The build does not use the tarball itself: it
@@ -454,11 +455,56 @@ libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 `LD_LIBRARY_PATH`. The bundled cmake finds both packages without hints (it
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
-The fish config sets `ACE_ROOT`, `TAO_ROOT` and `DDS_ROOT` (`PREFIX/share/{ace,tao,dds}`)
-for running `opendds_idl` or MPC by hand, plus `CMAKE_PREFIX_PATH=PREFIX` and
-`CPLUS_INCLUDE_PATH=PREFIX/include`. `build-dist.sh` removes the build-tree
+`build-dist.sh` also installs `PREFIX/bin/kide-dist-env.sh` (bash) and
+`PREFIX/bin/kide-dist-env.fish` (fish). Sourced, they set the environment for
+building against the libraries and running what links them: `PREFIX/bin` first
+on `PATH`, `CMAKE_PREFIX_PATH=PREFIX`, `PKG_CONFIG_PATH`,
+`CPLUS_INCLUDE_PATH=PREFIX/include`, `LIBRARY_PATH` and `LD_LIBRARY_PATH`
+(`PREFIX/lib`, `lib64`), and `ACE_ROOT`, `TAO_ROOT`, `DDS_ROOT`
+(`PREFIX/share/{ace,tao,dds}`, for `opendds_idl` or MPC by hand). They find
+`PREFIX` from their own path, so the same file works wherever `PREFIX` is
+seen, and sourcing one twice adds nothing twice. The fish config sources the
+fish one when it exists. `build-dist.sh` removes the build-tree
 paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
 the package resolves to `PREFIX`.
+
+In the container images (kide, kide-dev) the libraries are not built into
+the image. `build-dist.sh` and `dist/` are shipped in `/opt/kide/dist` instead
+(`build-dist.sh` is on `PATH`), and `KIDE_DIST_PREFIX=/workspace/kide-dist`
+is its default `PREFIX`. Run it once inside the container (~7 min):
+
+    build-dist.sh
+
+It installs into `/workspace/kide-dist/{bin,include,lib,lib64,share}`, which
+is `~/workspace/kide-dist` on the host, so the result stays there for every
+later container; `rm -rf ~/workspace/kide-dist` removes it completely. Run it
+again after an image update that changes `dist/`. New shells in the container
+source `kide-dist-env.fish` (fish) or `kide-dist-env.sh` (bash) themselves;
+in a shell that was already open, source it by hand once. On the host:
+
+    source ~/workspace/kide-dist/bin/kide-dist-env.fish   # fish
+    . ~/workspace/kide-dist/bin/kide-dist-env.sh          # bash
+
+Your own projects are built in the container and installed to `/workspace`
+(`cmake --install build --prefix /workspace`: `bin/`, `lib/` next to
+`kide-dist/`), and the host can then run them against those libraries. Two
+conditions:
+
+- **The host must find the libraries.** On the host they are in
+  `~/workspace/kide-dist/lib` and `lib64`, not `/workspace/…`, so link your
+  programs with an RPATH relative to the binary:
+
+      set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../kide-dist/lib;$ORIGIN/../kide-dist/lib64")
+
+  ACE, TAO and OpenDDS are already built this way (within `kide-dist`). The
+  alternative is sourcing `kide-dist-env.sh`/`.fish` on the host, which sets
+  `LD_LIBRARY_PATH`. Inside the container `LD_LIBRARY_PATH` is always set to
+  `/workspace/kide-dist/lib:/workspace/kide-dist/lib64`.
+- **The container must not be newer than the host.** Use a base image
+  (`podman/base.conf`) whose RHEL9 minor version is not newer than the host's,
+  because a binary built against a newer glibc or libstdc++ may not start on an
+  older host. The RHEL packages the software uses (opencv, gdal, Qt5, …) must
+  be installed on the host too.
 
 Gotcha: `onnxruntime_c_api.h` defines a macro `NO_EXCEPTION`, which breaks
 TAO's `CORBA::exception_type` enum (`tao/Exception.h`). Keep onnxruntime and
@@ -732,6 +778,14 @@ packages the UBI image lacks (opencv etc.) — use `build-ide.sh /opt/kide`
 there to skip the package step):
 
     docker run --rm -it --network=none -v "$PWD:/src:ro" kreatos-ide-rhel9-test /src/install.sh
+
+`test/prodsim/run.sh` tests the container workflow with a stand-in for the
+prod software (`test/prodsim`): IDL compiler on TAO's front end, CORBA, DDS,
+GDAL, onnxruntime, RapidJSON and an OpenGL viewer. It builds the dist
+libraries and the project in the kide image into a test workspace, then runs
+the pipeline in `prodsim-host`, a RHEL9 container with only the runtime RPMs,
+and checks the report and a screenshot of the viewer. See
+[test/prodsim/README.md](test/prodsim/README.md).
 
 <!-- inventory:start -->
 

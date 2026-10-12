@@ -1,0 +1,22 @@
+// DDS topics of the prodsim pipeline: prodsim-sensor publishes Detection,
+// prodsim-tracker turns them into Track, prodsim-viewer draws them.
+module ProdSim {
+  @topic
+  struct Detection {
+    @key unsigned long tile;     // tile index in the image
+    unsigned long frame;
+    double x;                    // georeferenced tile centre (GDAL geotransform)
+    double y;
+    float confidence;            // onnxruntime model output
+  };
+
+  @topic
+  struct Track {
+    @key unsigned long track_id;
+    unsigned long hits;
+    unsigned long last_frame;
+    double x;
+    double y;
+    float confidence;
+  };
+};

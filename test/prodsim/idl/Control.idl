@@ -1,0 +1,12 @@
+// CORBA control interface of the prodsim pipeline, served by prodsim-control
+// (TAO). The other programs read its IOR from prodsim-control.ior.
+module ProdSim {
+  interface TrackerControl {
+    // detection threshold the sensor applies to the model output
+    float threshold();
+    void set_threshold(in float value);
+    // false once stop() was called (the viewer calls it when it is done)
+    boolean running();
+    void stop();
+  };
+};

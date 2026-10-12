@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# prodsim-demo [--frames N --screenshot FILE.ppm] — run the whole prodsim
+# pipeline from its install prefix (PREFIX/bin), on the host or in a container:
+# control (CORBA) -> tracker + viewer (DDS) -> sensor (GDAL + onnxruntime ->
+# DDS). Without arguments the viewer window stays until you close it; with
+# --frames it renders N frames, saves a screenshot and the pipeline stops.
+# Files (IOR, sample.vrt + .raw, prodsim-report.json, logs) go to
+# $PRODSIM_RUN_DIR, default ./prodsim-run.
+set -euo pipefail
+
+bin=$(dirname "$(readlink -f "$0")")
+export PRODSIM_RUN_DIR=$(realpath -m "${PRODSIM_RUN_DIR:-prodsim-run}")
+mkdir -p "$PRODSIM_RUN_DIR"
+rm -f "$PRODSIM_RUN_DIR"/prodsim-control.ior "$PRODSIM_RUN_DIR"/prodsim-report.json
+cd "$PRODSIM_RUN_DIR"
+
+pids=()
+cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null || true; done; }
+trap cleanup EXIT
+
+"$bin/prodsim-sensor" --make-sample sample.vrt
+"$bin/prodsim-control" >control.log 2>&1 &
+pids+=($!)
+"$bin/prodsim-tracker" >tracker.log 2>&1 &
+tracker=$!
+pids+=($tracker)
+"$bin/prodsim-sensor" --image sample.vrt >sensor.log 2>&1 &
+sensor=$!
+pids+=($sensor)
+
+viewer_status=0
+"$bin/prodsim-viewer" "$@" 2>&1 | tee viewer.log || viewer_status=$?
+
+status=0
+wait "$tracker" || status=$?
+wait "$sensor" || status=$?
+cat control.log sensor.log tracker.log
+if [ "$viewer_status" != 0 ] || [ "$status" != 0 ]; then
+  echo "prodsim-demo: FAILED (viewer $viewer_status, others $status)" >&2
+  exit 1
+fi
+echo "prodsim-demo: ok, report in $PRODSIM_RUN_DIR/prodsim-report.json"

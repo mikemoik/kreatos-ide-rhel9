@@ -1,19 +1,26 @@
 #!/usr/bin/env bash
 # build-dist.sh [PREFIX] — offline build of the C/C++ libraries from dist/
-# (manifest/dist.tsv) into PREFIX (default ~/.local/kreatos-ide), no network:
+# (manifest/dist.tsv) into PREFIX (default $KIDE_DIST_PREFIX, else
+# ~/.local/kreatos-ide), no network:
 #   PREFIX/bin/{cmake,ctest,cpack}    CMake 4 (upstream's prebuilt)
 #   PREFIX/{include,lib64}            onnxruntime (upstream's prebuilt)
 #   PREFIX/{bin,include,lib,share}    ACE+TAO 8 + OpenDDS 3.34 built from source
 #   PREFIX/share/tao/TAO_IDL/{include,be_include}  TAO_IDL headers (from source)
-# Separate from build-ide.sh (the IDE): install.sh and test/run.sh run both,
-# podman/Containerfile runs them as separate layers, devcontainer/Containerfile
-# only this one. Needs gcc/g++, make, perl, perl-Dumpvalue and bzip2. Intermediate
-# files go to $KIDE_BUILD_DIR (default: $TMPDIR/kide-build); JOBS (default
-# nproc) parallel make jobs.
+#   PREFIX/bin/kide-dist-env.{sh,fish}  sets the environment for all of the above
+#                                     (source it; finds PREFIX from its own path)
+# Separate from build-ide.sh (the IDE): install.sh and test/run.sh run both.
+# The container images (podman/, devcontainer/) do not run it at build time:
+# they ship it with dist/ in /opt/kide/dist (on PATH as build-dist.sh) and
+# KIDE_DIST_PREFIX=/workspace/kide-dist, so it is run once inside the
+# container and installs into the mounted ~/workspace/kide-dist, where the
+# host can use the result.
+# Needs gcc/g++, make, perl, perl-Dumpvalue and bzip2. Intermediate files go
+# to $KIDE_BUILD_DIR (default: $TMPDIR/kide-build); JOBS (default nproc)
+# parallel make jobs.
 set -euo pipefail
 
-ROOT=$(cd "$(dirname "$0")" && pwd)
-PREFIX=$(realpath -m "${1:-$HOME/.local/kreatos-ide}")
+ROOT=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
+PREFIX=$(realpath -m "${1:-${KIDE_DIST_PREFIX:-$HOME/.local/kreatos-ide}}")
 BUILD=$(realpath -m "${KIDE_BUILD_DIR:-${TMPDIR:-/tmp}/kide-build}")
 JOBS=${JOBS:-$(nproc)}
 
@@ -121,3 +128,8 @@ rm -rf "$PREFIX/share/tao/TAO_IDL"
 mkdir -p "$PREFIX/share/tao/TAO_IDL"
 cp -a "$dds/ACE_wrappers/TAO/TAO_IDL/include" "$dds/ACE_wrappers/TAO/TAO_IDL/be_include" \
   "$PREFIX/share/tao/TAO_IDL/"
+
+log "kide-dist-env.sh, kide-dist-env.fish"
+# source one of them (bash, fish) to build against PREFIX or run from it
+install -m 644 "$ROOT/dist-env/kide-dist-env.sh" "$ROOT/dist-env/kide-dist-env.fish" "$PREFIX/bin/"
+log "done: in a shell that was open before, source $PREFIX/bin/kide-dist-env.fish (or .sh in bash); new shells in kide do it themselves"
