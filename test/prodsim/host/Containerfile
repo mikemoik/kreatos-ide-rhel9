@@ -2,7 +2,7 @@
 # kide image (podman/base.conf), but only the runtime RPMs the prodsim
 # programs use: no compiler, no -devel packages, no dist/ libraries (those
 # come from the mounted ~/workspace/kide-dist, built there by build-dist.sh
-# in kide).
+# in ibn-dev).
 # Xvfb + Mesa (llvmpipe) give prodsim-viewer an X display and OpenGL without
 # a GPU. Build from the repo root:
 #   podman build --build-arg-file podman/base.conf -t prodsim-host -f test/prodsim/host/Containerfile .

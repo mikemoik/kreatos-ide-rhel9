@@ -1,0 +1,142 @@
+# ibn-dev: the RHEL9 build environment — the C/C++/Python toolchain, the RHEL
+# libraries projects build against, and build-dist.sh with dist/ for the C/C++
+# libraries dnf does not have (CMake 4, onnxruntime, ACE+TAO + OpenDDS). No
+# IDE: podman/Containerfile.kide adds kide on top of any base, this image
+# included (and this file works on top of kide too: every step here may run
+# on a base that already has it).
+# The base image and its repo setup are not in this file: podman/base.conf
+# (BASE, CONF_DIR, KIDE_USER/KIDE_UID/KIDE_GID, PIP_INDEX_URL), as for kide.
+# Build from the repo root:
+#   podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
+# The C/C++ libraries are not built into the image: run `build-dist.sh` once
+# in the container; it installs them into /workspace/kide-dist, i.e. into the
+# mounted ~/workspace/kide-dist, where the host can use them. A shell (bash):
+#   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" ibn-dev
+# See podman/README.md.
+
+ARG BASE
+# CONF_DIR (podman/base.conf): repos.sh, ubi.repo, pip.conf, uv.toml, pip-server.crt
+ARG CONF_DIR
+
+FROM $BASE
+# Everything up to the USER line at the end runs as root.
+USER root
+# The RHEL packages: gcc/g++, make, cmake, tar/gzip/bzip2 and perl +
+# perl-Dumpvalue (also what build-dist.sh needs; MPC, ACE+TAO/OpenDDS
+# tooling), clangd/clang-format/clang-tidy, gdb, lldb, git, Python 3.12 with
+# numpy and pybind11, opencv, glew, glfw, gdal, Qt5, libtiff. shadow-utils
+# (useradd/usermod) for KIDE_USER below.
+# gdal-devel comes from dist/ (manifest/dist.tsv): Fedora 43's 3.10.3 build,
+# headers/CMake/pkg-config files for the same gdal version as the target's
+# gdal-libs (same libgdal.so.36). It pins gdal-libs = 3.10.3-3.fc43, so
+# rpm --nodeps; skipped when the base already has it.
+ARG CONF_DIR
+COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
+COPY dist/gdal-devel-3.10.3-3.fc43.x86_64.rpm /tmp/
+RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
+        gcc gcc-c++ make cmake clang-tools-extra gdb lldb tar gzip bzip2 \
+        perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
+        python3.12-pybind11 python3.12-pybind11-devel \
+        opencv-devel glew-devel glfw glfw-devel \
+        gdal gdal-libs qt5 libtiff libtiff-devel \
+    && dnf clean all \
+    && { rpm -q gdal-devel >/dev/null || rpm -i --nodeps /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm; } \
+    && rm /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm
+# pip-server.crt is the pip server's certificate (or the company CA that signed
+# it; PEM, no private key; the repo has a dummy). It goes into the system trust
+# store, so every user and tool trusts the pip repo, at build time and runtime:
+# pip through cert = the system bundle (/etc/pip.conf), uv through
+# system-certs = true (/etc/uv/uv.toml).
+COPY $CONF_DIR/pip-server.crt /tmp/pip-server.crt
+RUN set -e; \
+    grep -q -- '-----BEGIN CERTIFICATE-----' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must be a PEM certificate (BEGIN CERTIFICATE)" >&2; exit 1; }; \
+    ! grep -q 'PRIVATE KEY' /tmp/pip-server.crt \
+      || { echo "pip-server.crt must not contain a private key (it goes into the trust store)" >&2; exit 1; }; \
+    sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /tmp/pip-server.crt \
+      >/etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    chmod 644 /etc/pki/ca-trust/source/anchors/pip-server.crt; \
+    rm /tmp/pip-server.crt; \
+    update-ca-trust
+# pip and uv config, system-wide for every user (uv does not read pip.conf).
+# Both are templates: @PIP_INDEX_URL@ becomes PIP_INDEX_URL from
+# podman/base.conf (the pip package repo).
+ARG PIP_INDEX_URL
+COPY $CONF_DIR/pip.conf /etc/pip.conf
+COPY $CONF_DIR/uv.toml /etc/uv/uv.toml
+RUN set -e; \
+    [ -n "$PIP_INDEX_URL" ] || { echo "PIP_INDEX_URL is not set (podman/base.conf)" >&2; exit 1; }; \
+    url=$(printf '%s' "$PIP_INDEX_URL" | sed 's/[&|\\]/\\&/g'); \
+    sed -i "s|@PIP_INDEX_URL@|$url|g" /etc/pip.conf /etc/uv/uv.toml; \
+    ! grep -n '@[A-Z_]*@' /etc/pip.conf /etc/uv/uv.toml \
+      || { echo "unreplaced placeholder in pip.conf/uv.toml (above)" >&2; exit 1; }; \
+    chmod 644 /etc/pip.conf /etc/uv/uv.toml; \
+    echo "pip and uv use $PIP_INDEX_URL"
+# git trusts every repo (/etc/gitconfig): mounted projects are owned by whatever
+# uid the user namespace maps the host owner to, which often isn't the
+# container user (no or another --userns, files of another host user, --user
+# root), and git then refuses with "dubious ownership". The check guards
+# against other users' repos on a shared machine, which a container doesn't have.
+RUN git config --system --replace-all safe.directory '*'
+# The C/C++ libraries (CMake 4, onnxruntime, ACE+TAO + OpenDDS) are not in the
+# image: build-dist.sh and dist/ are, in /opt/kide/dist. Run once in the
+# container, `build-dist.sh` (PREFIX = KIDE_DIST_PREFIX below) builds them
+# into /workspace/kide-dist/{bin,include,lib,lib64,share}, i.e. into the
+# host's ~/workspace/kide-dist, where they stay for later containers and for
+# the host; with them PREFIX/bin/kide-dist-env.{sh,fish}, which set the
+# environment (bash below and kide's fish config source them).
+COPY build-dist.sh /opt/kide/dist/
+COPY dist-env /opt/kide/dist/dist-env
+COPY manifest/dist.tsv /opt/kide/dist/manifest/dist.tsv
+COPY dist /opt/kide/dist/dist
+RUN ln -sf /opt/kide/dist/build-dist.sh /usr/local/bin/build-dist.sh
+# KIDE_DIST_PREFIX: build-dist.sh's default PREFIX, and where the shells look
+# for kide-dist-env.*. PATH (CMake 4, tao_idl, opendds_idl, … ahead of RHEL's),
+# PKG_CONFIG_PATH (ACE, TAO, TAO_*, libonnxruntime; RHEL's default is only
+# /usr/lib64/pkgconfig:/usr/share/pkgconfig) and LD_LIBRARY_PATH (also for
+# binaries built without an RPATH; not ld.so.conf.d: the libraries only appear
+# at run time in the mount, after ldconfig could run) are set here as well,
+# for programs not started from a shell.
+ENV KIDE_DIST_PREFIX=/workspace/kide-dist \
+    PATH=/workspace/kide-dist/bin:$PATH \
+    PKG_CONFIG_PATH=/workspace/kide-dist/lib/pkgconfig:/workspace/kide-dist/lib64/pkgconfig \
+    LD_LIBRARY_PATH=/workspace/kide-dist/lib:/workspace/kide-dist/lib64
+# KIDE_USER (podman/base.conf): the user the image runs as. Taken from the base
+# image if it has it (e.g. "default" in Red Hat's application images, or kide's),
+# otherwise created with KIDE_UID/KIDE_GID. Its login shell becomes bash unless
+# the base made it fish (kide). Its ~/.bashrc and root's get, once each: ~/.local/bin
+# (pip and uv) on PATH, kide-dist-env.sh once build-dist.sh has installed it
+# (CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH, LIBRARY_PATH, ACE_ROOT, …), and the
+# host's proxy variables unset (fallback for --http-proxy=false; podman build
+# still passes them to the RUN steps, so dnf/pip may use them).
+# /workspace is the WORKDIR, a plain directory owned by KIDE_USER: the mount
+# point for the host's ~/workspace (podman run -v "$HOME/workspace:/workspace:Z").
+ARG KIDE_USER
+ARG KIDE_UID
+ARG KIDE_GID
+RUN set -e; \
+    if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
+      getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
+      useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
+    fi; \
+    case $(getent passwd "$KIDE_USER" | cut -d: -f7) in */fish) ;; *) usermod -s /bin/bash "$KIDE_USER" ;; esac; \
+    home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
+    group=$(id -g "$KIDE_USER"); \
+    for rc in "$home/.bashrc" /root/.bashrc; do \
+      for line in 'PATH="$HOME/.local/bin:$PATH"' \
+          '[ -f "$KIDE_DIST_PREFIX/bin/kide-dist-env.sh" ] && . "$KIDE_DIST_PREFIX/bin/kide-dist-env.sh"' \
+          'unset http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY'; do \
+        grep -qxF -- "$line" "$rc" 2>/dev/null || printf '%s\n' "$line" >>"$rc"; \
+      done; \
+    done; \
+    mkdir -p /workspace; \
+    chown "$KIDE_USER:$group" "$home" "$home/.bashrc" /workspace
+USER $KIDE_USER
+# as KIDE_USER: the newest pip and uv for Python 3.12 into its ~/.local
+# (pip install --user, with /etc/pip.conf: company repo, trusted via pip-server.crt);
+# root installs nothing with pip. /usr/bin/python3.12, the dnf one: a base
+# image may put a venv's python first on PATH (e.g. /opt/app-root in Red Hat's
+# Python images), and pip refuses --user inside a venv.
+RUN /usr/bin/python3.12 -m pip install --user --no-cache-dir --upgrade pip uv
+WORKDIR /workspace

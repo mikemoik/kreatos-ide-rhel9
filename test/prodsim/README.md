@@ -22,11 +22,12 @@ for plain link names (`CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`), and
 
 ## Run
 
-    test/prodsim/run.sh           # build in kide, run on prodsim-host under Xvfb, check
+    test/prodsim/run.sh           # build in ibn-dev, run on prodsim-host under Xvfb, check
     test/prodsim/run.sh --show    # the same, but the viewer opens on your display
 
-`run.sh` needs the kide image from this checkout (`podman/Containerfile`,
-with `build-dist.sh` in `/opt/kide/dist`). The workspace is
+`run.sh` needs the ibn-dev image from this checkout
+(`podman/Containerfile.ibn-dev`, with `build-dist.sh` in `/opt/kide/dist`;
+`IBN_DEV_IMAGE=kide` uses kide built on top of it instead). The workspace is
 `$PRODSIM_WORKSPACE` (default `~/.cache/prodsim-workspace`, not your
 `~/workspace`); `build-dist.sh` runs only when `kide-dist/` is not there yet
 (~7 min the first time).
@@ -38,7 +39,8 @@ has an unresolved library, i.e. if the `$ORIGIN` RPATH
 (`$ORIGIN/../lib;$ORIGIN/../kide-dist/lib;$ORIGIN/../kide-dist/lib64`) does
 not reach them.
 
-By hand, inside kide (fish):
+By hand, inside kide (fish; in ibn-dev's bash: `. …/kide-dist-env.sh` and
+`-j "$(nproc)"`):
 
     build-dist.sh                          # once, into /workspace/kide-dist
     source /workspace/kide-dist/bin/kide-dist-env.fish  # only in a shell opened before

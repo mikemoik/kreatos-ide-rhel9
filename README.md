@@ -116,14 +116,22 @@ Updating offline: bring over a new tarball, unpack it, and run `./install.sh`
 
 ### In a podman container
 
-No install on the host at all, only podman: `podman/Containerfile` builds a
-Rocky Linux 9 image (RHEL9-compatible; UBI9 lacks what the EPEL packages
-need) with kide in `/opt/kide`, the RHEL packages it uses, `build-dist.sh`
-for the [C/C++ libraries](#cc-libraries) (run once in the container, it
-installs them into the mounted `~/workspace/kide-dist`), and the newest pip plus uv for Python 3.12
-(details and limits: [podman/README.md](podman/README.md)).
+No install on the host at all, only podman. Two images, each built on top of
+a base image (default Rocky Linux 9, RHEL9-compatible; UBI9 lacks what the
+EPEL packages need):
 
-Build the image (~5–10 min). The build does not use the tarball itself: it
+- **ibn-dev** (`podman/Containerfile.ibn-dev`): the build environment. The
+  RHEL toolchain and libraries, `build-dist.sh` for the
+  [C/C++ libraries](#cc-libraries) (run once in the container, it installs
+  them into the mounted `~/workspace/kide-dist`), and the newest pip plus uv
+  for Python 3.12. bash is the shell.
+- **kide** (`podman/Containerfile.kide`): the IDE in `/opt/kide` and the few
+  RHEL packages it uses, with fish. Built on top of ibn-dev, it is the
+  complete environment; built on the plain base, only the IDE.
+
+Details and limits: [podman/README.md](podman/README.md).
+
+Build both (ibn-dev: a few minutes, mostly dnf; kide: ~5–10 min). The build does not use the tarball itself: it
 copies the repo **directory** you point it at into the image (`COPY . /src`)
 and runs `build-ide.sh` there. The last argument of `podman build` is that
 directory (the "build context"); `-f` names the Containerfile inside it.
@@ -135,16 +143,18 @@ Two ways to give it the repo:
 
       tar -xzf kreatos-ide-rhel9-main.tar.gz
       cd kreatos-ide-rhel9-main*/
-      podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
+      podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
+      podman build --build-arg-file podman/base.conf --build-arg BASE=localhost/ibn-dev -t kide -f podman/Containerfile.kide .
 
   Run from anywhere else, give the path instead of `.`:
-  `podman build --build-arg-file ~/kreatos-ide-rhel9/podman/base.conf -t kide -f ~/kreatos-ide-rhel9/podman/Containerfile ~/kreatos-ide-rhel9` (with the tree unpacked to `~/kreatos-ide-rhel9`).
+  `podman build --build-arg-file ~/kreatos-ide-rhel9/podman/base.conf -t ibn-dev -f ~/kreatos-ide-rhel9/podman/Containerfile.ibn-dev ~/kreatos-ide-rhel9`, likewise for kide (with the tree unpacked to `~/kreatos-ide-rhel9`).
   The directory is only read and can be deleted once the image is built.
 
 - **Straight from GitLab** (no tarball, no checkout; podman clones the repo
   itself; public project only):
 
-      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://gitlab.com/kreatos/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t ibn-dev -f podman/Containerfile.ibn-dev https://gitlab.com/kreatos/kreatos-ide-rhel9.git
+      podman build --build-arg BASE=localhost/ibn-dev --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile.kide https://gitlab.com/kreatos/kreatos-ide-rhel9.git
 
   (the arg file is local, so the base image is given directly)
 
@@ -468,7 +478,7 @@ fish one when it exists. `build-dist.sh` removes the build-tree
 paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
 the package resolves to `PREFIX`.
 
-In the container images (kide, kide-dev) the libraries are not built into
+In the container images (ibn-dev, and kide and kide-dev on top of it) the libraries are not built into
 the image. `build-dist.sh` and `dist/` are shipped in `/opt/kide/dist` instead
 (`build-dist.sh` is on `PATH`), and `KIDE_DIST_PREFIX=/workspace/kide-dist`
 is its default `PREFIX`. Run it once inside the container (~7 min):
@@ -652,8 +662,8 @@ The offline tarball install works the same with a tarball from GitLab
 unpacks to `kreatos-ide-rhel9-main-<commit>/` instead of
 `kreatos-ide-rhel9-main/`, so `cd kreatos-ide-rhel9-main*/`.
 
-**Podman image** from the GitLab: build from the clone (`podman build --build-arg-file podman/base.conf -t kide
--f podman/Containerfile .` in it), as described in
+**Podman images** from the GitLab: build from the clone (the two
+`podman build` commands, ibn-dev then kide, in it), as described in
 [In a podman container](#in-a-podman-container). Building straight from the
 URL only works for a project readable without login.
 
@@ -770,7 +780,7 @@ project that finds onnxruntime and OpenDDS, generates code from an IDL file
 (tao_idl + opendds_idl) and links both; it runs, and `tao_idl` and
 `opendds_idl` still start once the build directory is gone. The RHEL/EPEL
 packages and pip/uv are not in the UBI test image (UBI cannot install the
-EPEL ones); building `podman/Containerfile` covers them.
+EPEL ones); building `podman/Containerfile.ibn-dev` covers them.
 
 To try the install by hand in the same container (the container and its
 install are gone on exit; without network, `install.sh` stops at the CRB/EPEL

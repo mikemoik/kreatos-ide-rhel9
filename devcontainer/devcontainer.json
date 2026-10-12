@@ -1,5 +1,6 @@
 // Template: copy to <project>/.devcontainer/devcontainer.json.
-// Image: kide-dev (devcontainer/Containerfile), built once with
+// Image: kide-dev (devcontainer/Containerfile, on top of ibn-dev), built once with
+//   podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
 //   podman build --build-arg-file podman/base.conf -t kide-dev -f devcontainer/Containerfile .
 // VS Code needs "dev.containers.dockerPath": "podman". uid/gid 1001 and the
 // user "default" are KIDE_UID/KIDE_GID/KIDE_USER from podman/base.conf.

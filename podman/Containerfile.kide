@@ -1,0 +1,135 @@
+# kide in a RHEL9-compatible container — no install on the host, only podman.
+# The IDE only (nvim, yazi, fish, tmux, lazygit, …, built by build-ide.sh into
+# /opt/kide) on top of BASE. The build environment (compilers, RHEL libraries,
+# build-dist.sh) is the separate image ibn-dev (podman/Containerfile.ibn-dev);
+# kide with it is kide built on top of ibn-dev:
+#   podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
+#   podman build --build-arg-file podman/base.conf --build-arg BASE=localhost/ibn-dev -t kide -f podman/Containerfile.kide .
+# With base.conf's BASE alone (plain Rocky Linux 9) it is the IDE without the
+# build environment. Every step here may run on a base that already has it.
+# The base image and its repo setup are not in this file: podman/base.conf
+# (BASE=…, default Rocky Linux 9; CONF_DIR=…, default podman/conf with
+# repos.sh (default: CRB + EPEL, standing in for the RHEL9 target's own dnf
+# repos), ubi.repo, pip.conf, uv.toml, pip-server.crt; KIDE_USER/KIDE_UID/KIDE_GID, the
+# user the image runs as). Replace those for another base; this file stays as
+# it is.
+# Without a checkout, straight from GitHub (the default base, no arg file):
+#   podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile.kide https://github.com/kreatos/kreatos-ide-rhel9.git
+# Every step that installs or writes system files runs as root (USER root, also
+# when the base image defaults to another user); the image runs as KIDE_USER.
+# Start it with podman/start.sh [--shell] [FILE…], which runs rootless podman,
+# mapping you on the host to that user, so files in the mounted ~/workspace
+# stay yours:
+#   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide kide [FILE…]
+# A shell (fish, with the IDE's aliases from fish/):
+#   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" -v kide-data:/var/lib/kide --entrypoint fish kide
+# See podman/README.md.
+
+ARG BASE
+# CONF_DIR (podman/base.conf): repos.sh, ubi.repo, …
+ARG CONF_DIR
+
+# --- build: the RHEL9 toolchain + build-ide.sh (as test/run.sh) ---------------
+FROM $BASE AS build
+USER root
+ARG CONF_DIR
+COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
+RUN /tmp/repos.sh && dnf -y install gcc make cmake python3 rust-toolset golang findutils diffutils \
+        git-core file gcc-c++ clang-tools-extra gdb lldb libevent-devel ncurses-devel \
+    && dnf clean all
+# Two layers, so that a change rebuilds only what depends on it.
+# 1. IDE compile: nvim, parsers, tools (build-ide.sh from vendor/, manifest/,
+#    scripts/). Reused until one of them changes.
+#    The config dirs are empty here; build-ide.sh still copies them.
+COPY build-ide.sh /src/
+COPY manifest /src/manifest
+COPY scripts /src/scripts
+COPY vendor /src/vendor
+RUN mkdir -p /src/config /src/yazi /src/fish && /src/build-ide.sh /opt/kide
+# 2. config: nvim, yazi and fish config, plugins, launcher (build-ide.sh --no-build)
+COPY config /src/config
+COPY yazi /src/yazi
+COPY fish /src/fish
+RUN /src/build-ide.sh --no-build /opt/kide
+
+# --- runtime: kide + the RHEL packages it uses, no Rust/Go toolchain ---------
+FROM $BASE
+# Everything up to the USER line at the end runs as root.
+USER root
+# python3 (kide-python, debugpy), git (gitsigns, lazygit), file (yazi), the
+# C/C++ tools kide uses from RHEL (clangd/clang-format/clang-tidy, gdb,
+# lldb-dap), shadow-utils (useradd/usermod) for KIDE_USER below. tmux is built
+# by build-ide.sh; its libevent and ncurses-libs are in the base image.
+ARG CONF_DIR
+COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
+COPY $CONF_DIR/repos.sh /tmp/repos.sh
+RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
+        clang-tools-extra gdb lldb \
+    && dnf clean all
+COPY --from=build /opt/kide /opt/kide
+# git trusts every repo (see podman/Containerfile.ibn-dev)
+RUN git config --system --replace-all safe.directory '*'
+# tmux (built by build-ide.sh) reads /etc/tmux.conf first: mouse on, so a click
+# selects a pane, dragging a border resizes, the wheel scrolls. Last, your own
+# tmux config from the mounted workspace, if present (host:
+# ~/workspace/.container/tmux.conf); -q: no error when it is missing.
+RUN printf '%s\n' 'set -g mouse on' 'source-file -q /workspace/.container/tmux.conf' >/etc/tmux.conf
+# what PREFIX/bashrc does on an install. On top of ibn-dev, the fish config
+# sources kide-dist-env.fish from its KIDE_DIST_PREFIX (/workspace/kide-dist)
+# once build-dist.sh has installed it; without ibn-dev there is none.
+ENV PATH=/opt/kide/bin:$PATH \
+    YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
+# fish is the default shell: $SHELL (nvim's :terminal and terminal windows,
+# lazygit, yazi) and the login shell of KIDE_USER and root. Its config is the
+# bundled one (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME,
+# aliases, kide-dist-env.fish); bash stays as a fallback (--entrypoint bash)
+# and sources /opt/kide/bashrc (ibn-dev's bash lines add kide-dist-env.sh).
+ENV SHELL=/opt/kide/bin/fish
+RUN set -e; \
+    grep -qxF /opt/kide/bin/fish /etc/shells || echo /opt/kide/bin/fish >>/etc/shells; \
+    usermod -s /opt/kide/bin/fish root; \
+    mkdir -p /root/.config/fish; \
+    echo 'source /opt/kide/share/kreatos-ide/fish/config.fish' >/root/.config/fish/config.fish; \
+    grep -qxF '. /opt/kide/bashrc' /root/.bashrc 2>/dev/null || echo '. /opt/kide/bashrc' >>/root/.bashrc
+# kide's data and state (nvim undo/shada/swap, fish history, lazygit and yazi
+# state) live under /var/lib/kide instead of ~/.local, so the kide-data volume
+# has the same mount point whatever KIDE_USER's home is.
+ENV XDG_DATA_HOME=/var/lib/kide/share \
+    XDG_STATE_HOME=/var/lib/kide/state
+# KIDE_USER (podman/base.conf): the user the image runs as. Taken from the base
+# image if it has it (e.g. "default" in Red Hat's application images, or
+# ibn-dev's), otherwise created with KIDE_UID/KIDE_GID. Gets fish as login
+# shell and the fish and bash config (with ~/.local/bin, where ibn-dev's pip
+# and uv go, on PATH), owns /var/lib/kide.
+# No proxy at runtime: the run commands pass --http-proxy=false, and as a
+# fallback the fish config of KIDE_USER and root unsets the proxy variables
+# (podman build still passes them to the RUN steps, so dnf/pip may use them).
+# /workspace is the WORKDIR, a plain directory owned by KIDE_USER: the mount
+# point for the host's ~/workspace (podman run -v "$HOME/workspace:/workspace:Z").
+# fish sources every *.fish in /workspace/.container/fish/ (on the host:
+# ~/workspace/.container/fish/) last, in name order; none: nothing happens.
+ARG KIDE_USER
+ARG KIDE_UID
+ARG KIDE_GID
+RUN set -e; \
+    noproxy='set -e http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY'; \
+    echo "$noproxy" >>/root/.config/fish/config.fish; \
+    if ! id -u "$KIDE_USER" >/dev/null 2>&1; then \
+      getent group "$KIDE_GID" >/dev/null || groupadd -g "$KIDE_GID" "$KIDE_USER"; \
+      useradd -m -u "$KIDE_UID" -g "$KIDE_GID" "$KIDE_USER"; \
+    fi; \
+    usermod -s /opt/kide/bin/fish "$KIDE_USER"; \
+    home=$(getent passwd "$KIDE_USER" | cut -d: -f6); \
+    group=$(id -g "$KIDE_USER"); \
+    mkdir -p "$home/.config/fish" /var/lib/kide/share /var/lib/kide/state /workspace; \
+    printf '%s\n' 'fish_add_path -g ~/.local/bin' 'source /opt/kide/share/kreatos-ide/fish/config.fish' \
+      "$noproxy" 'for f in /workspace/.container/fish/*.fish; source $f; end' >"$home/.config/fish/config.fish"; \
+    for line in 'PATH="$HOME/.local/bin:$PATH"' '. /opt/kide/bashrc'; do \
+      grep -qxF -- "$line" "$home/.bashrc" 2>/dev/null || printf '%s\n' "$line" >>"$home/.bashrc"; \
+    done; \
+    chown "$KIDE_USER:$group" "$home" "$home/.bashrc"; \
+    chown -R "$KIDE_USER:$group" "$home/.config" /workspace /var/lib/kide
+USER $KIDE_USER
+WORKDIR /workspace
+ENTRYPOINT ["kide"]

@@ -1,4 +1,4 @@
-# uv's system-wide config, copied to /etc/uv/uv.toml (podman/Containerfile).
+# uv's system-wide config, copied to /etc/uv/uv.toml (podman/Containerfile.ibn-dev).
 # uv does not read pip.conf: the pip package repo is set here too.
 # The index URL below is a placeholder (PIP_INDEX_URL between @ signs); the
 # build replaces it with PIP_INDEX_URL from

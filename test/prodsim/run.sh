@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # test/prodsim/run.sh [--show] — the prod workflow end to end, with prodsim
 # standing in for the prod software:
-#   1. kide container (image $KIDE_IMAGE, default kide): build-dist.sh into
-#      /workspace/kide-dist (skipped when already there), then, with
-#      kide-dist-env.fish sourced, build prodsim and install it to /workspace
+#   1. build container (image $IBN_DEV_IMAGE, default ibn-dev; kide, built on
+#      top of it, works too): build-dist.sh into /workspace/kide-dist (skipped
+#      when already there), then, with kide-dist-env.sh sourced, build prodsim
+#      and install it to /workspace
 #   2. prodsim-host container (test/prodsim/host/Containerfile: runtime RPMs
 #      only, no compiler, no dist/ libraries): prodsim-demo from /workspace/bin,
 #      no LD_LIBRARY_PATH, viewer under Xvfb, 120 frames + screenshot
@@ -12,11 +13,11 @@
 # ~/.cache/prodsim-workspace; not ~/workspace), on /workspace.
 # --show: step 2 opens the viewer on your display instead (X11/XWayland,
 # DISPLAY and /tmp/.X11-unix), until you close the window.
-# Needs the kide image built from this checkout (with /opt/kide/dist).
+# Needs the ibn-dev image built from this checkout (podman/Containerfile.ibn-dev).
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-KIDE_IMAGE=${KIDE_IMAGE:-kide}
+IBN_DEV_IMAGE=${IBN_DEV_IMAGE:-ibn-dev}
 WS=${PRODSIM_WORKSPACE:-$HOME/.cache/prodsim-workspace}
 SHOW=0
 [ "${1:-}" = --show ] && SHOW=1
@@ -26,20 +27,19 @@ gid=$(sed -n 's/^KIDE_GID=//p' "$ROOT/podman/base.conf")
 mkdir -p "$WS"
 run=(podman run --rm --http-proxy=false --userns="keep-id:uid=$uid,gid=$gid" -v "$WS:/workspace:Z")
 
-echo "==> 1. kide: build-dist.sh + prodsim into $WS"
-# kide-dist-env.fish: TAO_ROOT, CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH and
-# LIBRARY_PATH (prodsim-idlc links plain -lACE as prod does). Sourced
-# explicitly: the fish config only does so when it exists at shell start.
-"${run[@]}" -v "$ROOT/test/prodsim:/src/prodsim:ro,Z" --entrypoint fish "$KIDE_IMAGE" -c '
-  if not test -e /workspace/kide-dist/lib/libOpenDDS_Dcps.so
-    build-dist.sh; or exit 1
+echo "==> 1. $IBN_DEV_IMAGE: build-dist.sh + prodsim into $WS"
+# kide-dist-env.sh: TAO_ROOT, CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH and
+# LIBRARY_PATH (prodsim-idlc links plain -lACE as prod does)
+"${run[@]}" -v "$ROOT/test/prodsim:/src/prodsim:ro,Z" --entrypoint bash "$IBN_DEV_IMAGE" -euc '
+  if [ ! -e /workspace/kide-dist/lib/libOpenDDS_Dcps.so ]; then
+    build-dist.sh
   else
     echo "build-dist.sh: already in /workspace/kide-dist (rm -rf it to redo)"
-  end
-  source /workspace/kide-dist/bin/kide-dist-env.fish; or exit 1
-  cmake -S /src/prodsim -B /tmp/prodsim-build -D CMAKE_INSTALL_PREFIX=/workspace; or exit 1
-  cmake --build /tmp/prodsim-build -j (nproc); or exit 1
-  cmake --install /tmp/prodsim-build; or exit 1
+  fi
+  . /workspace/kide-dist/bin/kide-dist-env.sh
+  cmake -S /src/prodsim -B /tmp/prodsim-build -D CMAKE_INSTALL_PREFIX=/workspace
+  cmake --build /tmp/prodsim-build -j "$(nproc)"
+  cmake --install /tmp/prodsim-build
 '
 
 echo "==> 2. prodsim-host: build the image"

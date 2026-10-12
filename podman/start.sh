@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # podman/start.sh [--shell] [FILE…] — start the kide container (image `kide`,
-# podman/Containerfile) on your ~/workspace.
+# podman/Containerfile.kide) on your ~/workspace.
 #
 # The host's ~/workspace (created if missing) is mounted on the container's
 # WORKDIR /workspace; FILE arguments are relative to it. --shell starts fish

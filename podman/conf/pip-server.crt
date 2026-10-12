@@ -2,7 +2,7 @@
 # (its key was thrown away) so the build has something to add.
 # On prod, replace this file with the pip server's certificate or the company
 # CA that signed it (PEM, BEGIN CERTIFICATE, no private key).
-# podman/Containerfile adds it to the system trust store (update-ca-trust).
+# podman/Containerfile.ibn-dev adds it to the system trust store (update-ca-trust).
 -----BEGIN CERTIFICATE-----
 MIIDXzCCAkegAwIBAgIUP9lCO9fnDkt3DpZXxspYH6M9gDwwDQYJKoZIhvcNAQEL
 BQAwPjE8MDoGA1UEAwwza2lkZSBkdW1teSBwaXAgc2VydmVyIGNlcnRpZmljYXRl

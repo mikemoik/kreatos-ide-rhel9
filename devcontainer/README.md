@@ -1,10 +1,12 @@
 # kide-dev: a VS Code dev container
 
-The toolchain of the kide podman image (`podman/Containerfile`) without
-the terminal IDE, for VS Code's Dev Containers extension with podman. VS Code
-is the editor and bash is the shell.
+The ibn-dev build environment (`podman/Containerfile.ibn-dev`, see
+[podman/README.md](../podman/README.md)) without the terminal IDE, for VS
+Code's Dev Containers extension with podman. VS Code is the editor and bash
+is the shell. `devcontainer/Containerfile` is a thin layer on top of ibn-dev:
+it only adds `~/.vscode-server`, owned by `KIDE_USER`, for the volume below.
 
-What is in it, the same as in `kide`:
+What is in it, all from ibn-dev:
 
 - the RHEL9 packages: gcc/g++, make, cmake, clangd/clang-format/clang-tidy,
   gdb, lldb (`lldb-dap`), git, perl + perl-Dumpvalue, Python 3.12 with numpy
@@ -14,7 +16,7 @@ What is in it, the same as in `kide`:
   the container, it builds CMake 4 (ahead of RHEL's on `PATH`), onnxruntime,
   ACE+TAO 8 + OpenDDS 3.34 (`tao_idl`, `opendds_idl`, `find_package(OpenDDS)`)
   into `/workspace/kide-dist/{bin,include,lib,lib64,share}`, that is, into
-  `kide-dist/` in the mounted project on the host (as in the kide image);
+  `kide-dist/` in the mounted project on the host;
   found by the dynamic linker through `LD_LIBRARY_PATH`, and by pkg-config
   (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`) through `PKG_CONFIG_PATH`;
   `~/.bashrc` sources `kide-dist/bin/kide-dist-env.sh` (`CMAKE_PREFIX_PATH`,
@@ -23,18 +25,22 @@ What is in it, the same as in `kide`:
   in `KIDE_USER`'s `~/.local`
 - `safe.directory = *` for git
 
-Left out: nvim/kide, yazi, fish, tmux, fd, fzf, lazygit, ruff/ty,
-neocmakelsp, shfmt, debugpy. With them gone, the build stage needs no Rust
-or Go and the image has no `kide-data` volume. It has a single stage, and the
-ACE+TAO/OpenDDS compile (~7 min) happens later, in the container
-(`build-dist.sh`).
+Left out: kide (`podman/Containerfile.kide`: nvim, yazi, fish, tmux, fd,
+fzf, lazygit, ruff/ty, neocmakelsp, shfmt, debugpy), so no Rust or Go build
+and no `kide-data` volume. The ACE+TAO/OpenDDS compile (~7 min) happens
+later, in the container (`build-dist.sh`).
 
 ## Build
 
-From the repo root, with the same `podman/base.conf` as the kide image
-(base image, repos, `KIDE_USER`, pip index):
+From the repo root, with the same `podman/base.conf` as ibn-dev and kide
+(`KIDE_USER`; the other args are not used here). ibn-dev first, if it is not
+built yet:
 
+    podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
     podman build --build-arg-file podman/base.conf -t kide-dev -f devcontainer/Containerfile .
+
+`--build-arg IBN_DEV=<image>` builds on another ibn-dev image (default
+`localhost/ibn-dev`).
 
 ## Use
 

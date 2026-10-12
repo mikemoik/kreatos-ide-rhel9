@@ -1,39 +1,58 @@
 # kide in a podman container
 
-kide without installing anything on the host except podman: the image is
-Rocky Linux 9 (RHEL9-compatible) with kide built into `/opt/kide` and the RHEL
-packages it uses (python3, git, file, gcc/g++, make, cmake,
-clangd/clang-format/clang-tidy, gdb, lldb), plus what C/C++ projects build
-against: CMake 4, onnxruntime, ACE+TAO and OpenDDS (`dist/`, built once in
-the container into the mounted `/workspace/kide-dist` with `build-dist.sh`, see
-[Libraries](#libraries-built-into-workspace)), and from AppStream/CRB/EPEL perl + perl-Dumpvalue, Python 3.12 with
-numpy and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5 (`qt5`) and
-libtiff + libtiff-devel, plus
-`gdal-devel` 3.10.3-3.fc43 as an RPM from `dist/`, installed with
-`rpm -i --nodeps` (it pins Fedora's gdal-libs build). pip (newest) and uv for Python 3.12 are
-pip-installed by the image's user (`KIDE_USER`) into its `~/.local`; root
-installs nothing with pip, it only sets up their config and certificate
-system-wide. Not UBI9: UBI lacks packages the EPEL ones
-depend on (Qt5, gdal, protobuf for opencv; GL libraries for glew/glfw).
-The build stage is `build-dist.sh` and `build-ide.sh`, as on a normal install; the Rust and Go
-toolchains stay in the build stage and are not in the final image.
+kide without installing anything on the host except podman, in two images.
+Each is built on top of a base image (`BASE` in `podman/base.conf`, default
+Rocky Linux 9, RHEL9-compatible), and each works on top of the other:
+
+- **ibn-dev** (`Containerfile.ibn-dev`): the build environment. The RHEL
+  packages (gcc/g++, make, cmake, clangd/clang-format/clang-tidy, gdb, lldb,
+  git, perl + perl-Dumpvalue, Python 3.12 with numpy and pybind11, opencv,
+  glew, glfw, gdal + gdal-libs, Qt5 (`qt5`), libtiff + libtiff-devel, from
+  AppStream/CRB/EPEL), `gdal-devel` 3.10.3-3.fc43 as an RPM from `dist/`
+  (installed with `rpm -i --nodeps`, it pins Fedora's gdal-libs build), and
+  what C/C++ projects build against beyond that: CMake 4, onnxruntime,
+  ACE+TAO and OpenDDS (`dist/`, built once in the container into the mounted
+  `/workspace/kide-dist` with `build-dist.sh`, see
+  [Libraries](#libraries-built-into-workspacekide-dist)). pip (newest) and uv
+  for Python 3.12 are pip-installed by the image's user (`KIDE_USER`) into
+  its `~/.local`; root installs nothing with pip, it only sets up their config
+  and certificate system-wide. bash is the shell.
+- **kide** (`Containerfile.kide`): kide built into `/opt/kide` by
+  `build-ide.sh` in a build stage, as on a normal install (the Rust and Go
+  toolchains stay in that stage), and the RHEL packages kide itself uses
+  (python3, git, file, clangd/clang-format/clang-tidy, gdb, lldb). fish is the
+  shell.
+
+kide on top of ibn-dev (`--build-arg BASE=localhost/ibn-dev`) is the
+complete environment: IDE plus build environment. kide on the plain base is
+the IDE alone, and ibn-dev alone is a build environment without the IDE. Each
+Containerfile only adds to its base, so a change to one rebuilds only that
+image (and kide, when ibn-dev changed under it).
+
+Not UBI9: UBI lacks packages the EPEL ones depend on (Qt5, gdal, protobuf for
+opencv; GL libraries for glew/glfw).
 
 ## Build
 
 The last argument of `podman build` is the repo directory (the build
-context); the Containerfile copies all of it into the image and runs
-`build-ide.sh`. From an unpacked tarball or a git checkout, run it in the repo's
-top directory (where `install.sh` and `podman/` are; ~5–10 min):
+context); the Containerfiles copy from it into the image. From an unpacked
+tarball or a git checkout, run them in the repo's top directory (where
+`install.sh` and `podman/` are). ibn-dev first (a few minutes, mostly dnf),
+then kide on top of it (~5–10 min):
 
     tar -xzf kreatos-ide-rhel9-main.tar.gz
     cd kreatos-ide-rhel9-main
-    podman build --build-arg-file podman/base.conf -t kide -f podman/Containerfile .
+    podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
+    podman build --build-arg-file podman/base.conf --build-arg BASE=localhost/ibn-dev -t kide -f podman/Containerfile.kide .
+
+Leave out `--build-arg BASE=…` for kide without the build environment.
 
 Without a checkout, straight from GitHub (no curl needed):
 
-    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t kide -f podman/Containerfile https://github.com/kreatos/kreatos-ide-rhel9.git
+    podman build --build-arg BASE=docker.io/rockylinux/rockylinux:9 --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 --build-arg PIP_INDEX_URL=https://pypi.org/simple -t ibn-dev -f podman/Containerfile.ibn-dev https://github.com/kreatos/kreatos-ide-rhel9.git
+    podman build --build-arg BASE=localhost/ibn-dev --build-arg CONF_DIR=podman/conf --build-arg KIDE_USER=default --build-arg KIDE_UID=1001 --build-arg KIDE_GID=1001 -t kide -f podman/Containerfile.kide https://github.com/kreatos/kreatos-ide-rhel9.git
 
-The build stage has two layers, each reused until its inputs change:
+kide's build stage has two layers, each reused until its inputs change:
 
 1. IDE compile: nvim, parsers, tools (`build-ide.sh`, from `vendor/`,
    `manifest/`, `scripts/`; ~5 min)
@@ -41,11 +60,11 @@ The build stage has two layers, each reused until its inputs change:
 
 A config change rebuilds only layer 2, and an IDE or vendor change rebuilds both.
 The C/C++ libraries are not compiled at image build time (next section);
-`dist/`, `manifest/dist.tsv` and `build-dist.sh` are only copied into the image.
+`dist/`, `manifest/dist.tsv` and `build-dist.sh` are only copied into ibn-dev.
 
 ### Libraries: built into /workspace/kide-dist
 
-The image contains `build-dist.sh` and `dist/` (in `/opt/kide/dist`,
+ibn-dev (and so kide on top of it) contains `build-dist.sh` and `dist/` (in `/opt/kide/dist`,
 `build-dist.sh` on `PATH`), not the built libraries. Run it once in the
 container:
 
@@ -63,9 +82,10 @@ conditions.
 With them it installs `kide-dist/bin/kide-dist-env.fish` and
 `kide-dist-env.sh`, which set the environment for building against the
 libraries (`CMAKE_PREFIX_PATH`, `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`,
-`ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`, …). fish (and bash with `--entrypoint
-bash`) sources them at start; in the shell `build-dist.sh` ran in, source
-`/workspace/kide-dist/bin/kide-dist-env.fish` once by hand. On the host the
+`ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`, …). bash (ibn-dev's shell, and kide's
+with `--entrypoint bash`) and kide's fish source them at start; in the shell
+`build-dist.sh` ran in, source `/workspace/kide-dist/bin/kide-dist-env.sh`
+(bash) or `.fish` once by hand. On the host the
 same files are in `~/workspace/kide-dist/bin`.
 
 `LD_LIBRARY_PATH` is `/workspace/kide-dist/lib:/workspace/kide-dist/lib64`
@@ -80,18 +100,19 @@ mount at run time, too late for `ldconfig`.
 
 ### Another base image
 
-The Containerfile names no base image and sets up no repos itself;
+The Containerfiles name no base image and set up no repos themselves;
 `podman/base.conf` and the files in its `CONF_DIR` do, and only they change for another base (e.g. a company RHEL9 image
 with its own dnf repos):
 
-- `podman/base.conf`: `BASE=<image>`, used by both stages and read with
+- `podman/base.conf`: `BASE=<image>`, the base of ibn-dev (and of kide's
+  two stages when kide is built without ibn-dev), read with
   `--build-arg-file` (podman ≥ 4.7). Default: `docker.io/rockylinux/rockylinux:9`.
   Without the file, `--build-arg BASE=<image>`; with neither, the build stops
   (no default).
 - `CONF_DIR` in `podman/base.conf` (default `podman/conf`, relative to the
   repo root): files copied into the image — `repos.sh` (below), `ubi.repo` to
-  `/etc/yum.repos.d/` (both stages, before any `dnf install`), and in the
-  runtime stage, system-wide as root:
+  `/etc/yum.repos.d/` (every stage, before any `dnf install`), and in
+  ibn-dev, system-wide as root:
   - `pip.conf` to `/etc/pip.conf`: `index-url` (the pip package repo) and
     `cert = /etc/pki/tls/certs/ca-bundle.crt` (the system trust store)
   - `uv.toml` to `/etc/uv/uv.toml`; uv does not read `pip.conf`, so the repo
@@ -117,15 +138,15 @@ with its own dnf repos):
   the pip package repo. `pip.conf` and `uv.toml` are templates; the build
   replaces `@PIP_INDEX_URL@` in both with it (and stops if it is empty). On
   prod set the company repo here, nothing else changes.
-- `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in both stages before any `dnf install`.
+- `$CONF_DIR/repos.sh` (`podman/conf/repos.sh`): runs as root in every stage before any `dnf install` (so on top of ibn-dev a second time, which changes nothing).
   Default: enables CRB and EPEL (Rocky's stand-in for the target repos).
   Replace it with whatever the base needs so dnf finds every package the
-  Containerfile installs (e.g. copying `.repo` files into
+  Containerfiles install (e.g. copying `.repo` files into
   `/etc/yum.repos.d/`), or with an empty script if the base is ready as is.
 - `KIDE_USER`, `KIDE_UID`, `KIDE_GID` in `podman/base.conf` (default
   `default`, 1001, 1001): the user the image runs as. Every step that
   installs or writes system files runs as root (`USER root` at the start of
-  both stages, also when the base image defaults to another user); the last
+  every stage, also when the base image defaults to another user); the last
   step switches to `KIDE_USER`. A base image that already has that user
   (e.g. `default` in Red Hat's application images) keeps it; set
   `KIDE_UID`/`KIDE_GID` to its uid/gid then (`podman run --rm <base> id default`).
@@ -245,8 +266,8 @@ A short alias for `~/.bashrc`:
 
 ## VS Code dev container
 
-For VS Code without the terminal IDE, use the slimmer `kide-dev` image
-instead: `devcontainer/` (see `devcontainer/README.md`).
+For VS Code without the terminal IDE, use the `kide-dev` image instead, a
+thin layer on top of ibn-dev: `devcontainer/` (see `devcontainer/README.md`).
 
 The `kide` image itself also works as a VS Code dev container (Dev Containers extension)
 with podman instead of docker. Not tested yet.
