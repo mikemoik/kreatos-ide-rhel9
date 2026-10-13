@@ -76,15 +76,15 @@ RUN git config --system --replace-all safe.directory '*'
 # ~/workspace/.container/tmux.conf); -q: no error when it is missing.
 RUN printf '%s\n' 'set -g mouse on' 'source-file -q /workspace/.container/tmux.conf' >/etc/tmux.conf
 # what PREFIX/bashrc does on an install. On top of ibn-dev, the fish config
-# sources kide-dist-env.fish from its KIDE_DIST_PREFIX (/workspace/kide-dist)
+# sources ibn-dist-env.fish from its IBN_DIST_PREFIX (/workspace/ibn-dist)
 # once build-dist.sh has installed it; without ibn-dev there is none.
 ENV PATH=/opt/kide/bin:$PATH \
     YAZI_CONFIG_HOME=/opt/kide/share/kreatos-ide/yazi
 # fish is the default shell: $SHELL (nvim's :terminal and terminal windows,
 # lazygit, yazi) and the login shell of KIDE_USER and root. Its config is the
 # bundled one (/opt/kide/share/kreatos-ide/fish: PATH, YAZI_CONFIG_HOME,
-# aliases, kide-dist-env.fish); bash stays as a fallback (--entrypoint bash)
-# and sources /opt/kide/bashrc (ibn-dev's bash lines add kide-dist-env.sh).
+# aliases, ibn-dist-env.fish); bash stays as a fallback (--entrypoint bash)
+# and sources /opt/kide/bashrc (ibn-dev's bash lines add ibn-dist-env.sh).
 ENV SHELL=/opt/kide/bin/fish
 RUN set -e; \
     grep -qxF /opt/kide/bin/fish /etc/shells || echo /opt/kide/bin/fish >>/etc/shells; \

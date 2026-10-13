@@ -19,13 +19,16 @@ set -euo pipefail
 
 # build toolchain, tar (download), git (gitsigns, lazygit), file (yazi), the
 # C/C++ tools kide uses from RHEL, libevent/ncurses headers (tmux build), and
-# perl, perl-Dumpvalue + bzip2 (ACE+TAO/OpenDDS build), and the libraries C/C++
-# projects build against: Python 3.12 with numpy + pybind11, opencv, glew, glfw.
+# perl, perl-Dumpvalue + bzip2 (ACE+TAO/OpenDDS build), the -devel packages
+# GDAL's build needs (proj, geos, libtiff, json-c, sqlite, libcurl, expat,
+# zlib), and the libraries C/C++ projects build against: Python 3.12 with
+# numpy + pybind11, opencv, glew, glfw.
 # All come from the box's configured dnf repos; install.sh adds no repos.
 PKGS=(gcc make cmake python3 rust-toolset golang findutils diffutils tar
       git-core gcc-c++ clang-tools-extra gdb lldb file libevent-devel ncurses-devel
       perl perl-Dumpvalue bzip2 python3.12 python3.12-pip python3.12-numpy
-      python3.12-pybind11 python3.12-pybind11-devel opencv-devel glew-devel glfw glfw-devel)
+      python3.12-pybind11 python3.12-pybind11-devel opencv-devel glew-devel glfw glfw-devel
+      proj-devel geos-devel libtiff-devel json-c-devel sqlite-devel libcurl-devel expat-devel zlib-devel)
 
 log() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 

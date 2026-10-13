@@ -4,7 +4,7 @@
 # control (CORBA) -> tracker + viewer (DDS) -> sensor (GDAL + onnxruntime ->
 # DDS). Without arguments the viewer window stays until you close it; with
 # --frames it renders N frames, saves a screenshot and the pipeline stops.
-# Files (IOR, sample.vrt + .raw, prodsim-report.json, logs) go to
+# Files (IOR, sample.tif, prodsim-report.json, logs) go to
 # $PRODSIM_RUN_DIR, default ./prodsim-run.
 set -euo pipefail
 
@@ -18,13 +18,13 @@ pids=()
 cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null || true; done; }
 trap cleanup EXIT
 
-"$bin/prodsim-sensor" --make-sample sample.vrt
+"$bin/prodsim-sensor" --make-sample sample.tif
 "$bin/prodsim-control" >control.log 2>&1 &
 pids+=($!)
 "$bin/prodsim-tracker" >tracker.log 2>&1 &
 tracker=$!
 pids+=($tracker)
-"$bin/prodsim-sensor" --image sample.vrt >sensor.log 2>&1 &
+"$bin/prodsim-sensor" --image sample.tif >sensor.log 2>&1 &
 sensor=$!
 pids+=($sensor)
 

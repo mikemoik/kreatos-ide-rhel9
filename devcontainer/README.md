@@ -10,17 +10,18 @@ What is in it, all from ibn-dev:
 
 - the RHEL9 packages: gcc/g++, make, cmake, clangd/clang-format/clang-tidy,
   gdb, lldb (`lldb-dap`), git, perl + perl-Dumpvalue, Python 3.12 with numpy
-  and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5, libtiff, and
-  `gdal-devel` 3.10.3 from `dist/`
-- `build-dist.sh` with `dist/` (in `/opt/kide/dist`, on `PATH`): run once in
+  and pybind11, opencv, glew, glfw, gdal + gdal-libs, Qt5, libtiff, and the
+  -devel packages GDAL's build needs
+- `build-dist.sh` with `dist/` (in `/opt/ibn-dev/dist`, on `PATH`): run once in
   the container, it builds CMake 4 (ahead of RHEL's on `PATH`), onnxruntime,
   ACE+TAO 8 + OpenDDS 3.34 (`tao_idl`, `opendds_idl`, `find_package(OpenDDS)`)
-  into `/workspace/kide-dist/{bin,include,lib,lib64,share}`, that is, into
-  `kide-dist/` in the mounted project on the host;
+  and GDAL 3.10.3 with GTiff (`find_package(GDAL)`) into `/workspace/ibn-dist/{bin,include,lib,lib64,share}`, that is, into
+  `ibn-dist/` in the mounted project on the host;
   found by the dynamic linker through `LD_LIBRARY_PATH`, and by pkg-config
-  (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`) through `PKG_CONFIG_PATH`;
-  `~/.bashrc` sources `kide-dist/bin/kide-dist-env.sh` (`CMAKE_PREFIX_PATH`,
-  `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`, `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`)
+  (`ACE`, `TAO`, `TAO_*`, `libonnxruntime`, `gdal`) through `PKG_CONFIG_PATH`;
+  `~/.bashrc` sources `ibn-dist/bin/ibn-dist-env.sh` (`CMAKE_PREFIX_PATH`,
+  `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`, `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`,
+  `GDAL_DATA`)
 - pip/uv config and the pip server certificate from `CONF_DIR`, and pip + uv
   in `KIDE_USER`'s `~/.local`
 - `safe.directory = *` for git
@@ -50,10 +51,10 @@ built yet:
    change `default`, `1001`, and the home path in `mounts` to match.
 3. *Dev Containers: Reopen in Container*.
 4. Once per project, in the container's terminal: `build-dist.sh`. This
-   installs the C/C++ libraries into `kide-dist/` in the project directory
+   installs the C/C++ libraries into `ibn-dist/` in the project directory
    (add it to the project's `.gitignore`). New terminals pick up
-   `kide-dist-env.sh`; in the one it ran in, run
-   `. /workspace/kide-dist/bin/kide-dist-env.sh` once.
+   `ibn-dist-env.sh`; in the one it ran in, run
+   `. /workspace/ibn-dist/bin/ibn-dist-env.sh` once.
 
 What the template sets:
 
@@ -65,7 +66,7 @@ What the template sets:
 - The `kide-dev-vscode` volume on `~/.vscode-server` keeps VS Code's server
   and extensions across rebuilt containers.
 - Extensions: clangd, lldb-dap, CMake Tools, Python. Their settings point at
-  `/usr/bin/clangd`, `/usr/bin/lldb-dap`, `/workspace/kide-dist/bin/cmake` and
+  `/usr/bin/clangd`, `/usr/bin/lldb-dap`, `/workspace/ibn-dist/bin/cmake` and
   `/usr/bin/python3.12`.
 
 To use the image without VS Code (a shell):

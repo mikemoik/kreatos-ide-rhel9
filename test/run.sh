@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # test/run.sh — prove the offline build on a clean RHEL9 (UBI9) container.
 # The image only gets the toolchain RPMs; build + smoke test run with
-# --network=none and the repo mounted read-only.
+# --network=none and the repo mounted read-only. GDAL is not built here (UBI9
+# lacks proj-devel; NO_GDAL=1): test/prodsim/run.sh covers it.
 #
 # It builds from the files git tracks (as in the working tree), copied to a
 # temp dir: what install.sh downloads. Untracked or git-ignored files and empty
@@ -16,7 +17,7 @@ git -C "$ROOT" ls-files -z | tar -C "$ROOT" --null -T - -cf - | tar -C "$SRC" -x
 
 docker build -q -t "$IMAGE" -f "$ROOT/test/Containerfile" "$ROOT/test" >/dev/null
 docker run --rm --network=none -v "$SRC:/src:ro" -e KIDE_SRC=/src "$IMAGE" bash -euc '
-  /src/build-dist.sh /opt/kide
+  NO_GDAL=1 /src/build-dist.sh /opt/kide  # UBI9 has no proj/geos/json-c -devel
   /src/build-ide.sh /opt/kide
   echo "==> smoke test"
   /opt/kide/bin/kide --headless "+lua dofile(\"/src/test/smoke.lua\")"

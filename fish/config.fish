@@ -10,13 +10,13 @@ set -l kide_prefix (path resolve (status dirname)/../../..)
 contains -- $kide_prefix/bin $PATH; or set -gx PATH $kide_prefix/bin $PATH
 set -gx YAZI_CONFIG_HOME $kide_prefix/share/kreatos-ide/yazi
 
-# the C/C++ libraries (build-dist.sh): in PREFIX, or in KIDE_DIST_PREFIX when
-# set (the container: /workspace/kide-dist). Their environment (CMake,
+# the C/C++ libraries (build-dist.sh): in PREFIX, or in IBN_DIST_PREFIX when
+# set (the container: /workspace/ibn-dist). Their environment (CMake,
 # pkg-config, compiler and linker paths, ACE_ROOT/TAO_ROOT/DDS_ROOT) is
-# build-dist.sh's kide-dist-env.fish; not there yet: build-dist.sh not run
+# build-dist.sh's ibn-dist-env.fish; not there yet: build-dist.sh not run
 set -l dist_prefix $kide_prefix
-set -q KIDE_DIST_PREFIX; and set dist_prefix $KIDE_DIST_PREFIX
-test -f $dist_prefix/bin/kide-dist-env.fish; and source $dist_prefix/bin/kide-dist-env.fish
+set -q IBN_DIST_PREFIX; and set dist_prefix $IBN_DIST_PREFIX
+test -f $dist_prefix/bin/ibn-dist-env.fish; and source $dist_prefix/bin/ibn-dist-env.fish
 
 # functions/: the IDE's fish functions (autoloaded, e.g. tm)
 set -l kide_functions (status dirname)/functions

@@ -7,13 +7,14 @@ Rocky Linux 9, RHEL9-compatible), and each works on top of the other:
 - **ibn-dev** (`Containerfile.ibn-dev`): the build environment. The RHEL
   packages (gcc/g++, make, cmake, clangd/clang-format/clang-tidy, gdb, lldb,
   git, perl + perl-Dumpvalue, Python 3.12 with numpy and pybind11, opencv,
-  glew, glfw, gdal + gdal-libs, Qt5 (`qt5`), libtiff + libtiff-devel, from
-  AppStream/CRB/EPEL), `gdal-devel` 3.10.3-3.fc43 as an RPM from `dist/`
-  (installed with `rpm -i --nodeps`, it pins Fedora's gdal-libs build), and
-  what C/C++ projects build against beyond that: CMake 4, onnxruntime,
-  ACE+TAO and OpenDDS (`dist/`, built once in the container into the mounted
-  `/workspace/kide-dist` with `build-dist.sh`, see
-  [Libraries](#libraries-built-into-workspacekide-dist)). pip (newest) and uv
+  glew, glfw, gdal + gdal-libs, Qt5 (`qt5`), libtiff + libtiff-devel, the
+  -devel packages GDAL's build needs (proj, geos, json-c, sqlite, libcurl,
+  expat, zlib), from AppStream/CRB/EPEL), and what C/C++ projects build
+  against beyond that: CMake 4, onnxruntime, ACE+TAO, OpenDDS and GDAL with
+  GTiff (RHEL's `gdal-libs` has no GTiff driver) (`dist/`, built once in the
+  container into the mounted
+  `/workspace/ibn-dist` with `build-dist.sh`, see
+  [Libraries](#libraries-built-into-workspaceibn-dist)). pip (newest) and uv
   for Python 3.12 are pip-installed by the image's user (`KIDE_USER`) into
   its `~/.local`; root installs nothing with pip, it only sets up their config
   and certificate system-wide. bash is the shell.
@@ -62,39 +63,39 @@ A config change rebuilds only layer 2, and an IDE or vendor change rebuilds both
 The C/C++ libraries are not compiled at image build time (next section);
 `dist/`, `manifest/dist.tsv` and `build-dist.sh` are only copied into ibn-dev.
 
-### Libraries: built into /workspace/kide-dist
+### Libraries: built into /workspace/ibn-dist
 
-ibn-dev (and so kide on top of it) contains `build-dist.sh` and `dist/` (in `/opt/kide/dist`,
+ibn-dev (and so kide on top of it) contains `build-dist.sh` and `dist/` (in `/opt/ibn-dev/dist`,
 `build-dist.sh` on `PATH`), not the built libraries. Run it once in the
 container:
 
     build-dist.sh
 
-It builds CMake 4, onnxruntime, ACE+TAO and OpenDDS into
-`/workspace/kide-dist/{bin,include,lib,lib64,share}` (its default `PREFIX`
-is `KIDE_DIST_PREFIX=/workspace/kide-dist`), which is the host's
-`~/workspace/kide-dist`, so they stay there for every later container. The
+It builds CMake 4, onnxruntime, ACE+TAO, OpenDDS and GDAL (with GTiff) into
+`/workspace/ibn-dist/{bin,include,lib,lib64,share}` (its default `PREFIX`
+is `IBN_DIST_PREFIX=/workspace/ibn-dist`), which is the host's
+`~/workspace/ibn-dist`, so they stay there for every later container. The
 idea is that your projects are built in the container, installed to
 `/workspace`, and run on the host against these libraries. See
 [C/C++ libraries](../README.md#cc-libraries) for the RPATH and RHEL-version
 conditions.
 
-With them it installs `kide-dist/bin/kide-dist-env.fish` and
-`kide-dist-env.sh`, which set the environment for building against the
+With them it installs `ibn-dist/bin/ibn-dist-env.fish` and
+`ibn-dist-env.sh`, which set the environment for building against the
 libraries (`CMAKE_PREFIX_PATH`, `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`,
 `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`, …). bash (ibn-dev's shell, and kide's
 with `--entrypoint bash`) and kide's fish source them at start; in the shell
-`build-dist.sh` ran in, source `/workspace/kide-dist/bin/kide-dist-env.sh`
+`build-dist.sh` ran in, source `/workspace/ibn-dist/bin/ibn-dist-env.sh`
 (bash) or `.fish` once by hand. On the host the
-same files are in `~/workspace/kide-dist/bin`.
+same files are in `~/workspace/ibn-dist/bin`.
 
-`LD_LIBRARY_PATH` is `/workspace/kide-dist/lib:/workspace/kide-dist/lib64`
+`LD_LIBRARY_PATH` is `/workspace/ibn-dist/lib:/workspace/ibn-dist/lib64`
 (set in the image, also for programs not started from a shell), so every program in
 the container finds them, also binaries built without an RPATH. An
 `ld.so.conf.d` entry would not work, because the libraries only show up in the
 mount at run time, too late for `ldconfig`.
 
-`PKG_CONFIG_PATH` is `/workspace/kide-dist/lib/pkgconfig:/workspace/kide-dist/lib64/pkgconfig`, so
+`PKG_CONFIG_PATH` is `/workspace/ibn-dist/lib/pkgconfig:/workspace/ibn-dist/lib64/pkgconfig`, so
 `pkg-config` (and CMake's `pkg_check_modules`) finds `ACE`, `TAO`, the
 `TAO_*` libraries (e.g. `TAO_Messaging`) and `libonnxruntime`.
 
@@ -230,7 +231,7 @@ The IDE's shell helpers live in the repo's `fish/` directory, installed to
 (of `KIDE_USER` and root):
 
 - `config.fish`: kide's `bin` first on `PATH`, `YAZI_CONFIG_HOME`, and
-  `kide-dist-env.fish` from the libraries' prefix (`KIDE_DIST_PREFIX=/workspace/kide-dist`
+  `ibn-dist-env.fish` from the libraries' prefix (`IBN_DIST_PREFIX=/workspace/ibn-dist`
   in the image) once `build-dist.sh` has installed it: `ACE_ROOT`/`TAO_ROOT`/`DDS_ROOT`,
   `CMAKE_PREFIX_PATH`, `CPLUS_INCLUDE_PATH`, `LIBRARY_PATH`
 - `aliases.fish`: aliases for interactive shells

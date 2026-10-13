@@ -2,8 +2,8 @@
 # test/prodsim/run.sh [--show] — the prod workflow end to end, with prodsim
 # standing in for the prod software:
 #   1. build container (image $IBN_DEV_IMAGE, default ibn-dev; kide, built on
-#      top of it, works too): build-dist.sh into /workspace/kide-dist (skipped
-#      when already there), then, with kide-dist-env.sh sourced, build prodsim
+#      top of it, works too): build-dist.sh into /workspace/ibn-dist (skipped
+#      when already there), then, with ibn-dist-env.sh sourced, build prodsim
 #      and install it to /workspace
 #   2. prodsim-host container (test/prodsim/host/Containerfile: runtime RPMs
 #      only, no compiler, no dist/ libraries): prodsim-demo from /workspace/bin,
@@ -28,15 +28,15 @@ mkdir -p "$WS"
 run=(podman run --rm --http-proxy=false --userns="keep-id:uid=$uid,gid=$gid" -v "$WS:/workspace:Z")
 
 echo "==> 1. $IBN_DEV_IMAGE: build-dist.sh + prodsim into $WS"
-# kide-dist-env.sh: TAO_ROOT, CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH and
+# ibn-dist-env.sh: TAO_ROOT, CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH and
 # LIBRARY_PATH (prodsim-idlc links plain -lACE as prod does)
 "${run[@]}" -v "$ROOT/test/prodsim:/src/prodsim:ro,Z" --entrypoint bash "$IBN_DEV_IMAGE" -euc '
-  if [ ! -e /workspace/kide-dist/lib/libOpenDDS_Dcps.so ]; then
+  if [ ! -e /workspace/ibn-dist/lib/libOpenDDS_Dcps.so ] || [ ! -e /workspace/ibn-dist/lib64/libgdal.so ]; then
     build-dist.sh
   else
-    echo "build-dist.sh: already in /workspace/kide-dist (rm -rf it to redo)"
+    echo "build-dist.sh: already in /workspace/ibn-dist (rm -rf it to redo)"
   fi
-  . /workspace/kide-dist/bin/kide-dist-env.sh
+  . /workspace/ibn-dist/bin/ibn-dist-env.sh
   cmake -S /src/prodsim -B /tmp/prodsim-build -D CMAKE_INSTALL_PREFIX=/workspace
   cmake --build /tmp/prodsim-build -j "$(nproc)"
   cmake --install /tmp/prodsim-build
@@ -62,6 +62,9 @@ echo "==> 2. prodsim-host: libraries resolve without LD_LIBRARY_PATH, prodsim-de
   for f in /workspace/bin/prodsim-{idlc,control,sensor,tracker,viewer}; do
     if ldd "$f" | grep "not found"; then echo "unresolved libraries in $f" >&2; exit 1; fi
   done
+  # the dist GDAL (GTiff), not gdal-libs of the host (same soname, no GTiff)
+  ldd /workspace/bin/prodsim-sensor | grep -q "libgdal.so.36 => .*/ibn-dist/lib64/libgdal" ||
+    { echo "prodsim-sensor does not load the dist GDAL" >&2; exit 1; }
   Xvfb :99 -screen 0 1024x768x24 >/dev/null 2>&1 &
   sleep 1
   DISPLAY=:99 PRODSIM_RUN_DIR=/workspace/prodsim-run \

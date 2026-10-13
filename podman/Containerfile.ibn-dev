@@ -1,6 +1,7 @@
 # ibn-dev: the RHEL9 build environment — the C/C++/Python toolchain, the RHEL
 # libraries projects build against, and build-dist.sh with dist/ for the C/C++
-# libraries dnf does not have (CMake 4, onnxruntime, ACE+TAO + OpenDDS). No
+# libraries dnf does not have (CMake 4, onnxruntime, ACE+TAO + OpenDDS, GDAL
+# with GTiff). No
 # IDE: podman/Containerfile.kide adds kide on top of any base, this image
 # included (and this file works on top of kide too: every step here may run
 # on a base that already has it).
@@ -9,8 +10,8 @@
 # Build from the repo root:
 #   podman build --build-arg-file podman/base.conf -t ibn-dev -f podman/Containerfile.ibn-dev .
 # The C/C++ libraries are not built into the image: run `build-dist.sh` once
-# in the container; it installs them into /workspace/kide-dist, i.e. into the
-# mounted ~/workspace/kide-dist, where the host can use them. A shell (bash):
+# in the container; it installs them into /workspace/ibn-dist, i.e. into the
+# mounted ~/workspace/ibn-dist, where the host can use them. A shell (bash):
 #   podman run --rm -it --http-proxy=false --userns=keep-id:uid=1001,gid=1001 -v "$HOME/workspace:/workspace:Z" ibn-dev
 # See podman/README.md.
 
@@ -26,23 +27,21 @@ USER root
 # tooling), clangd/clang-format/clang-tidy, gdb, lldb, git, Python 3.12 with
 # numpy and pybind11, opencv, glew, glfw, gdal, Qt5, libtiff. shadow-utils
 # (useradd/usermod) for KIDE_USER below.
-# gdal-devel comes from dist/ (manifest/dist.tsv): Fedora 43's 3.10.3 build,
-# headers/CMake/pkg-config files for the same gdal version as the target's
-# gdal-libs (same libgdal.so.36). It pins gdal-libs = 3.10.3-3.fc43, so
-# rpm --nodeps; skipped when the base already has it.
+# GDAL itself to build against is not RHEL's (its gdal-libs has no GTiff):
+# build-dist.sh builds GDAL 3.10.3 into the dist; the -devel packages of the
+# libraries it uses are here (proj, geos, json-c, sqlite, libcurl, expat,
+# zlib, libtiff). gdal + gdal-libs stay: opencv links RHEL's libgdal.so.36.
 ARG CONF_DIR
 COPY $CONF_DIR/ubi.repo /etc/yum.repos.d/ubi.repo
 COPY $CONF_DIR/repos.sh /tmp/repos.sh
-COPY dist/gdal-devel-3.10.3-3.fc43.x86_64.rpm /tmp/
 RUN /tmp/repos.sh && dnf -y install python3 git-core file findutils diffutils shadow-utils \
         gcc gcc-c++ make cmake clang-tools-extra gdb lldb tar gzip bzip2 \
         perl perl-Dumpvalue python3.12 python3.12-pip python3.12-numpy \
         python3.12-pybind11 python3.12-pybind11-devel \
         opencv-devel glew-devel glfw glfw-devel \
         gdal gdal-libs qt5 libtiff libtiff-devel \
-    && dnf clean all \
-    && { rpm -q gdal-devel >/dev/null || rpm -i --nodeps /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm; } \
-    && rm /tmp/gdal-devel-3.10.3-3.fc43.x86_64.rpm
+        proj-devel geos-devel json-c-devel sqlite-devel libcurl-devel expat-devel zlib-devel \
+    && dnf clean all
 # pip-server.crt is the pip server's certificate (or the company CA that signed
 # it; PEM, no private key; the repo has a dummy). It goes into the system trust
 # store, so every user and tool trusts the pip repo, at build time and runtime:
@@ -79,34 +78,34 @@ RUN set -e; \
 # root), and git then refuses with "dubious ownership". The check guards
 # against other users' repos on a shared machine, which a container doesn't have.
 RUN git config --system --replace-all safe.directory '*'
-# The C/C++ libraries (CMake 4, onnxruntime, ACE+TAO + OpenDDS) are not in the
-# image: build-dist.sh and dist/ are, in /opt/kide/dist. Run once in the
-# container, `build-dist.sh` (PREFIX = KIDE_DIST_PREFIX below) builds them
-# into /workspace/kide-dist/{bin,include,lib,lib64,share}, i.e. into the
-# host's ~/workspace/kide-dist, where they stay for later containers and for
-# the host; with them PREFIX/bin/kide-dist-env.{sh,fish}, which set the
+# The C/C++ libraries (CMake 4, onnxruntime, ACE+TAO + OpenDDS, GDAL) are not in the
+# image: build-dist.sh and dist/ are, in /opt/ibn-dev/dist. Run once in the
+# container, `build-dist.sh` (PREFIX = IBN_DIST_PREFIX below) builds them
+# into /workspace/ibn-dist/{bin,include,lib,lib64,share}, i.e. into the
+# host's ~/workspace/ibn-dist, where they stay for later containers and for
+# the host; with them PREFIX/bin/ibn-dist-env.{sh,fish}, which set the
 # environment (bash below and kide's fish config source them).
-COPY build-dist.sh /opt/kide/dist/
-COPY dist-env /opt/kide/dist/dist-env
-COPY manifest/dist.tsv /opt/kide/dist/manifest/dist.tsv
-COPY dist /opt/kide/dist/dist
-RUN ln -sf /opt/kide/dist/build-dist.sh /usr/local/bin/build-dist.sh
-# KIDE_DIST_PREFIX: build-dist.sh's default PREFIX, and where the shells look
-# for kide-dist-env.*. PATH (CMake 4, tao_idl, opendds_idl, … ahead of RHEL's),
-# PKG_CONFIG_PATH (ACE, TAO, TAO_*, libonnxruntime; RHEL's default is only
+COPY build-dist.sh /opt/ibn-dev/dist/
+COPY dist-env /opt/ibn-dev/dist/dist-env
+COPY manifest/dist.tsv /opt/ibn-dev/dist/manifest/dist.tsv
+COPY dist /opt/ibn-dev/dist/dist
+RUN ln -sf /opt/ibn-dev/dist/build-dist.sh /usr/local/bin/build-dist.sh
+# IBN_DIST_PREFIX: build-dist.sh's default PREFIX, and where the shells look
+# for ibn-dist-env.*. PATH (CMake 4, tao_idl, opendds_idl, … ahead of RHEL's),
+# PKG_CONFIG_PATH (ACE, TAO, TAO_*, libonnxruntime, gdal; RHEL's default is only
 # /usr/lib64/pkgconfig:/usr/share/pkgconfig) and LD_LIBRARY_PATH (also for
 # binaries built without an RPATH; not ld.so.conf.d: the libraries only appear
 # at run time in the mount, after ldconfig could run) are set here as well,
 # for programs not started from a shell.
-ENV KIDE_DIST_PREFIX=/workspace/kide-dist \
-    PATH=/workspace/kide-dist/bin:$PATH \
-    PKG_CONFIG_PATH=/workspace/kide-dist/lib/pkgconfig:/workspace/kide-dist/lib64/pkgconfig \
-    LD_LIBRARY_PATH=/workspace/kide-dist/lib:/workspace/kide-dist/lib64
+ENV IBN_DIST_PREFIX=/workspace/ibn-dist \
+    PATH=/workspace/ibn-dist/bin:$PATH \
+    PKG_CONFIG_PATH=/workspace/ibn-dist/lib/pkgconfig:/workspace/ibn-dist/lib64/pkgconfig \
+    LD_LIBRARY_PATH=/workspace/ibn-dist/lib:/workspace/ibn-dist/lib64
 # KIDE_USER (podman/base.conf): the user the image runs as. Taken from the base
 # image if it has it (e.g. "default" in Red Hat's application images, or kide's),
 # otherwise created with KIDE_UID/KIDE_GID. Its login shell becomes bash unless
 # the base made it fish (kide). Its ~/.bashrc and root's get, once each: ~/.local/bin
-# (pip and uv) on PATH, kide-dist-env.sh once build-dist.sh has installed it
+# (pip and uv) on PATH, ibn-dist-env.sh once build-dist.sh has installed it
 # (CMAKE_PREFIX_PATH, CPLUS_INCLUDE_PATH, LIBRARY_PATH, ACE_ROOT, …), and the
 # host's proxy variables unset (fallback for --http-proxy=false; podman build
 # still passes them to the RUN steps, so dnf/pip may use them).
@@ -125,7 +124,7 @@ RUN set -e; \
     group=$(id -g "$KIDE_USER"); \
     for rc in "$home/.bashrc" /root/.bashrc; do \
       for line in 'PATH="$HOME/.local/bin:$PATH"' \
-          '[ -f "$KIDE_DIST_PREFIX/bin/kide-dist-env.sh" ] && . "$KIDE_DIST_PREFIX/bin/kide-dist-env.sh"' \
+          '[ -f "$IBN_DIST_PREFIX/bin/ibn-dist-env.sh" ] && . "$IBN_DIST_PREFIX/bin/ibn-dist-env.sh"' \
           'unset http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY'; do \
         grep -qxF -- "$line" "$rc" 2>/dev/null || printf '%s\n' "$line" >>"$rc"; \
       done; \

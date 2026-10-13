@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 # build-dist.sh [PREFIX] — offline build of the C/C++ libraries from dist/
-# (manifest/dist.tsv) into PREFIX (default $KIDE_DIST_PREFIX, else
+# (manifest/dist.tsv) into PREFIX (default $IBN_DIST_PREFIX, else
 # ~/.local/kreatos-ide), no network:
 #   PREFIX/bin/{cmake,ctest,cpack}    CMake 4 (upstream's prebuilt)
 #   PREFIX/{include,lib64}            onnxruntime (upstream's prebuilt)
 #   PREFIX/{bin,include,lib,share}    ACE+TAO 8 + OpenDDS 3.34 built from source
 #   PREFIX/share/tao/TAO_IDL/{include,be_include}  TAO_IDL headers (from source)
-#   PREFIX/bin/kide-dist-env.{sh,fish}  sets the environment for all of the above
+#   PREFIX/{bin,include,lib64,share/gdal}  GDAL 3.10 built from source, with GTiff
+#   PREFIX/bin/ibn-dist-env.{sh,fish}  sets the environment for all of the above
 #                                     (source it; finds PREFIX from its own path)
 # Separate from build-ide.sh (the IDE): install.sh and test/run.sh run both.
 # The container images (podman/, devcontainer/) do not run it at build time:
-# they ship it with dist/ in /opt/kide/dist (on PATH as build-dist.sh) and
-# KIDE_DIST_PREFIX=/workspace/kide-dist, so it is run once inside the
-# container and installs into the mounted ~/workspace/kide-dist, where the
+# they ship it with dist/ in /opt/ibn-dev/dist (on PATH as build-dist.sh) and
+# IBN_DIST_PREFIX=/workspace/ibn-dist, so it is run once inside the
+# container and installs into the mounted ~/workspace/ibn-dist, where the
 # host can use the result.
-# Needs gcc/g++, make, perl, perl-Dumpvalue and bzip2. Intermediate files go
+# Needs gcc/g++, make, perl, perl-Dumpvalue and bzip2, and for GDAL the RHEL
+# -devel packages of proj, geos, libtiff, json-c, sqlite, libcurl, expat, zlib
+# (NO_GDAL=1 skips GDAL, e.g. on UBI9, whose repos lack proj/geos/json-c). Intermediate files go
 # to $KIDE_BUILD_DIR (default: $TMPDIR/kide-build); JOBS (default nproc)
 # parallel make jobs.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
-PREFIX=$(realpath -m "${1:-${KIDE_DIST_PREFIX:-$HOME/.local/kreatos-ide}}")
+PREFIX=$(realpath -m "${1:-${IBN_DIST_PREFIX:-$HOME/.local/kreatos-ide}}")
 BUILD=$(realpath -m "${KIDE_BUILD_DIR:-${TMPDIR:-/tmp}/kide-build}")
 JOBS=${JOBS:-$(nproc)}
 
@@ -129,7 +132,39 @@ mkdir -p "$PREFIX/share/tao/TAO_IDL"
 cp -a "$dds/ACE_wrappers/TAO/TAO_IDL/include" "$dds/ACE_wrappers/TAO/TAO_IDL/be_include" \
   "$PREFIX/share/tao/TAO_IDL/"
 
-log "kide-dist-env.sh, kide-dist-env.fish"
+if [ "${NO_GDAL:-}" = 1 ]; then
+  log "GDAL: skipped (NO_GDAL=1)"
+else
+  log "GDAL"
+  # RHEL9's gdal-libs (AppStream) is a minimal build: its only raster drivers are
+  # VRT and MEM, no GTiff. This one has GTiff/COG and the rest of GDAL's
+  # built-in drivers, against the same libraries as RHEL's build (proj, geos,
+  # json-c, sqlite, libcurl, expat, zlib; all of them in AppStream/BaseOS, so a
+  # host with gdal-libs has them) plus libtiff; libgeotiff is GDAL's internal
+  # copy (EPEL only). GDAL_USE_EXTERNAL_LIBS=OFF: nothing else is picked up just
+  # because its -devel package happens to be installed. Same version and soname
+  # as RHEL's (libgdal.so.36), so libraries linked against RHEL's (opencv) use
+  # this one in programs that load it first. RPATHs are $ORIGIN-relative.
+  # GDAL_DATA: the compiled-in share/gdal is the build-time PREFIX; ibn-dist-env
+  # sets GDAL_DATA wherever PREFIX is seen.
+  gdal=$BUILD/gdal
+  rm -rf "$gdal" "$PREFIX"/lib64/libgdal.* "$PREFIX/lib64/cmake/gdal" "$PREFIX/share/gdal"
+  mkdir -p "$gdal/src"
+  tar -xzf "$(dist gdal)" -C "$gdal/src" --strip-components=1
+  "$PREFIX/bin/cmake" -S "$gdal/src" -B "$gdal/build" -D CMAKE_BUILD_TYPE=Release \
+    -D CMAKE_INSTALL_PREFIX="$PREFIX" -D CMAKE_INSTALL_LIBDIR=lib64 -D GDAL_SET_INSTALL_RELATIVE_RPATH=ON \
+    -D BUILD_TESTING=OFF -D BUILD_PYTHON_BINDINGS=OFF -D BUILD_JAVA_BINDINGS=OFF -D BUILD_CSHARP_BINDINGS=OFF \
+    -D GDAL_USE_EXTERNAL_LIBS=OFF -D GDAL_USE_GEOS=ON -D GDAL_USE_TIFF=ON -D GDAL_USE_GEOTIFF_INTERNAL=ON \
+    -D GDAL_USE_JSONC=ON -D GDAL_USE_SQLITE3=ON -D GDAL_USE_CURL=ON -D GDAL_USE_EXPAT=ON -D GDAL_USE_ZLIB=ON \
+    >"$gdal/configure.log" 2>&1 &&
+    "$PREFIX/bin/cmake" --build "$gdal/build" -j "$JOBS" >"$gdal/make.log" 2>&1 &&
+    "$PREFIX/bin/cmake" --install "$gdal/build" >"$gdal/install.log" 2>&1 ||
+    { tail -30 "$gdal/configure.log" "$gdal/make.log" "$gdal/install.log" 2>/dev/null; exit 1; }
+  GDAL_DATA=$PREFIX/share/gdal "$PREFIX/bin/gdalinfo" --formats | grep '^ *GTiff ' >/dev/null ||
+    { echo "GDAL built without the GTiff driver (see $gdal/configure.log)" >&2; exit 1; }
+fi
+
+log "ibn-dist-env.sh, ibn-dist-env.fish"
 # source one of them (bash, fish) to build against PREFIX or run from it
-install -m 644 "$ROOT/dist-env/kide-dist-env.sh" "$ROOT/dist-env/kide-dist-env.fish" "$PREFIX/bin/"
-log "done: in a shell that was open before, source $PREFIX/bin/kide-dist-env.fish (or .sh in bash); new shells in kide do it themselves"
+install -m 644 "$ROOT/dist-env/ibn-dist-env.sh" "$ROOT/dist-env/ibn-dist-env.fish" "$PREFIX/bin/"
+log "done: in a shell that was open before, source $PREFIX/bin/ibn-dist-env.fish (or .sh in bash); new shells in kide do it themselves"

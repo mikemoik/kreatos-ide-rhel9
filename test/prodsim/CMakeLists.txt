@@ -1,6 +1,6 @@
 # prodsim: a stand-in for the prod software, using every dist/ package plus
 # the RHEL graphics libraries. Built in the kide container against
-# /workspace/kide-dist (build-dist.sh), installed to /workspace, run on the
+# /workspace/ibn-dist (build-dist.sh), installed to /workspace, run on the
 # host.
 # See README.md.
 cmake_minimum_required(VERSION 3.23)
@@ -13,13 +13,13 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # installed binaries and libraries find each other (PREFIX/lib) and the dist/
-# libraries (PREFIX/kide-dist/lib, lib64) relative to themselves, wherever
+# libraries (PREFIX/ibn-dist/lib, lib64) relative to themselves, wherever
 # the host has ~/workspace
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../kide-dist/lib;$ORIGIN/../kide-dist/lib64")
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../ibn-dist/lib;$ORIGIN/../ibn-dist/lib64")
 
 find_package(OpenDDS REQUIRED)       # also ACE/TAO (TAO::*), tao_idl, opendds_idl
 find_package(onnxruntime REQUIRED)
-find_package(GDAL REQUIRED)          # RHEL gdal-libs + gdal-devel from dist/
+find_package(GDAL REQUIRED)          # the dist's GDAL (with GTiff), not RHEL's
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -30,7 +30,7 @@ find_path(RAPIDJSON_INCLUDE_DIR rapidjson/document.h REQUIRED) # headers from bu
 # Prod style on purpose: plain library names (ACE, TAO_IDL_FE) and TAO_IDL's
 # headers from TAO_ROOT, no imported targets. That needs TAO_ROOT
 # (PREFIX/share/tao), and the ACE headers and libraries from the environment
-# (CPLUS_INCLUDE_PATH, LIBRARY_PATH): all from kide-dist-env.fish/.sh.
+# (CPLUS_INCLUDE_PATH, LIBRARY_PATH): all from ibn-dist-env.fish/.sh.
 set(TAO_ROOT "$ENV{TAO_ROOT}" CACHE PATH "TAO_ROOT (PREFIX/share/tao)")
 if(NOT EXISTS "${TAO_ROOT}/TAO_IDL/include/idl_defines.h")
   message(FATAL_ERROR "TAO_ROOT=${TAO_ROOT}: no TAO_IDL/include/idl_defines.h (build-dist.sh installs it)")

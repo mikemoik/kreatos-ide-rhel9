@@ -2,11 +2,10 @@
 // tile with the onnxruntime model and publishes the tiles above the threshold
 // (from prodsim-control over CORBA) as ProdSim::Detection over DDS, frame
 // after frame, until prodsim-control is stopped.
-//   prodsim-sensor --make-sample FILE.vrt   write the sample image and exit
+//   prodsim-sensor --make-sample FILE.tif   write the sample GeoTIFF and exit
 //   prodsim-sensor [--image FILE] [--rate HZ]   any format GDAL reads
-// The sample is a VRT (GDAL's XML format) over a raw pixel file FILE.raw, not
-// a GeoTIFF: RHEL9's gdal-libs (AppStream) is a minimal build without the
-// GTiff driver; its raster drivers are only VRT and MEM.
+// The GeoTIFF needs the dist's GDAL (build-dist.sh): RHEL9's gdal-libs
+// (AppStream) is a minimal build without the GTiff driver.
 #include "common.h"
 #include "ort_model.h"
 
@@ -19,7 +18,6 @@
 #include <ogr_srs_api.h>
 
 #include <cmath>
-#include <cstdio>
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -35,25 +33,14 @@ std::vector<uint8_t> sample_pixels();
 
 void make_sample(const std::string& path)
 {
-  // the pixels as a raw file, which the VRT's band points to
-  const std::string raw = path + ".raw";
-  const std::vector<uint8_t> pixels = sample_pixels();
-  FILE* f = std::fopen(raw.c_str(), "wb");
-  if (!f || std::fwrite(pixels.data(), 1, pixels.size(), f) != pixels.size() || std::fclose(f) != 0) {
-    throw std::runtime_error("cannot write " + raw);
-  }
-
-  GDALDriverH driver = GDALGetDriverByName("VRT");
-  if (!driver) throw std::runtime_error("GDAL has no VRT driver");
-  GDALDatasetH ds = GDALCreate(driver, path.c_str(), SIZE, SIZE, 0, GDT_Byte, nullptr);
+  GDALDriverH driver = GDALGetDriverByName("GTiff");
+  if (!driver) throw std::runtime_error("GDAL has no GTiff driver (RHEL's gdal-libs instead of the dist's?)");
+  GDALDatasetH ds = GDALCreate(driver, path.c_str(), SIZE, SIZE, 1, GDT_Byte, nullptr);
   if (!ds) throw std::runtime_error("cannot create " + path);
-  const std::string raw_name = raw.substr(raw.find_last_of('/') + 1);
-  const std::string source = "SourceFilename=" + raw_name;
-  const char* band[] = {"subClass=VRTRawRasterBand", source.c_str(), "RelativeToVRT=1",
-                        "ImageOffset=0", "PixelOffset=1", "LineOffset=256", nullptr};
-  static_assert(SIZE == 256, "LineOffset above is SIZE");
-  if (GDALAddBand(ds, GDT_Byte, const_cast<char**>(band)) != CE_None) {
-    throw std::runtime_error("cannot add the raw band to " + path);
+  std::vector<uint8_t> pixels = sample_pixels();
+  if (GDALRasterIO(GDALGetRasterBand(ds, 1), GF_Write, 0, 0, SIZE, SIZE, pixels.data(), SIZE, SIZE,
+                   GDT_Byte, 0, 0) != CE_None) {
+    throw std::runtime_error("cannot write the pixels to " + path);
   }
 
   // 0.001 degree pixels near Munich, WGS 84
@@ -67,7 +54,7 @@ void make_sample(const std::string& path)
   CPLFree(wkt);
   OSRDestroySpatialReference(srs);
   GDALClose(ds);
-  std::cout << "prodsim-sensor: wrote " << path << " + " << raw_name << " (" << SIZE << "x" << SIZE
+  std::cout << "prodsim-sensor: wrote " << path << " (GeoTIFF, " << SIZE << "x" << SIZE
             << ", EPSG:4326)" << std::endl;
 }
 
@@ -117,7 +104,7 @@ Image load(const std::string& path)
 int main(int argc, char* argv[])
 {
   GDALAllRegister();
-  std::string image = prodsim::run_dir() + "/sample.vrt";
+  std::string image = prodsim::run_dir() + "/sample.tif";
   double rate = 20;
   try {
     for (int i = 1; i < argc; ++i) {

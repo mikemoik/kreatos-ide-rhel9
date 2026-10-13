@@ -17,7 +17,8 @@ everything:
 1. Installs the RHEL packages that are missing (asks for your sudo
    password): the build toolchain (gcc, make, cmake, python3, rust-toolset,
    golang, libevent-devel and ncurses-devel for tmux, perl, perl-Dumpvalue
-   and bzip2 for ACE+TAO/OpenDDS), tar, git-core, the C/C++ tools below, and
+   and bzip2 for ACE+TAO/OpenDDS, the -devel packages GDAL's build needs:
+   proj, geos, libtiff, json-c, sqlite, libcurl, expat, zlib), tar, git-core, the C/C++ tools below, and
    the [C/C++ libraries](#cc-libraries) that come as RHEL packages. All
    from the box's configured dnf repos (install.sh adds no repos); stock RHEL
    has pybind11 only in CRB and opencv/glew/glfw only in EPEL, so the repos
@@ -123,7 +124,7 @@ EPEL packages need):
 - **ibn-dev** (`podman/Containerfile.ibn-dev`): the build environment. The
   RHEL toolchain and libraries, `build-dist.sh` for the
   [C/C++ libraries](#cc-libraries) (run once in the container, it installs
-  them into the mounted `~/workspace/kide-dist`), and the newest pip plus uv
+  them into the mounted `~/workspace/ibn-dist`), and the newest pip plus uv
   for Python 3.12. bash is the shell.
 - **kide** (`podman/Containerfile.kide`): the IDE in `/opt/kide` and the few
   RHEL packages it uses, with fish. Built on top of ibn-dev, it is the
@@ -458,20 +459,32 @@ upstream release tarballs in `dist/` (`manifest/dist.tsv`, sha256-checked by
 | onnxruntime 1.30.0 (CPU) | upstream's prebuilt Linux x64 tarball | `include/onnxruntime`, `lib64`; `find_package(onnxruntime)` → `onnxruntime::onnxruntime`, `pkg-config libonnxruntime` |
 | ACE 8.0.8 + TAO 4.0.8 | source, compiled by `build-dist.sh` | `lib/libACE*`, `libTAO*`, `include/{ace,tao,orbsvcs}`, `bin/tao_idl` |
 | OpenDDS 3.34.0 (+ RapidJSON headers) | source, compiled by `build-dist.sh` with OpenDDS's `configure` | `lib/libOpenDDS_*`, `include/dds`, `bin/opendds_idl`; `find_package(OpenDDS)` with `opendds_target_sources()` |
+| GDAL 3.10.3 (with GTiff/COG) | source, compiled by `build-dist.sh` with CMake | `lib64/libgdal.so.36`, `include/gdal*.h` etc., `bin/gdalinfo` etc., `share/gdal`; `find_package(GDAL)` → `GDAL::GDAL`, `pkg-config gdal` |
 
-ACE+TAO and OpenDDS ship no prebuilt Linux binaries, so they are the only
-part that compiles (~7 min on 24 cores, release build, no tests). Their
+ACE+TAO and OpenDDS ship no prebuilt Linux binaries, so they compile
+(~7 min on 24 cores, release build, no tests). GDAL compiles too: RHEL9's
+`gdal-libs` (AppStream) is a minimal build whose only raster drivers are VRT
+and MEM, without GTiff. This build has the GTiff/COG driver and GDAL's other
+built-in drivers, and links the same RHEL libraries as RHEL's (proj, geos,
+json-c, sqlite, libcurl, expat, zlib) plus libtiff, with GDAL's internal
+libgeotiff, so a host with RHEL's `gdal-libs` installed has everything it
+needs. It has the same soname (`libgdal.so.36`): libraries linked against
+RHEL's GDAL (opencv) use this one in programs that load it. `NO_GDAL=1
+build-dist.sh` skips GDAL (for boxes whose repos lack proj-devel, like
+UBI9's). Their
 libraries find each other through `$ORIGIN`-relative RPATHs; nothing needs
 `LD_LIBRARY_PATH`. The bundled cmake finds both packages without hints (it
 searches its own prefix); a different cmake needs
 `-D CMAKE_PREFIX_PATH=PREFIX`.
-`build-dist.sh` also installs `PREFIX/bin/kide-dist-env.sh` (bash) and
-`PREFIX/bin/kide-dist-env.fish` (fish). Sourced, they set the environment for
+`build-dist.sh` also installs `PREFIX/bin/ibn-dist-env.sh` (bash) and
+`PREFIX/bin/ibn-dist-env.fish` (fish). Sourced, they set the environment for
 building against the libraries and running what links them: `PREFIX/bin` first
 on `PATH`, `CMAKE_PREFIX_PATH=PREFIX`, `PKG_CONFIG_PATH`,
 `CPLUS_INCLUDE_PATH=PREFIX/include`, `LIBRARY_PATH` and `LD_LIBRARY_PATH`
 (`PREFIX/lib`, `lib64`), and `ACE_ROOT`, `TAO_ROOT`, `DDS_ROOT`
-(`PREFIX/share/{ace,tao,dds}`, for `opendds_idl` or MPC by hand). They find
+(`PREFIX/share/{ace,tao,dds}`, for `opendds_idl` or MPC by hand), and
+`GDAL_DATA=PREFIX/share/gdal` (GDAL's compiled-in data path is the `PREFIX`
+it was built in). They find
 `PREFIX` from their own path, so the same file works wherever `PREFIX` is
 seen, and sourcing one twice adds nothing twice. The fish config sources the
 fish one when it exists. `build-dist.sh` removes the build-tree
@@ -479,37 +492,37 @@ paths OpenDDS leaves in its installed `share/cmake/OpenDDS/config.cmake`, so
 the package resolves to `PREFIX`.
 
 In the container images (ibn-dev, and kide and kide-dev on top of it) the libraries are not built into
-the image. `build-dist.sh` and `dist/` are shipped in `/opt/kide/dist` instead
-(`build-dist.sh` is on `PATH`), and `KIDE_DIST_PREFIX=/workspace/kide-dist`
+the image. `build-dist.sh` and `dist/` are shipped in `/opt/ibn-dev/dist` instead
+(`build-dist.sh` is on `PATH`), and `IBN_DIST_PREFIX=/workspace/ibn-dist`
 is its default `PREFIX`. Run it once inside the container (~7 min):
 
     build-dist.sh
 
-It installs into `/workspace/kide-dist/{bin,include,lib,lib64,share}`, which
-is `~/workspace/kide-dist` on the host, so the result stays there for every
-later container; `rm -rf ~/workspace/kide-dist` removes it completely. Run it
+It installs into `/workspace/ibn-dist/{bin,include,lib,lib64,share}`, which
+is `~/workspace/ibn-dist` on the host, so the result stays there for every
+later container; `rm -rf ~/workspace/ibn-dist` removes it completely. Run it
 again after an image update that changes `dist/`. New shells in the container
-source `kide-dist-env.fish` (fish) or `kide-dist-env.sh` (bash) themselves;
+source `ibn-dist-env.fish` (fish) or `ibn-dist-env.sh` (bash) themselves;
 in a shell that was already open, source it by hand once. On the host:
 
-    source ~/workspace/kide-dist/bin/kide-dist-env.fish   # fish
-    . ~/workspace/kide-dist/bin/kide-dist-env.sh          # bash
+    source ~/workspace/ibn-dist/bin/ibn-dist-env.fish   # fish
+    . ~/workspace/ibn-dist/bin/ibn-dist-env.sh          # bash
 
 Your own projects are built in the container and installed to `/workspace`
 (`cmake --install build --prefix /workspace`: `bin/`, `lib/` next to
-`kide-dist/`), and the host can then run them against those libraries. Two
+`ibn-dist/`), and the host can then run them against those libraries. Two
 conditions:
 
 - **The host must find the libraries.** On the host they are in
-  `~/workspace/kide-dist/lib` and `lib64`, not `/workspace/…`, so link your
+  `~/workspace/ibn-dist/lib` and `lib64`, not `/workspace/…`, so link your
   programs with an RPATH relative to the binary:
 
-      set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../kide-dist/lib;$ORIGIN/../kide-dist/lib64")
+      set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../ibn-dist/lib;$ORIGIN/../ibn-dist/lib64")
 
-  ACE, TAO and OpenDDS are already built this way (within `kide-dist`). The
-  alternative is sourcing `kide-dist-env.sh`/`.fish` on the host, which sets
+  ACE, TAO and OpenDDS are already built this way (within `ibn-dist`). The
+  alternative is sourcing `ibn-dist-env.sh`/`.fish` on the host, which sets
   `LD_LIBRARY_PATH`. Inside the container `LD_LIBRARY_PATH` is always set to
-  `/workspace/kide-dist/lib:/workspace/kide-dist/lib64`.
+  `/workspace/ibn-dist/lib:/workspace/ibn-dist/lib64`.
 - **The container must not be newer than the host.** Use a base image
   (`podman/base.conf`) whose RHEL9 minor version is not newer than the host's,
   because a binary built against a newer glibc or libstdc++ may not start on an
@@ -809,7 +822,7 @@ license. Generated from `VERSIONS` by `scripts/gen-inventory.py` (run by
 |---|---|---|---|
 | dist/ace-tao | <https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_8/ACE%2BTAO-src-8.0.8.tar.bz2> | `8.0.8 (source)` | DOC |
 | dist/cmake | <https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz> | `4.4.4 (prebuilt)` | BSD-3-Clause |
-| dist/gdal-devel | <https://kojipkgs.fedoraproject.org/packages/gdal/3.10.3/3.fc43/x86_64/gdal-devel-3.10.3-3.fc43.x86_64.rpm> | `3.10.3-3.fc43 (rpm)` | MIT |
+| dist/gdal | <https://github.com/OSGeo/gdal/releases/download/v3.10.3/gdal-3.10.3.tar.gz> | `3.10.3 (source)` | MIT |
 | dist/onnxruntime | <https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz> | `1.30.0 (prebuilt)` | MIT |
 | dist/opendds | <https://github.com/OpenDDS/OpenDDS/releases/download/v3.34.0/OpenDDS-3.34.0.tar.gz> | `3.34.0 (source)` | LicenseRef-OpenDDS |
 | dist/rapidjson | <https://github.com/Tencent/rapidjson/archive/fd3dc29a5c2852df569e1ea81dbde2c412ac5051.tar.gz> | `fd3dc29a5c28` | MIT |

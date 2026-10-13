@@ -26,7 +26,7 @@
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
-        "cmake.cmakePath": "/workspace/kide-dist/bin/cmake",
+        "cmake.cmakePath": "/workspace/ibn-dist/bin/cmake",
         "clangd.path": "/usr/bin/clangd",
         "lldb-dap.executable-path": "/usr/bin/lldb-dap",
         "python.defaultInterpreterPath": "/usr/bin/python3.12"
